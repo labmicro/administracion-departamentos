@@ -1,0 +1,36 @@
+/* styles.css */
+
+/* Define un estilo para las celdas de encabezado */
+.header-row {
+    background-color: #1976d2; /* Fondo celeste */
+  }
+
+  .header-cell {
+    color: #ffff !important; /* Texto blanco */
+  }
+
+ .modal-container{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+  background-color: white;
+  border: 2px solid #000;
+  box-shadow: 24px;
+  padding: 16px;
+  text-align: center;
+};
+
+.seleccionado {
+  background-color: #4caf50 !important; /* Puedes ajustar esto según tus preferencias */
+  color: white;
+}
+
+.botonConfirmacion {
+  margin-top: auto;
+  margin-bottom: 10px;
+  position: sticky;
+  bottom: 0;
+  /* Otros estilos según sea necesario */
+}

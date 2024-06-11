@@ -1,0 +1,16 @@
+/* styles.css */
+
+/* Define un estilo para las celdas de encabezado */
+.header-row {
+    background-color: #1976d2; /* Fondo celeste */
+  }
+
+  .header-cell {
+    color: #ffff !important; /* Texto blanco */
+  }
+
+  .cellCenter {
+    text-align: center;
+    align-items: 'middle';
+
+  }

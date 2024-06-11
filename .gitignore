@@ -1,0 +1,13 @@
+# Entorno virtual python
+backend/facet/venv/*
+backend/facet/adminitracion/.env
+
+# Byte-compiled / optimized
+__pycache__/
+# Migraciones
+backend/facet/administracion/migrations/*
+backend/facet/roles/migrations/*
+backend/facet/usuarios/migrations/*
+
+#frontend
+frontend/node_modules
