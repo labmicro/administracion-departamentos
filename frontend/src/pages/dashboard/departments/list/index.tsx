@@ -1,201 +1,210 @@
-import { useEffect, useState } from 'react';
-import './styles.css';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+interface Departamento {
+  id: number;
+  nombre: string;
+  telefono: string;
+  estado: 0 | 1;
+  interno: string;
+}
 
 const ListaDepartamentos = () => {
-  const h1Style = {
-    color: 'black',
-  };
-
-  interface Departamento {
-    iddepartamento: number;
-    nombre: string;
-    telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    interno: string;
-    // Otros campos según sea necesario
-  }
-
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-  const [departamentosFiltro, setDepartamentosFiltro] = useState<Departamento[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/departamento/');
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        setDepartamentos(response.data);
-        setDepartamentosFiltro(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+    fetchData(currentUrl);
+  }, [currentUrl]);
 
-    
-
-    fetchData();
-  }, []);
-
-    const paginationContainerStyle = {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      margin: '16px 0', // Puedes ajustar según sea necesario
-    };
-    
-    const buttonStyle = {
-      marginLeft: '8px', // Puedes ajustar según sea necesario
-    };
-
-    // --Paginado
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20;
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = departamentosFiltro.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(departamentosFiltro.length / itemsPerPage);
-
-    const handleChangePage = (newPage: number) => {
-      setCurrentPage(newPage);
-    };
-    
+  const fetchData = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+      setDepartamentos(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const filtrarDepartamentos = () => {
+    const url = `http://127.0.0.1:8000/facet/departamento/?search=${filtroNombre}`;
+    setCurrentUrl(url);
+  };
 
-    // Implementa la lógica de filtrado aquí usando los estados de los filtros
-    // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-    // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
+  const totalPages = Math.ceil(totalItems / pageSize);
 
-     // Aplica la lógica de filtrado aquí utilizando la función filter
-     const departamentosFiltrados = departamentos.filter((departamento) => {
-      // Aplica condiciones de filtrado según los valores de los filtros
-      const cumpleNombre = departamento.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
+  const descargarExcel = async () => {
+    try {
+      let allDepartamentos: Departamento[] = [];
 
-      // Retorn true si la resolución cumple con todas las condiciones de filtrado
-      return cumpleNombre
-      // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-    });
+      // Obtener todos los departamentos sin aplicar filtros locales
+      const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+      const { results, next } = response.data;
 
-    // Actualiza el estado de resoluciones con el nuevo array filtrado
-    setDepartamentosFiltro(departamentosFiltrados);
-    setCurrentPage(1);
+      allDepartamentos = [...allDepartamentos, ...results];
+
+      // Iterar hasta que no haya más páginas
+      let url = next;
+      while (url) {
+        const nextPageResponse = await axios.get(url);
+        const { results: nextPageResults, next: nextPageNext } = nextPageResponse.data;
+
+        allDepartamentos = [...allDepartamentos, ...nextPageResults];
+        url = nextPageNext; // Actualizar la URL para la siguiente página
+      }
+
+      // Crear un libro de Excel
+      const workbook = XLSX.utils.book_new();
+
+      // Convertir los datos en una hoja de cálculo
+      const worksheet = XLSX.utils.json_to_sheet(allDepartamentos);
+
+      // Agregar la hoja de cálculo al libro de Excel
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamentos');
+
+      // Generar un archivo Excel (blob)
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+
+      // Guardar el archivo usando file-saver
+      saveAs(excelBlob, 'departamentos.xlsx');
+    } catch (error) {
+      console.error('Error downloading Excel:', error);
+    }
   };
 
   return (
     <Container maxWidth="lg">
       <div>
+        <Link to="/dashboard/departamentos/crear">
+          <Button variant="contained" endIcon={<AddIcon />}>
+            Agregar Departamento
+          </Button>
+        </Link>
 
-      <Link to="/dashboard/departamentos/crear"> {/* Agrega un enlace a la página deseada */}
-      <Button variant="contained" endIcon={<AddIcon />}>
-        Agregar Departamento
-      </Button>
-      </Link>
+        <Link to="/dashboard/departamentos/jefes">
+          <Button variant="contained" color='info' style={{ marginLeft: '10px' }}>
+            Jefes
+          </Button>
+        </Link>
 
-      <Link to="/dashboard/departamentos/jefes"> {/* Agrega un enlace a la página deseada */}
-      <Button variant="contained" color='info'>
-        Jefes
-      </Button>
-      </Link>
+        <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          Descargar Excel
+        </Button>
       </div>
 
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-<Typography variant="h4" gutterBottom>
-  Departamentos
-</Typography>
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Departamentos
+        </Typography>
 
-<Grid container spacing={2}marginBottom={2}>
-      <Grid item xs={4}>
-        <TextField
-          label="Nombre"
-          value={filtroNombre}
-          onChange={(e) => setFiltroNombre(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <Button variant="contained" onClick={filtrarDepartamentos}>
-          Filtrar
-        </Button>
-      </Grid>
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
+        <Grid container spacing={2} marginBottom={2}>
+          <Grid item xs={4}>
+            <TextField
+              label="Nombre"
+              value={filtroNombre}
+              onChange={(e) => setFiltroNombre(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <Button variant="contained" onClick={filtrarDepartamentos}>
+              Filtrar
+            </Button>
+          </Grid>
+        </Grid>
 
-<TableContainer component={Paper}>
-<Table>
-  <TableHead>
-    <TableRow className='header-row'>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Nombre</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Telefono</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Estado</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Interno</Typography>
-      </TableCell>
-        <TableCell className='header-cell'>
-        </TableCell>
-      {/* Agrega otras columnas de encabezado según sea necesario */}
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {currentItems.map((departamento) => (
-      <TableRow key={departamento.iddepartamento}>
-        <TableCell>
-          <Typography variant="body1">{departamento.nombre}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{departamento.telefono}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{departamento.estado}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{departamento.interno}</Typography>
-        </TableCell>
-        <TableCell>
-            <Link to={`/dashboard/departamentos/editar/${departamento.iddepartamento}`}>
-            <EditIcon />
-            </Link>
-          </TableCell>
-         {/* Agrega otras columnas de datos según sea necesario */}
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
-</TableContainer>
-</Paper>
-<div style={paginationContainerStyle}>
-        <Typography>Página {currentPage} de {totalPages}</Typography>
-        <div>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow className='header-row'>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Nombre</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Telefono</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Estado</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Interno</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {departamentos.map(departamento => (
+                <TableRow key={departamento.id}>
+                  <TableCell>
+                    <Typography variant="body1">{departamento.nombre}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{departamento.telefono}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{departamento.estado}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{departamento.interno}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Link to={`/dashboard/departamentos/editar/${departamento.id}`}>
+                      <EditIcon />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={buttonStyle}
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1); // Decrementar currentPage al ir a la página anterior
+            }}
+            disabled={!prevUrl}
           >
             Anterior
           </Button>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={buttonStyle}
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1); // Incrementar currentPage al ir a la siguiente página
+            }}
+            disabled={!nextUrl}
           >
             Siguiente
           </Button>
         </div>
-      </div>
-</Container>
+      </Paper>
+    </Container>
   );
 };
 

@@ -42,7 +42,7 @@ const EditarDepartamento : React.FC = () => {
   const closeModal = () => setModalOpen(false);
 
   interface Departamento {
-    idDepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -51,6 +51,7 @@ const EditarDepartamento : React.FC = () => {
   }
 
   const [departamento, setDepartamento] = useState<Departamento>();
+  console.log(departamento)
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [estado, setEstado] = useState('');
@@ -64,7 +65,7 @@ const EditarDepartamento : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/departamentos/${idDepartamento}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/departamento/${idDepartamento}/`);
         const data = response.data;
         setDepartamento(data);
       } catch (error) {
@@ -90,7 +91,7 @@ const EditarDepartamento : React.FC = () => {
 
   const edicionDepartamento = async () => {
 
-        const departamentoEditado = {
+        let departamentoEditado = {
       nombre: nombre,
       telefono: telefono,
       interno: interno,
@@ -100,7 +101,7 @@ const EditarDepartamento : React.FC = () => {
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/departamentos/${idDepartamento}/`, departamentoEditado, {
+      const response = await axios.put(`http://127.0.0.1:8000/facet/departamento/${idDepartamento}/`, departamentoEditado, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },

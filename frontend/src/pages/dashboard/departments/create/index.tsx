@@ -22,7 +22,7 @@ const CrearDepartamento = () => {
 
   
   interface Departamento {
-    idDepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -64,7 +64,7 @@ const CrearDepartamento = () => {
   const crearNuevoDepartamento= async () => {
 
 
-    const nuevoDepartamento= {
+    let nuevoDepartamento= {
       nombre: nombre,
       telefono: telefono,
       estado: 0 | 1, // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -74,7 +74,7 @@ const CrearDepartamento = () => {
 
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/departamentos/', nuevoDepartamento, {
+      const response = await axios.post('http://127.0.0.1:8000/facet/departamento/', nuevoDepartamento, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

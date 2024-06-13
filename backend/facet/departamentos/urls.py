@@ -3,10 +3,9 @@ from rest_framework import routers
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.documentation import include_docs_urls
-
+from .export.departamento import DepartamentoExportPDF, DepartamentoExportExcel
 from .apis import *
 
-# router permite registrar las vistas ViewSet en urlpatterns
 router = routers.DefaultRouter()
 router.register(r'area', AreaViewSet)
 router.register(r'asignatura', AsignaturaViewSet)
@@ -26,7 +25,10 @@ router.register(r'nodocente', NoDocenteViewSet)
 urlpatterns = [
     path('', include(router.urls)),
     path('docs/', include_docs_urls(title="FACET API")),
+    path('export/excel/departamentos/', DepartamentoExportExcel.as_view(), name='export_excel_departamentos'),
+    path('export/pdf/departamentos/', DepartamentoExportPDF.as_view(), name='export_pdf_departamentos'),
 ]
+
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
