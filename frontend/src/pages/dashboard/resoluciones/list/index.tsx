@@ -14,6 +14,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import VisibilityIcon from '@mui/icons-material/Visibility';
 import Tooltip from '@mui/material/Tooltip';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -22,7 +24,7 @@ dayjs.extend(timezone);
 const ListaResoluciones = () => {
 
   interface Resolucion {
-    idresolucion: number;
+    id: number;
     nexpediente: string;
     nresolucion: string;
     tipo: string;
@@ -35,83 +37,139 @@ const ListaResoluciones = () => {
   }
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
-  const [resolucionesFiltro, setResolucionesFiltro] = useState<Resolucion[]>([]);
   const [filtroNroExpediente, setFiltroNroExpediente] = useState('');
   const [filtroNroResolucion, setFiltroNroResolucion] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroFecha, setFiltroFecha] = useState<dayjs.Dayjs | null>(null);
-  const [filtroEstado, setFiltroEstado] = useState('');
+  const [filtroEstado, setFiltroEstado] =  useState<string | number>('');
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/resolucion/');
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+
 
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/resoluciones/');
-        setResoluciones(response.data);
-        setResolucionesFiltro(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+    fetchData(currentUrl);
+  }, [currentUrl]);
 
-    
-
-    fetchData();
-  }, []);
-
-  const paginationContainerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    margin: '16px 0', // Puedes ajustar según sea necesario
+  const fetchData = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+      setResoluciones(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
-  
-  const buttonStyle = {
-    marginLeft: '8px', // Puedes ajustar según sea necesario
-  };
-    
-    // --Paginado
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20;
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = resolucionesFiltro.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(resolucionesFiltro.length / itemsPerPage);
-  
-    const handleChangePage = (newPage: number) => {
-      setCurrentPage(newPage);
-    };
+
 
   const filtrarResoluciones = () => {
-
-    // Implementa la lógica de filtrado aquí usando los estados de los filtros
-    // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-    // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
-
-     // Aplica la lógica de filtrado aquí utilizando la función filter
-     const resolucionesFiltradas = resoluciones.filter((resolucion) => {
-      // Aplica condiciones de filtrado según los valores de los filtros
-      const cumpleNroExpediente = resolucion.nexpediente.includes(filtroNroExpediente);
-      const cumpleNroResolucion = resolucion.nresolucion.includes(filtroNroResolucion);
-      const cumpleTipo = (
-        resolucion.tipo.includes(filtroTipo)||filtroTipo=="Todos");
-      const fechaResolucion = dayjs.utc(resolucion.fecha);
-      const cumpleFecha = (
-        filtroFecha instanceof dayjs &&
-        fechaResolucion instanceof dayjs &&
-        filtroFecha.format('YYYY-MM-DD') === fechaResolucion.format('YYYY-MM-DD') ||
-        (filtroFecha ===null || !filtroFecha.isValid())
-      );
-
-      // Retorna true si la resolución cumple con todas las condiciones de filtrado
-      return cumpleNroExpediente && cumpleNroResolucion && cumpleTipo && cumpleFecha
-      // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-    });
-
-    // Actualiza el estado de resoluciones con el nuevo array filtrado
-    setResolucionesFiltro(resolucionesFiltradas);
-    setCurrentPage(1);
+    let url = `http://127.0.0.1:8000/facet/resolucion/?`;
+    const params = new URLSearchParams();
+    if (filtroNroExpediente !== '') {
+      params.append('nexpediente__icontains', filtroNroExpediente);
+    }
+    if (filtroEstado !== '') {
+      params.append('estado', filtroEstado.toString());
+    }
+    if (filtroTipo !== '') {
+      params.append('tipo', filtroTipo);
+    }
+    if (filtroNroResolucion !== '') {
+      params.append('nresolucion__icontains', filtroNroResolucion);
+    }
+    // Agregar filtro de fecha si está seleccionada
+    if (filtroFecha) {
+      params.append('fecha__date', filtroFecha.format('YYYY-MM-DD')); // Formato ISO8601 para la fecha exacta
+    } else {
+      // Si filtroFecha no está definido, no se agrega ningún parámetro de fecha al URL
+    }
+    url += params.toString();
+    setCurrentUrl(url);
   };
+  
+    const totalPages = Math.ceil(totalItems / pageSize);
+
+    const descargarExcel = async () => {
+      try {
+        let allResoluciones: Resolucion[] = [];
+  
+        let url = `http://127.0.0.1:8000/facet/resolucion/?`;
+        const params = new URLSearchParams();
+        if (filtroNroExpediente !== '') {
+          params.append('nexpediente__icontains', filtroNroExpediente);
+        }
+        if (filtroEstado !== '') {
+          params.append('estado', filtroEstado.toString());
+        }
+        if (filtroTipo !== '') {
+          params.append('tipo', filtroTipo);
+        }
+        if (filtroNroResolucion !== '') {
+          params.append('nresolucion__icontains', filtroNroResolucion);
+        }
+        if (filtroFecha) {
+          params.append('fecha__date', filtroFecha.format('YYYY-MM-DD')); // Formato ISO8601 para la fecha exacta
+        } else {
+          // Si filtroFecha no está definido, no se agrega ningún parámetro de fecha al URL
+        }
+        url += params.toString();
+  
+        while (url) {
+          const response = await axios.get(url);
+          const { results, next } = response.data;
+  
+          allResoluciones = [...allResoluciones, ...results];
+          url = next;
+        }
+  
+        const workbook = XLSX.utils.book_new();
+        const worksheet = XLSX.utils.json_to_sheet(allResoluciones);
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Resoluciones');
+        const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        saveAs(excelBlob, 'resoluciones.xlsx');
+      } catch (error) {
+        console.error('Error downloading Excel:', error);
+      }
+    };  
+
+  // const filtrarResoluciones = () => {
+
+  //   // Implementa la lógica de filtrado aquí usando los estados de los filtros
+  //   // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
+  //   // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
+
+  //    // Aplica la lógica de filtrado aquí utilizando la función filter
+  //    const resolucionesFiltradas = resoluciones.filter((resolucion) => {
+  //     // Aplica condiciones de filtrado según los valores de los filtros
+  //     const cumpleNroExpediente = resolucion.nexpediente.includes(filtroNroExpediente);
+  //     const cumpleNroResolucion = resolucion.nresolucion.includes(filtroNroResolucion);
+  //     const cumpleTipo = (
+  //       resolucion.tipo.includes(filtroTipo)||filtroTipo=="Todos");
+  //     const fechaResolucion = dayjs.utc(resolucion.fecha);
+  //     const cumpleFecha = (
+  //       filtroFecha instanceof dayjs &&
+  //       fechaResolucion instanceof dayjs &&
+  //       filtroFecha.format('YYYY-MM-DD') === fechaResolucion.format('YYYY-MM-DD') ||
+  //       (filtroFecha ===null || !filtroFecha.isValid())
+  //     );
+
+  //     // Retorna true si la resolución cumple con todas las condiciones de filtrado
+  //     return cumpleNroExpediente && cumpleNroResolucion && cumpleTipo && cumpleFecha
+  //     // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
+  //   });
+
+  //   // Actualiza el estado de resoluciones con el nuevo array filtrado
+  //   setResolucionesFiltro(resolucionesFiltradas);
+  //   setCurrentPage(1);
+  // };
 
   return (
 
@@ -122,6 +180,9 @@ const ListaResoluciones = () => {
         Agregar Resolucion
       </Button>
     </Link>
+    <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          Descargar Excel
+        </Button>
  </div>
 
 <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
@@ -157,7 +218,7 @@ const ListaResoluciones = () => {
             label="Tipo"
             onChange={(e) => setFiltroTipo(e.target.value)}
           >
-            <MenuItem value={"Todos"}>Todos</MenuItem>
+            <MenuItem value={""}>Todos</MenuItem>
             <MenuItem value={"Rector"}>Rector</MenuItem>
             <MenuItem value={"Decano"}>Decano</MenuItem>
             <MenuItem value={"Consejo_Superior"}>Consejo Superior</MenuItem>
@@ -224,8 +285,8 @@ const ListaResoluciones = () => {
       </TableRow>
     </TableHead>
     <TableBody>
-      {currentItems.map((resolucion) => (
-        <TableRow key={resolucion.idresolucion}>
+      {resoluciones.map((resolucion) => (
+        <TableRow key={resolucion.id}>
           <TableCell>
             <Typography variant="body1">{resolucion.nexpediente}</Typography>
           </TableCell>
@@ -258,7 +319,7 @@ const ListaResoluciones = () => {
             </Tooltip>
           </TableCell>
           <TableCell>
-            <Link to={`/dashboard/resoluciones/editar/${resolucion.idresolucion}`}>
+            <Link to={`/dashboard/resoluciones/editar/${resolucion.id}`}>
             <EditIcon />
             </Link>
           </TableCell>
@@ -268,30 +329,35 @@ const ListaResoluciones = () => {
     </TableBody>
   </Table>
 </TableContainer>
-</Paper>
-<div style={paginationContainerStyle}>
-        <Typography>Página {currentPage} de {totalPages}</Typography>
-        <div>
+
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={buttonStyle}
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            disabled={!prevUrl}
           >
             Anterior
           </Button>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={buttonStyle}
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            disabled={!nextUrl}
           >
             Siguiente
           </Button>
         </div>
-      </div>
+</Paper>
 </Container>
   );
 };

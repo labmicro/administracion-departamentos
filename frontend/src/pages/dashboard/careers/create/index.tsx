@@ -61,7 +61,7 @@ const CrearCarrera = () => {
   const crearNuevaCarrera= async () => {
 
 
-    const nuevaCarrera= {
+    let nuevaCarrera= {
       nombre: nombre,
       tipo:tipo,
       planestudio: planEstudio,
@@ -72,7 +72,7 @@ const CrearCarrera = () => {
 
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/carreras/', nuevaCarrera, {
+      const response = await axios.post('http://127.0.0.1:8000/facet/carrera/', nuevaCarrera, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

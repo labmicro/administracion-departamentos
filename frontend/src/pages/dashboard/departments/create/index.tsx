@@ -20,16 +20,6 @@ const CrearDepartamento = () => {
 
   const navigate = useNavigate();
 
-  
-  interface Departamento {
-    id: number;
-    nombre: string;
-    telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    interno: string;
-    // Otros campos según sea necesario
-  }
-
   const [nombre, setNombre] = useState('');
   const [telefono, setTelefono] = useState('');
   const [estado, setEstado] = useState('');

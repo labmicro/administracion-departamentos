@@ -169,6 +169,7 @@ REST_FRAMEWORK = {
         "rest_framework.parsers.FormParser",
         "rest_framework.parsers.MultiPartParser",
     ),
+    
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 10,
     "DATETIME_FORMAT": "%d/%m/%Y %H:%M:%S",
@@ -242,4 +243,6 @@ MEDIA_URL = "/media/"
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
-CORS_ALLOWED_ORIGINS=[]
+CORS_ALLOWED_ORIGINS=[
+    "http://localhost:3000",
+]

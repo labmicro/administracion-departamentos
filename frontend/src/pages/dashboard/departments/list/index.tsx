@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid } from '@mui/material';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
@@ -18,6 +18,8 @@ interface Departamento {
 const ListaDepartamentos = () => {
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
+  const [filtroTelefono, setFiltroTelefono] = useState('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/departamento/');
@@ -43,7 +45,18 @@ const ListaDepartamentos = () => {
   };
 
   const filtrarDepartamentos = () => {
-    const url = `http://127.0.0.1:8000/facet/departamento/?search=${filtroNombre}`;
+    let url = `http://127.0.0.1:8000/facet/departamento/?`;
+    const params = new URLSearchParams();
+    if (filtroNombre !== '') {
+      params.append('nombre__icontains', filtroNombre);
+    }
+    if (filtroEstado !== '') {
+      params.append('estado', filtroEstado.toString());
+    }
+    if (filtroTelefono !== '') {
+      params.append('telefono__icontains', filtroTelefono);
+    }
+    url += params.toString();
     setCurrentUrl(url);
   };
 
@@ -53,20 +66,27 @@ const ListaDepartamentos = () => {
     try {
       let allDepartamentos: Departamento[] = [];
 
-      // Obtener todos los departamentos sin aplicar filtros locales
-      const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
-      const { results, next } = response.data;
-
-      allDepartamentos = [...allDepartamentos, ...results];
+      // Usar la URL de filtrado actual si hay un filtro aplicado
+      let url = `http://127.0.0.1:8000/facet/departamento/?`;
+      const params = new URLSearchParams();
+      if (filtroNombre !== '') {
+        params.append('nombre__icontains', filtroNombre);
+      }
+      if (filtroEstado !== '') {
+        params.append('estado', filtroEstado.toString());
+      }
+      if (filtroTelefono !== '') {
+        params.append('telefono__icontains', filtroTelefono);
+      }
+      url += params.toString();
 
       // Iterar hasta que no haya más páginas
-      let url = next;
       while (url) {
-        const nextPageResponse = await axios.get(url);
-        const { results: nextPageResults, next: nextPageNext } = nextPageResponse.data;
+        const response = await axios.get(url);
+        const { results, next } = response.data;
 
-        allDepartamentos = [...allDepartamentos, ...nextPageResults];
-        url = nextPageNext; // Actualizar la URL para la siguiente página
+        allDepartamentos = [...allDepartamentos, ...results];
+        url = next; // Actualizar la URL para la siguiente página
       }
 
       // Crear un libro de Excel
@@ -120,6 +140,28 @@ const ListaDepartamentos = () => {
               label="Nombre"
               value={filtroNombre}
               onChange={(e) => setFiltroNombre(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                label="Estado"
+              >
+                <MenuItem value=""><em>Todos</em></MenuItem>
+                <MenuItem value={1}>1</MenuItem>
+                <MenuItem value={0}>0</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Telefono"
+              value={filtroTelefono}
+              onChange={(e) => setFiltroTelefono(e.target.value)}
               fullWidth
             />
           </Grid>
@@ -182,7 +224,7 @@ const ListaDepartamentos = () => {
             color="primary"
             onClick={() => {
               prevUrl && setCurrentUrl(prevUrl);
-              setCurrentPage(currentPage - 1); // Decrementar currentPage al ir a la página anterior
+              setCurrentPage(currentPage - 1);
             }}
             disabled={!prevUrl}
           >
@@ -196,7 +238,7 @@ const ListaDepartamentos = () => {
             color="primary"
             onClick={() => {
               nextUrl && setCurrentUrl(nextUrl);
-              setCurrentPage(currentPage + 1); // Incrementar currentPage al ir a la siguiente página
+              setCurrentPage(currentPage + 1);
             }}
             disabled={!nextUrl}
           >

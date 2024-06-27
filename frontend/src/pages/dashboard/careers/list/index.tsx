@@ -1,203 +1,274 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';  // Asegúrate de tener instalada esta dependencia
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
-import TextSnippetIcon from '@mui/icons-material/TextSnippet';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
+
+interface Carrera {
+  id: number;
+  nombre: string;
+  tipo: TipoCarrera;
+  planestudio: string;
+  sitio: string;
+  estado: 0 | 1;
+}
 
 const ListaCarreras = () => {
-  const h1Style = {
-    color: 'black',
-  };
-
-  type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
-
-  interface Carrera {
-    idcarrera: number;
-    nombre: string;
-    tipo: TipoCarrera;
-    planestudio: string;
-    sitio: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
-  }
-
   const [carreras, setCarreras] = useState<Carrera[]>([]);
-  const [carrerasFiltro, setCarrerasFiltro] = useState<Carrera[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [filtroPlanEstudio, setFiltroPlanEstudio] = useState('');
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/carrera/');
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/carreras/');
-        setCarreras(response.data);
-        setCarrerasFiltro(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+    fetchData(currentUrl);
+  }, [currentUrl]);
 
-    
-
-    fetchData();
-  }, []);
-
-  const filtrarCarreras = () => {
-
-    // Implementa la lógica de filtrado aquí usando los estados de los filtros
-    // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-    // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
-
-     // Aplica la lógica de filtrado aquí utilizando la función filter
-     const carrerasFiltradas = carreras.filter((carrera) => {
-      // Aplica condiciones de filtrado según los valores de los filtros
-      const cumpleNombre = carrera.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
-      const cumpleTipo = (
-        carrera.tipo.includes(filtroTipo)||filtroTipo=="Todos");
-      const cumplePlanEstudio = carrera.planestudio.includes(filtroPlanEstudio);  
-
-      // Retorna true si la resolución cumple con todas las condiciones de filtrado
-      return cumplePlanEstudio && cumpleNombre && cumpleTipo  
-      // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-    });
-
-    // Actualiza el estado de resoluciones con el nuevo array filtrado
-    setCarrerasFiltro(carrerasFiltradas);
+  const fetchData = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+      setCarreras(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
 
+  const filtrarCarreras = () => {
+    let url = `http://127.0.0.1:8000/facet/carrera/?`;
+    const params = new URLSearchParams();
+    if (filtroNombre !== '') {
+      params.append('nombre__icontains', filtroNombre);
+    }
+    if (filtroEstado !== '') {
+      params.append('estado', filtroEstado.toString());
+    }
+    if (filtroTipo !== '') {
+      params.append('tipo', filtroTipo);
+    }
+    if (filtroPlanEstudio !== '') {
+      params.append('planestudio__icontains', filtroPlanEstudio);
+    }
+    url += params.toString();
+    setCurrentUrl(url);
+  };
+
+  const totalPages = Math.ceil(totalItems / pageSize);
+
+  const descargarExcel = async () => {
+    try {
+      let allCarreras: Carrera[] = [];
+
+      let url = `http://127.0.0.1:8000/facet/carrera/?`;
+      const params = new URLSearchParams();
+      if (filtroNombre !== '') {
+        params.append('nombre__icontains', filtroNombre);
+      }
+      if (filtroEstado !== '') {
+        params.append('estado', filtroEstado.toString());
+      }
+      if (filtroTipo !== '') {
+        params.append('tipo', filtroTipo);
+      }
+      if (filtroPlanEstudio !== '') {
+        params.append('planestudio__icontains', filtroPlanEstudio);
+      }
+      url += params.toString();
+
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
+
+        allCarreras = [...allCarreras, ...results];
+        url = next;
+      }
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(allCarreras);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Carreras');
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(excelBlob, 'carreras.xlsx');
+    } catch (error) {
+      console.error('Error downloading Excel:', error);
+    }
+  };
 
   return (
-    <Container maxWidth="lg">
-    <div>
-
-    <Link to="/dashboard/carreras/crear"> {/* Agrega un enlace a la página deseada */}
-    <Button variant="contained" endIcon={<AddIcon />}>
-      Agregar Carrera
-    </Button>
-    </Link>
-    </div>
-
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-<Typography variant="h4" gutterBottom>
-  Carreras
-</Typography>
-
-<Grid container spacing={2}>
-      <Grid item xs={4}>
-        <TextField
-          label="Nombre"
-          value={filtroNombre}
-          onChange={(e) => setFiltroNombre(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <FormControl fullWidth margin="none">
-          <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={filtroTipo}
-            label="Tipo"
-            onChange={(e) => setFiltroTipo(e.target.value)}
-          >
-            <MenuItem value={"Todos"}>Todos</MenuItem>
-            <MenuItem value={"Pregado"}>Pregado</MenuItem>
-            <MenuItem value={"Grado"}>Grado</MenuItem>
-            <MenuItem value={"Posgrado"}>Posgrado</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <TextField
-          label="Plan de Estudio"
-          value={filtroPlanEstudio}
-          onChange={(e) => setFiltroPlanEstudio(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <Button variant="contained" onClick={filtrarCarreras}>
-          Filtrar
+    <Container maxWidth="md">
+      <div>
+        <Link to="/dashboard/carreras/crear">
+          <Button variant="contained" endIcon={<AddIcon />}>
+            Agregar Carrera
+          </Button>
+        </Link>
+        <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          Descargar Excel
         </Button>
-      </Grid>
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
+      </div>
 
-<TableContainer component={Paper}>
-<Table>
-  <TableHead>
-    <TableRow className='header-row'>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Nombre</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Tipo</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Plan de Estudio</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Sitio</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Asignaturas</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Estado</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        </TableCell>
-      {/* Agrega otras columnas de encabezado según sea necesario */}
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {carrerasFiltro.map((carrera) => (
-      <TableRow key={carrera.idcarrera}>
-        <TableCell>
-          <Typography variant="body1">{carrera.nombre}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{carrera.tipo}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{carrera.planestudio}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{carrera.sitio}</Typography>
-        </TableCell>
-        <TableCell style={{ textAlign: 'center' }}>
-            <Link to={`/dashboard/carreras/asignaturas/${carrera.idcarrera}`}>
-            <NoteAltIcon />
-            </Link>
-          </TableCell>
-        <TableCell style={{ textAlign: 'center' }}>
-          <Typography variant="body1">{carrera.estado}</Typography>
-        </TableCell>
-        <TableCell>
-            <Link to={`/dashboard/carreras/editar/${carrera.idcarrera}`}>
-            <EditIcon />
-            </Link>
-          </TableCell>
-         {/* Agrega otras columnas de datos según sea necesario */}
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
-</TableContainer>
-</Paper>
-</Container>
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Carreras
+        </Typography>
+
+        <Grid container spacing={2} marginBottom={2}>
+          <Grid item xs={4}>
+            <TextField
+              label="Nombre"
+              value={filtroNombre}
+              onChange={(e) => setFiltroNombre(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth>
+              <InputLabel>Tipo</InputLabel>
+              <Select
+                value={filtroTipo}
+                onChange={(e) => setFiltroTipo(e.target.value)}
+                label="Tipo"
+              >
+                <MenuItem value=""><em>Todos</em></MenuItem>
+                <MenuItem value="Pregrado">Pregrado</MenuItem>
+                <MenuItem value="Grado">Grado</MenuItem>
+                <MenuItem value="Posgrado">Posgrado</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                label="Estado"
+              >
+                <MenuItem value=""><em>Todos</em></MenuItem>
+                <MenuItem value={1}>1</MenuItem>
+                <MenuItem value={0}>0</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Plan de Estudio"
+              value={filtroPlanEstudio}
+              onChange={(e) => setFiltroPlanEstudio(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <Button variant="contained" onClick={filtrarCarreras}>
+              Filtrar
+            </Button>
+          </Grid>
+        </Grid>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow className='header-row'>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Nombre</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Tipo</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Plan de Estudio</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Sitio</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Asignaturas</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Estado</Typography>
+                </TableCell>
+                <TableCell className='header-cell'></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {carreras.map(carrera => (
+                <TableRow key={carrera.id}>
+                  <TableCell>
+                    <Typography variant="body1">{carrera.nombre}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{carrera.tipo}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{carrera.planestudio}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{carrera.sitio}</Typography>
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'center' }}>
+                    <Link to={`/dashboard/carreras/asignaturas/${carrera.id}`}>
+                      <NoteAltIcon />
+                    </Link>
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'center' }}>
+                    <Typography variant="body1">{carrera.estado}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Link to={`/dashboard/carreras/editar/${carrera.id}`}>
+                      <EditIcon />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            disabled={!prevUrl}
+          >
+            Anterior
+          </Button>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            disabled={!nextUrl}
+          >
+            Siguiente
+          </Button>
+        </div>
+      </Paper>
+    </Container>
   );
 };
 
