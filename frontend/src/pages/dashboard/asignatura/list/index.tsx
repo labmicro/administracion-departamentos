@@ -7,6 +7,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const ListaAsignaturas = () => {
   const h1Style = {
@@ -16,7 +18,7 @@ const ListaAsignaturas = () => {
   type EstadoAsignatura = 'Electiva' | 'Obligatoria';
 
   interface Area {
-    idarea: number;
+    id: number;
     iddepartamento: number;
     nombre: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -24,7 +26,7 @@ const ListaAsignaturas = () => {
   }
 
   interface Departamento {
-    iddepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -34,7 +36,7 @@ const ListaAsignaturas = () => {
 
 
   interface Asignatura {
-    idasignatura: number;
+    id: number;
     idarea: number;
     iddepartamento: number;
     codigo: string;
@@ -54,77 +56,92 @@ const ListaAsignaturas = () => {
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroModulo, setFiltroModulo] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/asignatura/');
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        setDepartamentos(responseDeptos.data);
+    fetchData(currentUrl);
+  }, [currentUrl]);
 
-        // Obtener áreas después de obtener departamentos
-        const responseAreas = await axios.get('http://127.0.0.1:8000/facet/api/v1/areas/');
-        setAreas(responseAreas.data);
-
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/asignaturas/');
-        setAsignaturas(response.data);
-        setAsignaturasFiltro(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-  
-
-    fetchData();
-  }, []);
-
-  const paginationContainerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    margin: '16px 0', // Puedes ajustar según sea necesario
+  const fetchData = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+      setAsignaturas(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
-  
-  const buttonStyle = {
-    marginLeft: '8px', // Puedes ajustar según sea necesario
-  };
-
-  // --Paginado
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = asignaturasFiltro.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(asignaturasFiltro.length / itemsPerPage);
-
-  const handleChangePage = (newPage: number) => {
-    setCurrentPage(newPage);
-  };
-  
 
   const filtrarAsignaturas = () => {
+    let url = `http://127.0.0.1:8000/facet/asignatura/?`;
+    const params = new URLSearchParams();
+    if (filtroNombre !== '') {
+      params.append('nombre__icontains', filtroNombre);
+    }
+    if (filtroCodigo !== '') {
+      params.append('codigo__icontains', filtroCodigo);
+    }
+    if (filtroEstado !== '') {
+      params.append('estado', filtroEstado.toString());
+    }
+    if (filtroTipo !== '') {
+      params.append('tipo', filtroTipo);
+    }
+    if (filtroModulo !== '') {
+      params.append('modulo__icontains', filtroModulo);
+    }
+    url += params.toString();
+    setCurrentUrl(url);
+  };
 
-    // Implementa la lógica de filtrado aquí usando los estados de los filtros
-    // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-    // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
+  const totalPages = Math.ceil(totalItems / pageSize);
 
-     // Aplica la lógica de filtrado aquí utilizando la función filter
-     const asignaturasFiltradas = asignaturas.filter((asignatura) => {
-      // Aplica condiciones de filtrado según los valores de los filtros
-      const cumpleCodigo = asignatura.codigo.toLowerCase().includes(filtroCodigo.toLowerCase());
-      const cumpleNombre = asignatura.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
-      const cumpleTipo = (
-        asignatura.tipo.includes(filtroTipo)||filtroTipo=="Todos");
-      const cumpleModulo = asignatura.modulo.toLowerCase().includes(filtroModulo.toLowerCase());  
+  const descargarExcel = async () => {
+    try {
+      let allAsignaturas: Asignatura[] = [];
 
-      // Retorna true si la resolución cumple con todas las condiciones de filtrado
-      return cumpleCodigo && cumpleNombre && cumpleTipo && cumpleModulo 
-      // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-    });
+      let url = `http://127.0.0.1:8000/facet/asignatura/?`;
+      const params = new URLSearchParams();
+      if (filtroNombre !== '') {
+        params.append('nombre__icontains', filtroNombre);
+      }
+      if (filtroEstado !== '') {
+        params.append('estado', filtroEstado.toString());
+      }
+      if (filtroTipo !== '') {
+        params.append('tipo', filtroTipo);
+      }
+      if (filtroModulo !== '') {
+        params.append('planestudio__icontains', filtroModulo);
+      }
+      url += params.toString();
 
-    // Actualiza el estado de resoluciones con el nuevo array filtrado
-    setAsignaturasFiltro(asignaturasFiltradas);
-    setCurrentPage(1);
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
+
+        allAsignaturas = [...allAsignaturas, ...results];
+        url = next;
+      }
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(allAsignaturas);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Asignaturas');
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(excelBlob, 'asignaturas.xlsx');
+    } catch (error) {
+      console.error('Error downloading Excel:', error);
+    }
   };
 
   return (
@@ -136,6 +153,9 @@ const ListaAsignaturas = () => {
       Agregar Asignatura
     </Button>
     </Link>
+    <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          Descargar Excel
+        </Button>
     </div>
 
 <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
@@ -171,7 +191,7 @@ const ListaAsignaturas = () => {
             label="Tipo"
             onChange={(e) => setFiltroTipo(e.target.value)}
           >
-            <MenuItem value={"Todos"}>Todos</MenuItem>
+            <MenuItem value=""><em>Todos</em></MenuItem>
             <MenuItem value={"Electiva"}>Electiva</MenuItem>
             <MenuItem value={"Obligatoria"}>Obligatoria</MenuItem>
           </Select>
@@ -230,8 +250,8 @@ const ListaAsignaturas = () => {
     </TableRow>
   </TableHead>
   <TableBody>
-    {currentItems.map((asignatura) => (
-      <TableRow key={asignatura.idasignatura}>
+    {asignaturas.map((asignatura) => (
+      <TableRow key={asignatura.id}>
         <TableCell>
           <Typography variant="body1">{asignatura.codigo}</Typography>
         </TableCell>
@@ -253,18 +273,18 @@ const ListaAsignaturas = () => {
           <Typography variant="body1">{asignatura.estado}</Typography>
         </TableCell>
         <TableCell>
-          {areas.find(area => area.idarea === asignatura.idarea)?.nombre || 'Area no encontrado'}
+          {areas.find(area => area.id === asignatura.idarea)?.nombre || 'Area no encontrado'}
         </TableCell>
         <TableCell>
-          {departamentos.find(depto => depto.iddepartamento === asignatura.iddepartamento)?.nombre || 'Departamento no encontrado'}
+          {departamentos.find(depto => depto.id === asignatura.id)?.nombre || 'Departamento no encontrado'}
         </TableCell>   
         <TableCell style={{ textAlign: 'center' }}>
-            <Link to={`/dashboard/asignaturas/docentes/${asignatura.idasignatura}`}>
+            <Link to={`/dashboard/asignaturas/docentes/${asignatura.id}`}>
             <GroupIcon />
             </Link>
           </TableCell>       
         <TableCell style={{ textAlign: 'center' }}>
-            <Link to={`/dashboard/asignaturas/editar/${asignatura.idasignatura}/${asignatura.iddepartamento}`}>
+            <Link to={`/dashboard/asignaturas/editar/${asignatura.id}/${asignatura.id}`}>
             <EditIcon />
             </Link>
           </TableCell>
@@ -274,30 +294,34 @@ const ListaAsignaturas = () => {
   </TableBody>
 </Table>
 </TableContainer>
-</Paper>
-<div style={paginationContainerStyle}>
-        <Typography>Página {currentPage} de {totalPages}</Typography>
-        <div>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={buttonStyle}
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            disabled={!prevUrl}
           >
             Anterior
           </Button>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={buttonStyle}
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            disabled={!nextUrl}
           >
             Siguiente
           </Button>
         </div>
-      </div>
+</Paper>
 </Container>
   );
 };

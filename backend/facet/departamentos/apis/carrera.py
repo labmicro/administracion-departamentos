@@ -16,4 +16,4 @@ class CarreraViewSet(viewsets.ModelViewSet):
         'planestudio': ['icontains'], # Filtrar por plan de estudio que contiene el valor especificado
         'nombre': ['icontains'],   # Filtrar por nombre que contiene el valor especificado
     }
-    print(filterset_fields)
+
