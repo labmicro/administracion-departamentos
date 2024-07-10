@@ -21,7 +21,7 @@ const CrearArea = () => {
   const navigate = useNavigate();
 
   interface Area {
-    idarea: number;
+    id: number;
     iddepartamento: number;
     nombre: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -29,7 +29,7 @@ const CrearArea = () => {
   }
 
   interface Departamento {
-    iddepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -70,8 +70,8 @@ const CrearArea = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        setDepartamentos(response.data);
+        const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+        setDepartamentos(response.data.results);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -86,7 +86,7 @@ const CrearArea = () => {
   const crearNuevoDepartamento= async () => {
 
     const nuevaArea= {
-      iddepartamento: iddepartamento,    
+      departamento: iddepartamento,    
       nombre: nombre,
       estado: estado, // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
 
@@ -95,7 +95,7 @@ const CrearArea = () => {
 
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/areas/', nuevaArea, {
+      const response = await axios.post('http://127.0.0.1:8000/facet/area/', nuevaArea, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -140,7 +140,7 @@ const CrearArea = () => {
           }}
         >
           {departamentos.map(departamentos => (
-            <MenuItem key={departamentos.iddepartamento} value={departamentos.iddepartamento}>
+            <MenuItem key={departamentos.id} value={departamentos.id}>
               {departamentos.nombre}
             </MenuItem>
           ))}

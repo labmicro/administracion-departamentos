@@ -11,7 +11,7 @@ import { saveAs } from 'file-saver';
 
 interface Area {
   id: number;
-  iddepartamento: number;
+  departamento: number;
   nombre: string;
   estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
   // Otros campos según sea necesario
@@ -159,12 +159,13 @@ const ListaAreas = () => {
   </TableHead>
   <TableBody>
     {areas.map((area) => (
+      
       <TableRow key={area.id}>
         <TableCell>
           <Typography variant="body1">{area.nombre}</Typography>
         </TableCell>
         <TableCell>
-          {departamentos.find(depto => depto.id === area.id)?.nombre || 'Departamento no encontrado'}
+          {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
           </TableCell>
         <TableCell>
           <Typography variant="body1">{area.estado}</Typography>

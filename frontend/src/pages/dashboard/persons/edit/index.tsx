@@ -42,7 +42,7 @@ const EditarPersona : React.FC = () => {
   const closeModal = () => setModalOpen(false);
 
   interface Persona {
-    idpersona: number;
+    id: number;
     nombre: string;
     apellido: string;
     telefono: string;
@@ -72,7 +72,7 @@ const EditarPersona : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/personas/${idPersona}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/persona/${idPersona}/`);
         const personaData = response.data;
         setPersona(personaData);
       } catch (error) {
@@ -114,7 +114,7 @@ const EditarPersona : React.FC = () => {
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/personas/${idPersona}/`, personaEditada, {
+      const response = await axios.put(`http://127.0.0.1:8000/facet/persona/${idPersona}/`, personaEditada, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
@@ -132,7 +132,7 @@ const EditarPersona : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/personas/${idPersona}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/persona/${idPersona}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },

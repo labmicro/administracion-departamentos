@@ -45,7 +45,7 @@ const EditarResolucion : React.FC = () => {
   const closeModal = () => setModalOpen(false);
 
   interface Resolucion {
-    idresolucion: number;
+    id: number;
     nexpediente: string;
     nresolucion: string;
     tipo: string;
@@ -70,7 +70,7 @@ const EditarResolucion : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/resoluciones/${idResolucion}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`);
         const resolucionData = response.data;
         setResolucion(resolucionData);
       } catch (error) {
@@ -114,16 +114,13 @@ const EditarResolucion : React.FC = () => {
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/resoluciones/${idResolucion}/`, resolucionEditada, {
+      const response = await axios.put(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`, resolucionEditada, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
       });
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
-      // navigate('/dashboard/resoluciones/');
-      // console.log('Respuesta del servidor:', response.data);
     } catch (error) {
-      // console.error('Error al hacer la solicitud PUT:', error);
       handleOpenModal('Error','NO  se pudo realizar la acción.');
 
     }
@@ -134,16 +131,14 @@ const EditarResolucion : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/resoluciones/${idResolucion}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },
   });
   handleOpenModal('Resolución Eliminada', 'La acción se realizó con éxito.');
-  // navigate('/dashboard/resoluciones/');
-  // console.log('Respuesta del servidor:', response.data);
 } catch (error) {
-  // console.error('Error al hacer la solicitud PUT:', error);
+  
   handleOpenModal('Error','NO  se pudo realizar la acción.');
 
 }

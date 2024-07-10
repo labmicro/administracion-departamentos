@@ -5,25 +5,26 @@ import { Container, Table, TableBody, TableCell, TableContainer, TableHead, Tabl
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
+
+interface Persona {
+  id: number;
+  nombre: string;
+  apellido: string;
+  telefono: string;
+  dni: string;
+  estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+  email: string;
+  interno: string;
+  legajo: string;
+  // Otros campos según sea necesario
+}
 
 const ListaPersonas = () => {
   const h1Style = {
     color: 'black',
   };
-
-
-  interface Persona {
-    idpersona: number;
-    nombre: string;
-    apellido: string;
-    telefono: string;
-    dni: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    email: string;
-    interno: string;
-    legajo: string;
-    // Otros campos según sea necesario
-  }
 
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [personasFiltro, setPersonasFiltro] = useState<Persona[]>([]);
@@ -31,69 +32,95 @@ const ListaPersonas = () => {
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroApellido, setFiltroApellido] = useState('');
   const [filtroLegajo, setFiltroLegajo] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/persona/');
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
   
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/personas/');
-        setPersonas(response.data);
-        setPersonasFiltro(response.data)
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+    fetchData(currentUrl);
+  }, [currentUrl]);
 
-    
-
-    fetchData();
-  }, [])
-
-
-  const paginationContainerStyle = {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    margin: '16px 0', // Puedes ajustar según sea necesario
-  };
-  
-  const buttonStyle = {
-    marginLeft: '8px', // Puedes ajustar según sea necesario
-  };
-
-  // --Paginado
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 20;
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = personasFiltro.slice(indexOfFirstItem, indexOfLastItem);
-  const totalPages = Math.ceil(personasFiltro.length / itemsPerPage);
-
-  const handleChangePage = (newPage: number) => {
-    setCurrentPage(newPage);
+  const fetchData = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+      setPersonas(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
   };
     
 
   const filtrarPersonas = () => {
 
-    // Implementa la lógica de filtrado aquí usando los estados de los filtros
-     // Aplica la lógica de filtrado aquí utilizando la función filter
-     const personasFiltradas = personas.filter((persona) => {
-      // Aplica condiciones de filtrado según los valores de los filtros
-      const cumpleDni = persona.dni.includes(filtroDni);
-      const cumpleNombre = persona.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
-      const cumpleApellido = persona.apellido.toLowerCase().includes(filtroApellido.toLowerCase());
-      const cumpleLegajo =((persona.legajo && persona.legajo.includes(filtroLegajo)) ||
-      persona.legajo === null);
+    let url = `http://127.0.0.1:8000/facet/persona/?`;
+    const params = new URLSearchParams();
+    if (filtroNombre !== '') {
+      params.append('nombre__icontains', filtroNombre);
+    }
+    if (filtroDni !== '') {
+      params.append('dni__icontains', filtroDni);
+    }
+    if (filtroEstado !== '') {
+      params.append('estado', filtroEstado.toString());
+    }
+    if (filtroApellido !== '') {
+      params.append('apellido__icontains', filtroApellido);
+    }
+    if (filtroLegajo !== '') {
+      params.append('legajo__icontains', filtroLegajo);
+    }
+    url += params.toString();
+    setCurrentUrl(url);
+  };
 
-      // Retorna true si la resolución cumple con todas las condiciones de filtrado
-      return cumpleDni && cumpleNombre && cumpleApellido && cumpleLegajo
-      // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-    });
+  const totalPages = Math.ceil(totalItems / pageSize);
 
-    // Actualiza el estado de resoluciones con el nuevo array filtrado
-    setPersonasFiltro(personasFiltradas);
-    setCurrentPage(1);
+  const descargarExcel = async () => {
+    try {
+      let allPersona: Persona[] = [];
+
+      let url = `http://127.0.0.1:8000/facet/persona/?`;
+      const params = new URLSearchParams();
+      if (filtroNombre !== '') {
+        params.append('nombre__icontains', filtroNombre);
+      }
+      if (filtroEstado !== '') {
+        params.append('estado', filtroEstado.toString());
+      }
+      if (filtroApellido !== '') {
+        params.append('apellido__icontains', filtroApellido);
+      }
+      if (filtroLegajo !== '') {
+        params.append('legajo__icontains', filtroLegajo);
+      }
+      url += params.toString();
+
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
+
+        allPersona = [...allPersona, ...results];
+        url = next;
+      }
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(allPersona);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Personas');
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(excelBlob, 'personas.xlsx');
+    } catch (error) {
+      console.error('Error downloading Excel:', error);
+    }
   };
 
   return (
@@ -120,6 +147,9 @@ const ListaPersonas = () => {
         No Docentes
       </Button>
       </Link>
+      <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          Descargar Excel
+        </Button>
     </div>
 
 <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
@@ -202,8 +232,8 @@ const ListaPersonas = () => {
     </TableRow>
   </TableHead>
   <TableBody>
-    {currentItems.map((persona) => (
-      <TableRow key={persona.idpersona}>
+    {personas.map((persona) => (
+      <TableRow key={persona.id}>
         <TableCell>
           <Typography variant="body1">{persona.nombre}</Typography>
         </TableCell>
@@ -229,7 +259,7 @@ const ListaPersonas = () => {
           <Typography variant="body1">{persona.legajo}</Typography>
         </TableCell>
         <TableCell>
-            <Link to={`/dashboard/personas/editar/${persona.idpersona}`}>
+            <Link to={`/dashboard/personas/editar/${persona.id}`}>
             <EditIcon />
             </Link>
           </TableCell>
@@ -239,31 +269,34 @@ const ListaPersonas = () => {
   </TableBody>
 </Table>
 </TableContainer>
-</Paper>
-<div style={paginationContainerStyle}>
-        <Typography>Página {currentPage} de {totalPages}</Typography>
-        <div>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={buttonStyle}
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            disabled={!prevUrl}
           >
             Anterior
           </Button>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={buttonStyle}
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            disabled={!nextUrl}
           >
             Siguiente
           </Button>
         </div>
-      </div>
-
+</Paper>
 </Container>
   );
 };

@@ -82,7 +82,7 @@ const CrearResolucion = () => {
 
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/resoluciones/', nuevaResolucion, {
+      const response = await axios.post('http://127.0.0.1:8000/facet/resolucion/', nuevaResolucion, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -171,7 +171,6 @@ const CrearResolucion = () => {
           if (date) {
             const fechaSeleccionada = dayjs(date).utc();  // Usa .utc() para evitar problemas de zona horaria
             setFecha(fechaSeleccionada);
-            console.log(fechaSeleccionada); // Imprime la fecha en la consola
           }
         }}
       />
