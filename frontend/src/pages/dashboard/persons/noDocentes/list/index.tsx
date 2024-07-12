@@ -32,6 +32,7 @@ const ListaNoDocentes = () => {
 
 
   interface NoDocente {
+    id: number;
     persona: number;
     observaciones: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -195,7 +196,7 @@ const ListaNoDocentes = () => {
                     <TableCell>{NoDocente.observaciones}</TableCell>
                     <TableCell>{NoDocente.estado}</TableCell>
                     <TableCell>
-            <Link to={`/dashboard/personas/nodocentes/editar/${persona.id}`}>
+            <Link to={`/dashboard/personas/nodocentes/editar/${NoDocente.id}`}>
             <EditIcon />
             </Link>
           </TableCell>
