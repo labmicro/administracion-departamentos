@@ -5,98 +5,102 @@ import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer,
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
+
+interface Area {
+  id: number;
+  departamento: number;
+  nombre: string;
+  estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+  // Otros campos según sea necesario
+}
+
+interface Departamento {
+  id: number;
+  nombre: string;
+  telefono: string;
+  estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+  interno: string;
+  // Otros campos según sea necesario
+}
 const ListaAreas = () => {
   const h1Style = {
     color: 'black',
   };
 
-  interface Area {
-    idarea: number;
-    iddepartamento: number;
-    nombre: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
-  }
-
-  interface Departamento {
-    iddepartamento: number;
-    nombre: string;
-    telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    interno: string;
-    // Otros campos según sea necesario
-  }
-
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [areasFiltro, setAreasFiltro] = useState<Area[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/area/');
+  const [currentUrlDepto, setCurrentUrlDepto] = useState<string>('http://127.0.0.1:8000/facet/departamento/');
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        // Obtener departamentos
-        const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        setDepartamentos(responseDeptos.data);
+    fetchData(currentUrl,currentUrlDepto);
+  }, [currentUrl,currentUrlDepto]);
 
-        // Obtener áreas después de obtener departamentos
-        const responseAreas = await axios.get('http://127.0.0.1:8000/facet/api/v1/areas/');
-        setAreasFiltro(responseAreas.data);
-        setAreas(responseAreas.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData(); // Llamar a la función para cargar datos
-  }, []); // El segundo argumento [] asegura que useEffect se ejecute solo una vez al montar el componente
-
-  
-
-    const paginationContainerStyle = {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      margin: '16px 0', // Puedes ajustar según sea necesario
-    };
-    
-    const buttonStyle = {
-      marginLeft: '8px', // Puedes ajustar según sea necesario
-    };
-
-    // --Paginado
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20;
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = areasFiltro.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(areasFiltro.length / itemsPerPage);
-
-    const handleChangePage = (newPage: number) => {
-      setCurrentPage(newPage);
-    };
-    
+  const fetchData = async (url: string,url2: string) => {
+    try {
+      const response = await axios.get(url);
+      const deptos = await axios.get(url2);
+      setAreas(response.data.results);
+      setDepartamentos(deptos.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
 
   const filtrarAreas = () => {
+    let url = `http://127.0.0.1:8000/facet/area/?`;
+    const params = new URLSearchParams();
+    if (filtroNombre !== '') {
+      params.append('nombre__icontains', filtroNombre);
+    }
+    url += params.toString();
+    setCurrentUrl(url);
+  };
 
-    // Implementa la lógica de filtrado aquí usando los estados de los filtros
-    // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-    // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
+  const totalPages = Math.ceil(totalItems / pageSize);
 
-     // Aplica la lógica de filtrado aquí utilizando la función filter
-     const departamentosFiltrados = areas.filter((area) => {
-      // Aplica condiciones de filtrado según los valores de los filtros
-      const cumpleNombre = area.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
+  const descargarExcel = async () => {
+    try {
+      let allAreas: Area[] = [];
 
-      // Retorn true si la resolución cumple con todas las condiciones de filtrado
-      return cumpleNombre
-      // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-    });
+      let url = `http://127.0.0.1:8000/facet/area/?`;
+      const params = new URLSearchParams();
+      if (filtroNombre !== '') {
+        params.append('nombre__icontains', filtroNombre);
+      }
+      url += params.toString();
 
-    // Actualiza el estado de resoluciones con el nuevo array filtrado
-    setAreasFiltro(departamentosFiltrados);
-    setCurrentPage(1);
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
+
+        allAreas = [...allAreas, ...results];
+        url = next;
+      }
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(allAreas);
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Areas');
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(excelBlob, 'areas.xlsx');
+    } catch (error) {
+      console.error('Error downloading Excel:', error);
+    }
   };
 
   return (
@@ -108,6 +112,9 @@ const ListaAreas = () => {
         Agregar Area
       </Button>
       </Link>
+      <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          Descargar Excel
+        </Button>
       </div>
 
 <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
@@ -151,19 +158,20 @@ const ListaAreas = () => {
     </TableRow>
   </TableHead>
   <TableBody>
-    {currentItems.map((area) => (
-      <TableRow key={area.idarea}>
+    {areas.map((area) => (
+      
+      <TableRow key={area.id}>
         <TableCell>
           <Typography variant="body1">{area.nombre}</Typography>
         </TableCell>
         <TableCell>
-          {departamentos.find(depto => depto.iddepartamento === area.iddepartamento)?.nombre || 'Departamento no encontrado'}
+          {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
           </TableCell>
         <TableCell>
           <Typography variant="body1">{area.estado}</Typography>
         </TableCell>
         <TableCell>
-            <Link to={`/dashboard/areas/editar/${area.idarea}`}>
+            <Link to={`/dashboard/areas/editar/${area.id}`}>
             <EditIcon />
             </Link>
           </TableCell>
@@ -173,30 +181,34 @@ const ListaAreas = () => {
   </TableBody>
 </Table>
 </TableContainer>
-</Paper>
-<div style={paginationContainerStyle}>
-        <Typography>Página {currentPage} de {totalPages}</Typography>
-        <div>
+<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={buttonStyle}
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            disabled={!prevUrl}
           >
             Anterior
           </Button>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={buttonStyle}
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            disabled={!nextUrl}
           >
             Siguiente
           </Button>
         </div>
-      </div>
+</Paper>
 </Container>
   );
 };

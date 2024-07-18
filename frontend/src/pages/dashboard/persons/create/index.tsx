@@ -89,7 +89,7 @@ const CrearPersona = () => {
 
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/personas/', nuevaPersona, {
+      const response = await axios.post('http://127.0.0.1:8000/facet/persona/', nuevaPersona, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
