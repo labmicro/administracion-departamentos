@@ -33,7 +33,7 @@ const EditarDocente: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    navigate('/dashboard/departamentos/docentes/');
+    navigate('/dashboard/personas/docentes/');
   };
 
   interface Docente {

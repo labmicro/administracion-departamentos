@@ -140,37 +140,6 @@ const ListaResoluciones = () => {
       }
     };  
 
-  // const filtrarResoluciones = () => {
-
-  //   // Implementa la lógica de filtrado aquí usando los estados de los filtros
-  //   // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-  //   // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
-
-  //    // Aplica la lógica de filtrado aquí utilizando la función filter
-  //    const resolucionesFiltradas = resoluciones.filter((resolucion) => {
-  //     // Aplica condiciones de filtrado según los valores de los filtros
-  //     const cumpleNroExpediente = resolucion.nexpediente.includes(filtroNroExpediente);
-  //     const cumpleNroResolucion = resolucion.nresolucion.includes(filtroNroResolucion);
-  //     const cumpleTipo = (
-  //       resolucion.tipo.includes(filtroTipo)||filtroTipo=="Todos");
-  //     const fechaResolucion = dayjs.utc(resolucion.fecha);
-  //     const cumpleFecha = (
-  //       filtroFecha instanceof dayjs &&
-  //       fechaResolucion instanceof dayjs &&
-  //       filtroFecha.format('YYYY-MM-DD') === fechaResolucion.format('YYYY-MM-DD') ||
-  //       (filtroFecha ===null || !filtroFecha.isValid())
-  //     );
-
-  //     // Retorna true si la resolución cumple con todas las condiciones de filtrado
-  //     return cumpleNroExpediente && cumpleNroResolucion && cumpleTipo && cumpleFecha
-  //     // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-  //   });
-
-  //   // Actualiza el estado de resoluciones con el nuevo array filtrado
-  //   setResolucionesFiltro(resolucionesFiltradas);
-  //   setCurrentPage(1);
-  // };
-
   return (
 
 <Container maxWidth="lg">

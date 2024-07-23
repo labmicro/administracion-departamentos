@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
+import { Container, Grid, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import Tooltip from '@mui/material/Tooltip';
 import { Link } from 'react-router-dom';
+import * as XLSX from 'xlsx';
+import { saveAs } from 'file-saver';
 
 const ListaDepartamentosJefe = () => {
   const h1Style = {
@@ -14,261 +15,352 @@ const ListaDepartamentosJefe = () => {
   };
 
   interface Departamento {
-    iddepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    interno: string;
-    // Otros campos según sea necesario
+    estado: 0 | 1;
   }
 
   interface Resolucion {
-    idresolucion: number;
+    id: number;
     nexpediente: string;
     nresolucion: string;
     tipo: string;
-    fechadecarga: Date;
-    fecha: Date; // Aquí indicas que 'fecha' es de tipo Date
-    adjunto:string;
-    observaciones:string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    fechadecarga: string; // Actualizado de Date a string
+    fecha: string; // Actualizado de Date a string
+    adjunto: string;
+    observaciones: string;
+    estado: 0 | 1;
   }
 
   interface Persona {
-    idpersona: number;
+    id: number;
     nombre: string;
     apellido: string;
     telefono: string;
     dni: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1;
     email: string;
     interno: string;
     legajo: string;
-    // Otros campos según sea necesario
   }
 
-  interface Departamento {
-    iddepartamento: number;
-    nombre: string;
-    telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    interno: string;
-    // Otros campos según sea necesario
+  interface Jefe {
+    id: number;
+    persona: Persona;
+    observaciones: string;
+    estado: 0 | 1;
   }
 
   interface DepartamentoJefe {
-    iddepartamento: number;
-    idpersona: number;
-    idresolucion: number;
-    fecha_de_creacion: Date;
+    id: number;
+    jefe: Jefe; // Cambiado de number a Jefe
+    departamento: Departamento;
+    resolucion: Resolucion;
+    fecha_de_inicio: string; // Actualizado de Date a string
+    fecha_de_fin: string | null; // Actualizado de Date a string | null
     observaciones: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    estado: 0 | 1;
   }
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
-  const [personas, setPersonas] = useState<Persona[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-  const [departamentosFiltro, setDepartamentosFiltro] = useState<Departamento[]>([]);
-  const [deptoJefes,setDeptoJefes] = useState<DepartamentoJefe[]>([]);
-  const [deptoJefesFiltro,setDeptoJefesFiltro] = useState<DepartamentoJefe[]>([]);
+  const [deptoJefes, setDeptoJefes] = useState<DepartamentoJefe[]>([]);
+  const [jefes, setJefes] = useState<Jefe[]>([]);
+  const [personas, setPersonas] = useState<Persona[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
+  const [filtroDni, setFiltroDni] = useState('');
+  const [filtroApellido, setFiltroApellido] = useState('');
+  const [filtroLegajo, setFiltroLegajo] = useState('');
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
+  const [filtroDepartamento, setFiltroDepartamento] = useState<string | ''>('');
+  const [filtroResolucion, setFiltroResolucion] = useState<string | ''>('');
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe-departamento/');
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseRes = await axios.get('http://127.0.0.1:8000/facet/api/v1/resoluciones/');
-        const responsePers = await axios.get('http://127.0.0.1:8000/facet/api/v1/personas/');
-        const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        const responseDeptoJefes = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos-tiene-jefe/');
-        setResoluciones(responseRes.data);
-        setPersonas(responsePers.data);
-        setDepartamentos(responseDeptos.data);
-        setDeptoJefes(responseDeptoJefes.data)
-        setDeptoJefesFiltro(responseDeptoJefes.data)
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
+    fetchData(currentUrl);
+  }, [currentUrl]);
 
-    
-
-    fetchData();
-  }, []);
-
-    const paginationContainerStyle = {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      margin: '16px 0', // Puedes ajustar según sea necesario
-    };
-    
-    const buttonStyle = {
-      marginLeft: '8px', // Puedes ajustar según sea necesario
-    };
-
-    // --Paginado
-    const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20;
-    const indexOfLastItem = currentPage * itemsPerPage;
-    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = deptoJefesFiltro.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(deptoJefes.length / itemsPerPage);
-
-    const handleChangePage = (newPage: number) => {
-      setCurrentPage(newPage);
-    };
-    
-
-    const filtrarDepartamentos = () => {
-
-      // Implementa la lógica de filtrado aquí usando los estados de los filtros
-      // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-      // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
-
-      // Aplica la lógica de filtrado aquí utilizando la función filter
-      const departamentosJefeFiltrados = deptoJefes.filter((departamentoJefe) => {
-        // Aplica condiciones de filtrado según los valores de los filtros
-
-        const departamentoAsociado = departamentos.find((departamento)=> departamento.iddepartamento === departamentoJefe.iddepartamento)
-        console.log(departamentoAsociado)
-        const cumpleNombre = departamentoAsociado?.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
-
-        // Retorn true si la resolución cumple con todas las condiciones de filtrado
-        return cumpleNombre
-        // && cumpleNroResolucion && cumpleTipo && cumpleFecha && cumpleEstado;
-      });
-
-      // Actualiza el estado de resoluciones con el nuevo array filtrado
-      setDeptoJefesFiltro(departamentosJefeFiltrados);
+  const fetchData = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+      setDeptoJefes(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
       setCurrentPage(1);
-    };
+
+      const personasResponse = await axios.get('http://127.0.0.1:8000/facet/persona/');
+      setPersonas(personasResponse.data.results);
+      const departamentosResponse = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+      setDepartamentos(departamentosResponse.data.results);
+      const resolucionesResponse = await axios.get('http://127.0.0.1:8000/facet/resolucion/');
+      setResoluciones(resolucionesResponse.data.results);
+      const jefesResponse = await axios.get('http://127.0.0.1:8000/facet/jefe/');
+      setJefes(jefesResponse.data.results);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const filtrarJefesDepartamentos = () => {
+    let url = `http://127.0.0.1:8000/facet/jefe-departamento/?`;
+    const params = new URLSearchParams();
+    if (filtroNombre !== '') {
+      params.append('jefe__persona__nombre__icontains', filtroNombre);
+    }
+    if (filtroDni !== '') {
+      params.append('jefe__persona__dni__icontains', filtroDni);
+    }
+    if (filtroEstado !== '') {
+      params.append('jefe__estado', filtroEstado.toString());
+    }
+    if (filtroApellido !== '') {
+      params.append('jefe__persona__apellido__icontains', filtroApellido);
+    }
+    if (filtroLegajo !== '') {
+      params.append('jefe__persona__legajo__icontains', filtroLegajo);
+    }
+    if (filtroDepartamento !== '') {
+      params.append('departamento__nombre__icontains', filtroDepartamento);
+    }
+    if (filtroResolucion !== '') {
+      params.append('resolucion__nresolucion__icontains', filtroResolucion);
+    }
+    url += params.toString();
+    setCurrentUrl(url);
+};
+
+const descargarExcel = async () => {
+  try {
+    let allDeptoJefes: DepartamentoJefe[] = [];
+
+    let url = `http://127.0.0.1:8000/facet/jefe-departamento/?`;
+    const params = new URLSearchParams();
+    if (filtroNombre !== '') {
+      params.append('jefe__persona__nombre__icontains', filtroNombre);
+    }
+    if (filtroDni !== '') {
+      params.append('jefe__persona__dni__icontains', filtroDni);
+    }
+    if (filtroEstado !== '') {
+      params.append('jefe__estado', filtroEstado.toString());
+    }
+    if (filtroApellido !== '') {
+      params.append('jefe__persona__apellido__icontains', filtroApellido);
+    }
+    if (filtroLegajo !== '') {
+      params.append('jefe__persona__legajo__icontains', filtroLegajo);
+    }
+    if (filtroDepartamento !== '') {
+      params.append('departamento__nombre__icontains', filtroDepartamento);
+    }
+    if (filtroResolucion !== '') {
+      params.append('resolucion__nresolucion__icontains', filtroResolucion);
+    }
+    url += params.toString();
+
+    while (url) {
+      const response = await axios.get(url);
+      const { results, next } = response.data;
+
+      allDeptoJefes = [...allDeptoJefes, ...results];
+      url = next;
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(allDeptoJefes.map((item) => ({
+      'Nombre': item.jefe.persona.nombre,
+      'Apellido': item.jefe.persona.apellido,
+      'Departamento': item.departamento.nombre,
+      'Resolución': item.resolucion.nresolucion,
+      'Fecha de Inicio': item.fecha_de_inicio,
+      'Fecha de Fin': item.fecha_de_fin,
+      'Estado': item.estado === 1 ? 'Activo' : 'Inactivo',
+      'Observaciones': item.observaciones
+    })));
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamento Jefes');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(excelBlob, 'departamento_jefes.xlsx');
+  } catch (error) {
+    console.error('Error downloading Excel:', error);
+  }
+};
+
+
+
+  const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <Container maxWidth="lg">
       <div>
-
-      <Link to="/dashboard/departamentos/jefes/crear"> {/* Agrega un enlace a la página deseada */}
-      <Button variant="contained" endIcon={<AddIcon />}>
-        Agregar Jefe
-      </Button>
-      </Link>
-
+        <Link to="/dashboard/departamentos/jefes/crear">
+          <Button variant="contained" endIcon={<AddIcon />}>
+            Agregar Jefe
+          </Button>
+        </Link>
+        <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          Descargar Excel
+        </Button>
       </div>
 
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-<Typography variant="h4" gutterBottom>
-  Jefes de Departamentos
-</Typography>
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Jefes Departamentos
+        </Typography>
 
-<Grid container spacing={2}marginBottom={2}>
-      <Grid item xs={4}>
-        <TextField
-          label="Nombre Departamento"
-          value={filtroNombre}
-          onChange={(e) => setFiltroNombre(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <Button variant="contained" onClick={filtrarDepartamentos}>
-          Filtrar
-        </Button>
-      </Grid>
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <TextField
+              label="DNI"
+              value={filtroDni}
+              onChange={(e) => setFiltroDni(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Nombre"
+              value={filtroNombre}
+              onChange={(e) => setFiltroNombre(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Apellido"
+              value={filtroApellido}
+              onChange={(e) => setFiltroApellido(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+          <TextField
+            label="Legajo"
+            value={filtroLegajo}
+            onChange={(e) => setFiltroLegajo(e.target.value)}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={4} marginBottom={2}>
+          <TextField
+            label="Departamento"
+            value={filtroDepartamento}
+            onChange={(e) => setFiltroDepartamento(e.target.value)}
+            fullWidth
+          />
+        </Grid>
+        <Grid item xs={4} marginBottom={2}>
+          <TextField
+            label="Resolución"
+            value={filtroResolucion}
+            onChange={(e) => setFiltroResolucion(e.target.value)}
+            fullWidth
+          />
+        </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <Button variant="contained" onClick={filtrarJefesDepartamentos}>
+              Filtrar
+            </Button>
+          </Grid>
+        </Grid>
 
-<TableContainer component={Paper}>
-<Table>
-  <TableHead>
-    <TableRow className='header-row'>
-      {/* <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Id</Typography>
-      </TableCell> */}
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Nombre</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Departamento</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Resolucion</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Estado</Typography>
-      </TableCell>
-        <TableCell className='header-cell'>
-        </TableCell>
-        <TableCell className='header-cell'>
-        </TableCell>
-      {/* Agrega otras columnas de encabezado según sea necesario */}
-    </TableRow>
-  </TableHead>
-  <TableBody>
-  {currentItems.map((departamentojefe) => {
-    // Buscar la persona con el idpersona correspondiente
-    const personaAsociada = personas.find((persona) => persona.idpersona === departamentojefe.idpersona);
-    const departamentoAsociado = departamentos.find((departamento)=> departamento.iddepartamento === departamentojefe.iddepartamento)
-    const resolucionAsociada = resoluciones.find((resolucion)=> resolucion.idresolucion === departamentojefe.idresolucion)
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow className='header-row'>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Nombre</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Apellido</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Departamento</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Resolución</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Fecha de Inicio</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Fecha de Fin</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Estado</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Observaciones</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1"></Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {deptoJefes.map((deptoJefe) => (
+                <TableRow key={deptoJefe.id}>
+                  <TableCell>{deptoJefe.jefe.persona.nombre}</TableCell>
+                  <TableCell>{deptoJefe.jefe.persona.apellido}</TableCell>
+                  <TableCell>{deptoJefe.departamento.nombre}</TableCell>
+                  <TableCell>{deptoJefe.resolucion.nresolucion}</TableCell>
+                  <TableCell>{deptoJefe.fecha_de_inicio}</TableCell>
+                  <TableCell>{deptoJefe.fecha_de_fin}</TableCell>
+                  <TableCell>{deptoJefe.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                  <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                  <Tooltip title={deptoJefe.observaciones}>
+                    <VisibilityIcon/>
+                  </Tooltip>
+                    </TableCell>
+                    <TableCell>
+                    <Tooltip title="Editar">
+                      <Link to={`/dashboard/departamentos/jefes/editar/${deptoJefe.id}`}>
+                        <EditIcon />
+                      </Link>
+                    </Tooltip>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
-    return (
-      <TableRow key={departamentojefe.iddepartamento}>
-
-        <TableCell>
-          {/* Mostrar el nombre de la persona si se encuentra */}
-          <Typography variant="body1">{personaAsociada ? `${personaAsociada.nombre} ${personaAsociada.apellido}` : 'No disponible'}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{departamentoAsociado?.nombre}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{resolucionAsociada?.nresolucion}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{departamentojefe.estado}</Typography>
-        </TableCell>
-        <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-            <Tooltip title={departamentojefe.observaciones}>
-              <VisibilityIcon/>
-            </Tooltip>
-          </TableCell>
-          <TableCell>
-            <Link to={`/dashboard/departamentos/jefes/editar/${departamentojefe.iddepartamento}`}>
-            <EditIcon />
-            </Link>
-          </TableCell>
-      </TableRow>
-    );
-  })}
-</TableBody>
-</Table>
-</TableContainer>
-</Paper>
-<div style={paginationContainerStyle}>
-        <Typography>Página {currentPage} de {totalPages}</Typography>
-        <div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage - 1)}
-            disabled={currentPage === 1}
-            style={buttonStyle}
+            onClick={() => {
+              prevUrl && setCurrentUrl(prevUrl);
+              setCurrentPage(currentPage - 1);
+            }}
+            disabled={!prevUrl}
           >
             Anterior
           </Button>
+          <Typography variant="body1">
+            Página {currentPage} de {totalPages}
+          </Typography>
           <Button
             variant="contained"
             color="primary"
-            onClick={() => handleChangePage(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            style={buttonStyle}
+            onClick={() => {
+              nextUrl && setCurrentUrl(nextUrl);
+              setCurrentPage(currentPage + 1);
+            }}
+            disabled={!nextUrl}
           >
             Siguiente
           </Button>
         </div>
-      </div>
-</Container>
+      </Paper>
+    </Container>
   );
 };
 

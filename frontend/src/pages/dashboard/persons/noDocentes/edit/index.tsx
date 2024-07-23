@@ -33,7 +33,7 @@ const EditarNoDocentes: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    navigate('/dashboard/departamentos/nodocente/');
+    navigate('/dashboard/personas/nodocentes/');
   };
 
   interface NoDocentes {

@@ -33,7 +33,7 @@ const EditarJefe: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    navigate('/dashboard/departamentos/jefes/');
+    navigate('/dashboard/personas/jefes/');
   };
 
   interface Jefe {

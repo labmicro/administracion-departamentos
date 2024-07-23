@@ -95,6 +95,7 @@ const EditarDepartamentoJefe : React.FC = () => {
   const [idPersona, setIdPersona] = useState<number>(0); 
   const [departamento, setDepartamento] = useState<Departamento>();
   const [departamentoJefe, setDepartamentoJefe] = useState<DepartamentoJefe>();
+  console.log(departamentoJefe);
   const [NroResolucion, SetNroResolucion] = useState('');
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
@@ -121,14 +122,13 @@ const EditarDepartamentoJefe : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/departamentos-tiene-jefe/${idDepartamento}`);
-        const responseDepto = await axios.get(`http://127.0.0.1:8000/facet/api/v1/departamentos/${idDepartamento}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/jefe-departamento/${idDepartamento}/`);
+        setDepartamentoJefe(response.data);
+        const responseDepto = await axios.get(`http://127.0.0.1:8000/facet/departamentos/${idDepartamento}/`);
         const responseRes = await axios.get('http://127.0.0.1:8000/facet/api/v1/resoluciones/');
         const responsePers = await axios.get('http://127.0.0.1:8000/facet/api/v1/personas/');
-        const data = response.data;
         setResoluciones(responseRes.data);
         setPersonas(responsePers.data);
-        setDepartamentoJefe(data);
         setDepartamento(responseDepto.data)
         setNombreDepto(responseDepto.data.nombre)
         // console.log(departamentoJefe)
