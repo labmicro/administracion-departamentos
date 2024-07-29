@@ -49,7 +49,7 @@ const EditarResolucion : React.FC = () => {
     nexpediente: string;
     nresolucion: string;
     tipo: string;
-    fechadecarga: Date;
+    fecha_creacion: Date;
     fecha: Date; // Aquí indicas que 'fecha' es de tipo Date
     adjunto:string;
     observaciones:string;
@@ -85,19 +85,31 @@ const EditarResolucion : React.FC = () => {
   useEffect(() => {
     if (resolucion) {
       setNroExpediente(resolucion.nexpediente);
-      setNroResolucion(resolucion.nresolucion)
-      setTipo(resolucion.tipo)
-      setAdjunto(resolucion.adjunto)
-      const fechaDayjs = dayjs(resolucion.fecha).utc();
-      setFecha(fechaDayjs);
+      setNroResolucion(resolucion.nresolucion);
+      setTipo(resolucion.tipo);
+      setAdjunto(resolucion.adjunto);  
+      // Define el formato de las fechas recibidas
+      const formatoFecha = 'DD/MM/YYYY HH:mm:ss';
+  
+      // Parsear la fecha con el formato especificado
+      const fechaDayjs = dayjs(resolucion.fecha, formatoFecha);
+      if (fechaDayjs.isValid()) {
+        setFecha(fechaDayjs);
+      } else {
+        console.error('Fecha inválida para "fecha":', resolucion.fecha);
+      }
+  
+      const fechaCargaDayjs = dayjs(resolucion.fecha_creacion, formatoFecha);
+      if (fechaCargaDayjs.isValid()) {
+        setFechaCarga(fechaCargaDayjs);
+      } else {
+        console.error('Fecha inválida para "fecha_creacion":', resolucion.fecha_creacion);
+      }
+  
       setEstado(String(resolucion.estado));
       setObservaciones(resolucion.observaciones);
-      const fechaCargaDayjs = dayjs(resolucion.fechadecarga).utc();
-      setFechaCarga(fechaCargaDayjs)
-      // Otros cambios de estado según sea necesario
     }
   }, [resolucion]);
-
 
   const edicionResolucion = async () => {
 
@@ -221,7 +233,6 @@ try {
           if (date) {
             const fechaSeleccionada = dayjs(date).utc();  // Usa .utc() para evitar problemas de zona horaria
             setFecha(fechaSeleccionada);
-            // console.log(fechaSeleccionada); // Imprime la fecha en la consola
           }
         }}
       />
@@ -259,9 +270,6 @@ try {
           eliminarResolucion();
         }}
       />
-    
-        {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />
-        <TextField label="Estado" value={filtroEstado} onChange={(e) => setFiltroEstado(e.target.value)} /> */}
         
 </Paper>
 </Container>

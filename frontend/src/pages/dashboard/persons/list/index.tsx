@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,Grid} from '@mui/material';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import EditIcon from '@mui/icons-material/Edit';
 import { Link } from 'react-router-dom';
@@ -190,6 +190,20 @@ const ListaPersonas = () => {
           fullWidth
         />
       </Grid>
+      <Grid item xs={4} marginBottom={2}>
+            <FormControl fullWidth>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                label="Estado"
+              >
+                <MenuItem value="">Todos</MenuItem>
+                <MenuItem value="0">Inactivo</MenuItem>
+                <MenuItem value="1">Activo</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
       <Grid item xs={4} marginBottom={2}>
         <Button variant="contained" onClick={filtrarPersonas}>
           Filtrar

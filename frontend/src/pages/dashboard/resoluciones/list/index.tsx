@@ -28,7 +28,7 @@ const ListaResoluciones = () => {
     nexpediente: string;
     nresolucion: string;
     tipo: string;
-    fechadecarga: Date;
+    fecha_creacion: Date;
     fecha: Date; // Aquí indicas que 'fecha' es de tipo Date
     adjunto:string;
     observaciones:string;
@@ -37,6 +37,7 @@ const ListaResoluciones = () => {
   }
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
+  console.log(resoluciones)
   const [filtroNroExpediente, setFiltroNroExpediente] = useState('');
   const [filtroNroResolucion, setFiltroNroResolucion] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -72,6 +73,7 @@ const ListaResoluciones = () => {
   const filtrarResoluciones = () => {
     let url = `http://127.0.0.1:8000/facet/resolucion/?`;
     const params = new URLSearchParams();
+    
     if (filtroNroExpediente !== '') {
       params.append('nexpediente__icontains', filtroNroExpediente);
     }
@@ -84,15 +86,17 @@ const ListaResoluciones = () => {
     if (filtroNroResolucion !== '') {
       params.append('nresolucion__icontains', filtroNroResolucion);
     }
-    // Agregar filtro de fecha si está seleccionada
     if (filtroFecha) {
-      params.append('fecha__date', filtroFecha.format('YYYY-MM-DD')); // Formato ISO8601 para la fecha exacta
-    } else {
-      // Si filtroFecha no está definido, no se agrega ningún parámetro de fecha al URL
+      const fechaStr = filtroFecha.format('YYYY-MM-DD');
+      if (fechaStr !== 'Invalid Date') {
+        params.append('fecha__date', fechaStr);
+      }
     }
+  
     url += params.toString();
     setCurrentUrl(url);
   };
+  
   
     const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -269,11 +273,15 @@ const ListaResoluciones = () => {
               </Typography>
           </TableCell>
           <TableCell>
-            <Typography variant="body1">{resolucion.fecha.toLocaleString().split('T')[0]}</Typography>
-          </TableCell>
+          <Typography variant="body1">
+            {resolucion.fecha ? dayjs(resolucion.fecha, 'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY') : 'No disponible'}
+          </Typography>
+        </TableCell>
           <TableCell>
-            <Typography variant="body1">{resolucion.fechadecarga.toLocaleString().split('T')[0]}</Typography>
-          </TableCell>
+          <Typography variant="body1">
+          {resolucion.fecha_creacion ? dayjs(resolucion.fecha_creacion, 'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY') : 'No disponible'}
+          </Typography>
+            </TableCell>
           <TableCell>
             <Typography variant="body1">{resolucion.estado}</Typography>
           </TableCell>

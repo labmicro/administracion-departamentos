@@ -55,7 +55,7 @@ const EditarJefe: React.FC = () => {
         const response = await axios.get(`http://127.0.0.1:8000/facet/jefe/${idPersona}/`);
         console.log(response.data)
         setPersona(response.data.persona)
-        const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/${response.data.persona}/`);
+        const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/${response.data.persona.id}/`);
         setNombre(responsePers.data.nombre);
         setApellido(responsePers.data.apellido);
         SetDni(responsePers.data.dni);

@@ -4,6 +4,7 @@ import axios from 'axios';
 import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
 import BasicModal from '@/utils/modal';
+import dayjs from 'dayjs';
 
 const CrearJefe = () => {
   const navigate = useNavigate();
@@ -18,9 +19,17 @@ const CrearJefe = () => {
     email: string;
     interno: string;
     legajo: string;
+    fecha_creacion:string;
+  }
+  interface Jefe {
+    id:number;
+    persona: Persona;
+    observaciones: string;
+    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    // Otros campos según sea necesario
   }
 
-  const [idPersona, setIdPersona] = useState<number>(0);
+  const [persona, setPersona] = useState<Persona>();
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [apellido, SetApellido] = useState('');
   const [dni, SetDni] = useState('');
@@ -86,19 +95,20 @@ const CrearJefe = () => {
 
   const crearNuevoJefeDepartamento = async () => {
     const nuevoJefe = {
-      persona: idPersona,
+      persona: persona,
       observaciones: observaciones,
       estado: estado as 0 | 1,
     };
 
     try {
-      const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/jefe/${idPersona}/`);
+      const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/jefe/${persona?.id}/`);
       if (existeRegistro.data) {
         handleOpenModal('Error', 'Ya existe jefe departamento', () => {});
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
         try {
+          console.log(nuevoJefe)
           await axios.post('http://127.0.0.1:8000/facet/jefe/', nuevoJefe, {
             headers: {
               'Content-Type': 'application/json',
@@ -137,18 +147,18 @@ const CrearJefe = () => {
                 fullWidth
               />
 
-              {handleFilterPersonas(filtroPersonas).map((persona) => (
-                <div key={persona.id}>
+              {handleFilterPersonas(filtroPersonas).map((personafilter) => (
+                <div key={personafilter.id}>
                   <Button
                     onClick={() => {
-                      setIdPersona(persona.id);
-                      SetApellido(persona.apellido);
-                      SetDni(persona.dni);
-                      setNombre(persona.nombre);
+                      setPersona(personafilter);
+                      SetApellido(personafilter.apellido);
+                      SetDni(personafilter.dni);
+                      setNombre(personafilter.nombre);
                     }}
-                    style={{ backgroundColor: persona.id === idPersona ? '#4caf50' : 'inherit', color: persona.id === idPersona ? 'white' : 'inherit' }}
+                    style={{ backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit', color: personafilter.id === persona?.id? 'white' : 'inherit' }}
                   >
-                    DNI {persona.dni} - {persona.apellido} {persona.nombre} - Legajo {persona.legajo}
+                    DNI {personafilter.dni} - {personafilter.apellido} {personafilter.nombre} - Legajo {personafilter.legajo}
                   </Button>
                 </div>
               ))}

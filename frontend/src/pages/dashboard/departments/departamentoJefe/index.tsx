@@ -15,7 +15,7 @@ const DepartamentosJefe = () => {
     
       <Route path="/*" element={<ListaDepartamentosJefe/>}/>
       <Route path="crear/*" element={<CrearDepartamentoJefe/>}/>
-      <Route path="editar/:idDepartamento" Component={EditarDepartamentoJefe}/>
+      <Route path="editar/:idDepartamentoJefe" Component={EditarDepartamentoJefe}/>
 
 
       </Routes>

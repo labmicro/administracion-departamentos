@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import Tooltip from '@mui/material/Tooltip';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
@@ -14,8 +12,6 @@ const ListaJefes = () => {
   const h1Style = {
     color: 'black',
   };
-
-
 
   interface Persona {
     id: number;
@@ -30,13 +26,11 @@ const ListaJefes = () => {
     // Otros campos según sea necesario
   }
 
-
   interface Jefe {
-    id:number;
-    persona: number;
+    id: number;
+    persona: Persona;
     observaciones: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
   }
 
   const [jefes, setJefes] = useState<Jefe[]>([]);
@@ -45,7 +39,8 @@ const ListaJefes = () => {
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroApellido, setFiltroApellido] = useState('');
   const [filtroLegajo, setFiltroLegajo] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
+  const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Añadido
+  console.log("festadoi",filtroEstado)
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe/');
@@ -95,6 +90,21 @@ const ListaJefes = () => {
     setCurrentUrl(url);
   };
 
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(jefes.map(jefe => ({
+      Nombre: jefe.persona.nombre,
+      Apellido: jefe.persona.apellido,
+      DNI: jefe.persona.dni,
+      Legajo: jefe.persona.legajo,
+      Observaciones: jefe.observaciones,
+      Estado: jefe.estado === 1 ? 'Activo' : 'Inactivo',
+    })));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Jefes');
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'jefes.xlsx');
+  };
+
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
@@ -105,6 +115,14 @@ const ListaJefes = () => {
             Agregar Jefe
           </Button>
         </Link>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={exportToExcel}
+          style={{ marginLeft: '16px' }}
+        >
+          Exportar a Excel
+        </Button>
       </div>
 
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
@@ -146,6 +164,20 @@ const ListaJefes = () => {
             />
           </Grid>
           <Grid item xs={4} marginBottom={2}>
+            <FormControl fullWidth>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                label="Estado"
+              >
+                <MenuItem value="">Todos</MenuItem>
+                <MenuItem value="0">Inactivo</MenuItem>
+                <MenuItem value="1">Activo</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
             <Button variant="contained" onClick={filtrarJefes}>
               Filtrar
             </Button>
@@ -180,29 +212,21 @@ const ListaJefes = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {jefes.map((jefe) => {
-                const persona = personas.find((p) => p.id === jefe.persona);
-
-                if (!persona) {
-                  return null; // Si la persona no se encuentra, omite este jefe
-                }
-
-                return (
-                  <TableRow key={jefe.persona}>
-                    <TableCell>{persona.nombre}</TableCell>
-                    <TableCell>{persona.apellido}</TableCell>
-                    <TableCell>{persona.dni}</TableCell>
-                    <TableCell>{persona.legajo}</TableCell>
-                    <TableCell>{jefe.observaciones}</TableCell>
-                    <TableCell>{jefe.estado}</TableCell>
-                    <TableCell>
-            <Link to={`/dashboard/personas/jefes/editar/${jefe.id}`}>
-            <EditIcon />
-            </Link>
-          </TableCell>
-                  </TableRow>
-                );
-              })}
+              {jefes.map((jefe) => (
+                <TableRow key={jefe.id}>
+                  <TableCell>{jefe.persona.nombre}</TableCell>
+                  <TableCell>{jefe.persona.apellido}</TableCell>
+                  <TableCell>{jefe.persona.dni}</TableCell>
+                  <TableCell>{jefe.persona.legajo}</TableCell>
+                  <TableCell>{jefe.observaciones}</TableCell>
+                  <TableCell>{jefe.estado}</TableCell>
+                  <TableCell>
+                    <Link to={`/dashboard/personas/jefes/editar/${jefe.id}`}>
+                      <EditIcon />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
         </TableContainer>

@@ -11,7 +11,7 @@ class DocenteViewSet(viewsets.ModelViewSet):
     serializer_class = DocenteSerializer
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_fields = {
-        'persona__estado': ['exact'],       # Filtrar por estado exacto (0 o 1)
+        'estado': ['exact'],       # Filtrar por estado exacto (0 o 1)
         'persona__legajo': ['icontains'],
         'persona__apellido': ['icontains'],
         'persona__nombre': ['icontains'],

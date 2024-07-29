@@ -1,9 +1,11 @@
 from django.db import models
 from .base import BaseModel
+from .persona import Persona 
 
 class Jefe(BaseModel):
     persona = models.OneToOneField(
-        'Persona', models.CASCADE)
+        Persona, 
+        on_delete=models.CASCADE)
     
     observaciones = models.TextField(blank=True, null=True)
     estado = models.CharField(max_length=1)

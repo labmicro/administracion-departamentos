@@ -38,15 +38,15 @@ const EditarDepartamentoJefe : React.FC = () => {
     navigate('/dashboard/departamentos/jefes/');
   };
 
-  const { idDepartamento } = useParams();
+  const { idDepartamentoJefe } = useParams();
 
-  console.log(idDepartamento)
+  console.log(idDepartamentoJefe)
 
   const [modalOpen, setModalOpen] = useState(false);
   const closeModal = () => setModalOpen(false);
 
   interface Departamento {
-    idDepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -55,7 +55,7 @@ const EditarDepartamentoJefe : React.FC = () => {
   }
 
   interface Resolucion {
-    idresolucion: number;
+    id: number;
     nexpediente: string;
     nresolucion: string;
     tipo: string;
@@ -68,7 +68,7 @@ const EditarDepartamentoJefe : React.FC = () => {
   }
 
   interface Persona {
-    idpersona: number;
+    id: number;
     nombre: string;
     apellido: string;
     telefono: string;
@@ -82,16 +82,17 @@ const EditarDepartamentoJefe : React.FC = () => {
 
 
     interface DepartamentoJefe {
-    iddepartamento: number;
-    idpersona: number;
-    idresolucion: number;
+    id: number;
+    departamento: number;
+    persona: number;
+    resolucion: number;
     fecha_de_creacion: Date;
     observaciones: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
     // Otros campos según sea necesario
   }
 
-  const [idresolucion, setIdresolucion] = useState<number>(0); 
+  const [resolucion, setResolucion] = useState<Resolucion>(); 
   const [idPersona, setIdPersona] = useState<number>(0); 
   const [departamento, setDepartamento] = useState<Departamento>();
   const [departamentoJefe, setDepartamentoJefe] = useState<DepartamentoJefe>();
@@ -118,20 +119,37 @@ const EditarDepartamentoJefe : React.FC = () => {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
   }
 
+  function convertToISOFormat(dateString: string): string  {
+    // Convierte la fecha del formato "DD/MM/YYYY hh:mm:ss" a "YYYY-MM-DDThh:mm:ss"
+    const [datePart, timePart] = dateString.split(' ');
+    const [day, month, year] = datePart.split('/');
+    return `${year}-${month}-${day}T${timePart}`;
+  }
+
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/jefe-departamento/${idDepartamento}/`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/jefe-departamento/${idDepartamentoJefe}/`);
         setDepartamentoJefe(response.data);
-        const responseDepto = await axios.get(`http://127.0.0.1:8000/facet/departamentos/${idDepartamento}/`);
-        const responseRes = await axios.get('http://127.0.0.1:8000/facet/api/v1/resoluciones/');
-        const responsePers = await axios.get('http://127.0.0.1:8000/facet/api/v1/personas/');
-        setResoluciones(responseRes.data);
-        setPersonas(responsePers.data);
-        setDepartamento(responseDepto.data)
-        setNombreDepto(responseDepto.data.nombre)
+        SetNroResolucion(response.data.resolucion.nresolucion);
+        setNombre(response.data.jefe.persona.nombre);
+        SetApellido(response.data.jefe.persona.apellido);
+        SetDni(response.data.jefe.persona.dni) 
+        setNombreDepto(response.data.departamento.nombre)
+        setObservaciones(response.data.observaciones)
+        setEstado(response.data.estado)
+        setDepartamento(response.data.departamento)
+
         // console.log(departamentoJefe)
+        const responseRes = await axios.get(`http://127.0.0.1:8000/facet/resolucion/`);
+        const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/`);
+        setResoluciones(responseRes.data.results)
+        setPersonas(responsePers.data.results)
+        console.log(responseRes.data)
+        const fechaCargaDayjs = dayjs(response.data.fecha_de_creacion).utc();
+        setFechaCreacion(fechaCargaDayjs)
+        
 
 
       } catch (error) {
@@ -140,37 +158,8 @@ const EditarDepartamentoJefe : React.FC = () => {
     };
   
     fetchData();
-  }, [idDepartamento]);
+  }, [idDepartamentoJefe]);
   
-  // Manejar la actualización del estado fuera del efecto
-  useEffect(() => {
-    if (departamentoJefe) {
-      setIdresolucion(departamentoJefe.idresolucion)
-      setIdPersona(departamentoJefe.idpersona)
-      setEstado(String(departamentoJefe.estado))
-      setObservaciones(departamentoJefe.observaciones)
-      const fechaCargaDayjs = dayjs(departamentoJefe.fecha_de_creacion).utc();
-      setFechaCreacion(fechaCargaDayjs)
-    
-
-      const fetchData = async () => {
-        try {
-          const responseRes = await axios.get(`http://127.0.0.1:8000/facet/api/v1/resoluciones/${departamentoJefe.idresolucion}`);
-          const responsePers = await axios.get(`http://127.0.0.1:8000/facet/api/v1/personas/${departamentoJefe.idpersona}`);
-          SetNroResolucion(responseRes.data.nresolucion);
-          setNombre(responsePers.data.nombre);
-          SetApellido(responsePers.data.apellido);
-          SetDni(responsePers.data.dni)          
-          // console.log(departamentoJefe)
-  
-  
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      };
-  
-      fetchData();
-  }}, [departamentoJefe]);
 
     const handleOpenPersona = () => {
       setOpenPersona(true);
@@ -192,9 +181,9 @@ const EditarDepartamentoJefe : React.FC = () => {
 
     const handleConfirmSelection = () => {
       // Realiza la lógica necesaria con idResolucionSeleccionada
-      console.log('ID de la resolución seleccionada:', idresolucion);
+      console.log('ID de la resolución seleccionada:', resolucion);
       console.log('ID de la persona seleccionada:', idPersona);
-      console.log('ID del depto seleccionada:', idDepartamento);
+      console.log('ID del depto seleccionada:', departamento);
   
       // Luego, cierra el modal
       handleClose();
@@ -223,25 +212,29 @@ const EditarDepartamentoJefe : React.FC = () => {
 
   const edicionDepartamentoJefe = async () => {
 
+
+
     const jefeDepartamentoEditado= {
-      iddepartamento: idDepartamento,
-      idpersona: idPersona,
-      idresolucion: idresolucion,
-      fecha_de_creacion: fechaCreacion,
+      id: idDepartamentoJefe,
+      departamento: departamento,
+      persona: idPersona,
+      resolucion: resolucion,
+      fecha_de_inicio: fechaCreacion,
       observaciones: observaciones,
       estado: 0 | 1, // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
     };
+    console.log(jefeDepartamentoEditado)
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/departamentos-tiene-jefe/${idDepartamento}/`, jefeDepartamentoEditado, {
+      const response = await axios.put(`http://127.0.0.1:8000/facet/jefe-departamento/${idDepartamentoJefe}/`, jefeDepartamentoEditado, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
       });
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
-      // console.error('Error al hacer la solicitud PUT:', error);
+      console.error('Error al hacer la solicitud PUT:', error);
       handleOpenModal('Error','NO  se pudo realizar la acción.');
 
     }
@@ -252,7 +245,7 @@ const EditarDepartamentoJefe : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/departamentos-tiene-jefe/${idDepartamento}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/jefe-departamento/${idDepartamentoJefe}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },
@@ -295,14 +288,14 @@ try {
         />
 
         {/* Mostrar lista de resoluciones */}
-        {handleFilterResoluciones(filtroResolucion).map((resolucion) => (
-          <div key={resolucion.idresolucion}>
+        {handleFilterResoluciones(filtroResolucion).map((resolucionfilter) => (
+          <div key={resolucionfilter.id}>
             {/* Puedes agregar más detalles o botones según tus necesidades */}
             <Button
-              onClick={() => {setIdresolucion(resolucion.idresolucion);SetNroResolucion(resolucion.nresolucion)}}
-              style={{ backgroundColor: resolucion.idresolucion === idresolucion ? '#4caf50' : 'inherit', color: resolucion.idresolucion === idresolucion ? 'white' : 'inherit' }}
+              onClick={() => {setResolucion(resolucionfilter);SetNroResolucion(resolucionfilter.nresolucion)}}
+              style={{ backgroundColor: resolucionfilter === resolucion ? '#4caf50' : 'inherit', color: resolucionfilter === resolucion ? 'white' : 'inherit' }}
             >
-              N° Resolución {resolucion.nresolucion} - N° Expediente {resolucion.nexpediente}
+              N° Resolución {resolucionfilter.nresolucion} - N° Expediente {resolucionfilter.nexpediente}
             </Button>
           </div>
         ))}
@@ -339,11 +332,11 @@ try {
 
         {/* Mostrar lista de resoluciones */}
         {handleFilterPersonas(filtroPersonas).map((persona) => (
-          <div key={persona.idpersona}>
+          <div key={persona.id}>
             {/* Puedes agregar más detalles o botones según tus necesidades */}
             <Button
-              onClick={() => {setIdPersona(persona.idpersona);SetApellido(persona.apellido);SetDni(persona.dni),setNombre(persona.nombre)}}
-              style={{ backgroundColor: persona.idpersona=== idPersona ? '#4caf50' : 'inherit', color: persona.idpersona === idPersona ? 'white' : 'inherit' }}
+              onClick={() => {setIdPersona(persona.id);SetApellido(persona.apellido);SetDni(persona.dni),setNombre(persona.nombre)}}
+              style={{ backgroundColor: persona.id=== idPersona ? '#4caf50' : 'inherit', color: persona.id === idPersona ? 'white' : 'inherit' }}
             >
               DNI {persona.dni} - {persona.apellido} {persona.nombre} - Legajo {persona.legajo}
             </Button>

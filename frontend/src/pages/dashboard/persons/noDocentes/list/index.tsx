@@ -1,21 +1,17 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, FormControl, InputLabel, Select, MenuItem, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import Tooltip from '@mui/material/Tooltip';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { Link } from 'react-router-dom';
 
 const ListaNoDocentes = () => {
   const h1Style = {
     color: 'black',
   };
-
-
 
   interface Persona {
     id: number;
@@ -29,7 +25,6 @@ const ListaNoDocentes = () => {
     legajo: string;
     // Otros campos según sea necesario
   }
-
 
   interface NoDocente {
     id: number;
@@ -45,7 +40,7 @@ const ListaNoDocentes = () => {
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroApellido, setFiltroApellido] = useState('');
   const [filtroLegajo, setFiltroLegajo] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
+  const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Agregado
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/nodocente/');
@@ -95,6 +90,24 @@ const ListaNoDocentes = () => {
     setCurrentUrl(url);
   };
 
+  const exportToExcel = () => {
+    const ws = XLSX.utils.json_to_sheet(NoDocentes.map((noDocente) => {
+      const persona = personas.find((p) => p.id === noDocente.persona);
+      return {
+        Nombre: persona?.nombre || '',
+        Apellido: persona?.apellido || '',
+        DNI: persona?.dni || '',
+        Legajo: persona?.legajo || '',
+        Observaciones: noDocente.observaciones,
+        Estado: noDocente.estado === 1 ? 'Activo' : 'Inactivo',
+      };
+    }));
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'NoDocentes');
+    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'nodocentes.xlsx');
+  };
+
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
@@ -105,6 +118,14 @@ const ListaNoDocentes = () => {
             Agregar No Docente
           </Button>
         </Link>
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={exportToExcel}
+          style={{ marginLeft: '16px' }}
+        >
+          Exportar a Excel
+        </Button>
       </div>
 
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
@@ -146,6 +167,20 @@ const ListaNoDocentes = () => {
             />
           </Grid>
           <Grid item xs={4} marginBottom={2}>
+            <FormControl fullWidth>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                label="Estado"
+              >
+                <MenuItem value="">Todos</MenuItem>
+                <MenuItem value="0">Inactivo</MenuItem>
+                <MenuItem value="1">Activo</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
             <Button variant="contained" onClick={filtrarNoDocentes}>
               Filtrar
             </Button>
@@ -184,22 +219,22 @@ const ListaNoDocentes = () => {
                 const persona = personas.find((p) => p.id === NoDocente.persona);
 
                 if (!persona) {
-                  return null; // Si la persona no se encuentra, omite este Docente
+                  return null; // Si la persona no se encuentra, omite este NoDocente
                 }
 
                 return (
-                  <TableRow key={NoDocente.persona}>
+                  <TableRow key={NoDocente.id}>
                     <TableCell>{persona.nombre}</TableCell>
                     <TableCell>{persona.apellido}</TableCell>
                     <TableCell>{persona.dni}</TableCell>
                     <TableCell>{persona.legajo}</TableCell>
                     <TableCell>{NoDocente.observaciones}</TableCell>
-                    <TableCell>{NoDocente.estado}</TableCell>
+                    <TableCell>{NoDocente.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
                     <TableCell>
-            <Link to={`/dashboard/personas/nodocentes/editar/${NoDocente.id}`}>
-            <EditIcon />
-            </Link>
-          </TableCell>
+                      <Link to={`/dashboard/personas/nodocentes/editar/${NoDocente.id}`}>
+                        <EditIcon />
+                      </Link>
+                    </TableCell>
                   </TableRow>
                 );
               })}

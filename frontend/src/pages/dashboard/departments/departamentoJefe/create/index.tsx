@@ -1,106 +1,185 @@
 import { useEffect, useState } from 'react';
-import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid, Modal, Box} from '@mui/material';
-import Dialog from '@mui/material/Dialog';
-import dayjs from 'dayjs';  // Asegúrate de tener instalada esta dependencia
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import { Container, Grid, TextField, Button, Dialog, Paper, Typography, FormControl, InputLabel, Select, MenuItem, Pagination } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
 import BasicModal from '@/utils/modal';
-import { Link, useNavigate} from 'react-router-dom';
-
-// Habilita los plugins
-dayjs.extend(utc);
-dayjs.extend(timezone);
 
 const CrearDepartamentoJefe = () => {
-  const h1Style = {
-    color: 'black',
-  };
-
   const navigate = useNavigate();
 
-  
-  interface DepartamentoJefe {
-    idDepartamento: number;
-    idPersona: number;
-    idResolucion: number;
-    fechadecarga: Date;
-    fechaModificacion: Date; // Aquí indicas que 'fecha' es de tipo Date
-    observaciones: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
-  }
-
   interface Resolucion {
-    idresolucion: number;
+    id: number;
     nexpediente: string;
     nresolucion: string;
-    tipo: string;
-    fechadecarga: Date;
-    fecha: Date; // Aquí indicas que 'fecha' es de tipo Date
-    adjunto:string;
-    observaciones:string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
   }
 
   interface Persona {
-    idpersona: number;
+    id: number;
+    dni: string;
+    legajo?: string;
     nombre: string;
     apellido: string;
-    telefono: string;
-    dni: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    email: string;
-    interno: string;
-    legajo: string;
-    // Otros campos según sea necesario
   }
 
   interface Departamento {
-    iddepartamento: number;
+    id: number;
     nombre: string;
-    telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    interno: string;
-    // Otros campos según sea necesario
   }
 
-  const fechaActual = new Date();
-  const [idresolucion, setIdresolucion] = useState<number>(0); 
-  const [idPersona, setIdPersona] = useState<number>(0); 
-  const [idDepartamento, setIdDepartamento] = useState<number>(0); 
-  const [NroResolucion, SetNroResolucion] = useState('');
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-  const [apellido, SetApellido] = useState('');
-  const [dni, SetDni] = useState('');
   const [filtroResolucion, setFiltroResolucion] = useState('');
   const [filtroPersonas, setFiltroPersonas] = useState('');
   const [filtroDeptos, setFiltroDeptos] = useState('');
-  const [openResolucion, setOpenResolucion] = useState(false);
-  const [openDeptos, setOpenDeptos] = useState(false);
-  const [openPersona, setOpenPersona] = useState(false);
-  const [nombre, setNombre] = useState('');
-  const [nombreDepto, setNombreDepto] = useState('');
+  const [nextUrlResolucion, setNextUrlResolucion] = useState<string | null>(null);
+  const [prevUrlResolucion, setPrevUrlResolucion] = useState<string | null>(null);
+  const [nextUrlPersona, setNextUrlPersona] = useState<string | null>(null);
+  const [prevUrlPersona, setPrevUrlPersona] = useState<string | null>(null);
+  const [nextUrlDepto, setNextUrlDepto] = useState<string | null>(null);
+  const [prevUrlDepto, setPrevUrlDepto] = useState<string | null>(null);
+  const [currentUrlResolucion, setCurrentUrlResolucion] = useState<string>('http://127.0.0.1:8000/facet/resolucion/');
+  const [currentUrlPersona, setCurrentUrlPersona] = useState<string>('http://127.0.0.1:8000/facet/persona/');
+  const [currentUrlDepto, setCurrentUrlDepto] = useState<string>('http://127.0.0.1:8000/facet/departamento/');
+  const [totalItemsResolucion, setTotalItemsResolucion] = useState<number>(0);
+  const [totalItemsPersona, setTotalItemsPersona] = useState<number>(0);
+  const [totalItemsDepto, setTotalItemsDepto] = useState<number>(0);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPageResolucion, setCurrentPageResolucion] = useState<number>(1);
+  const [currentPagePersona, setCurrentPagePersona] = useState<number>(1);
+  const [currentPageDepto, setCurrentPageDepto] = useState<number>(1);
+  const [resolucion, setResolucion] = useState<Resolucion | undefined>();
+  const [persona, setPersona] = useState<Persona | undefined>();
+  const [departamento, setDepartamento] = useState<Departamento | undefined>();
   const [observaciones, setObservaciones] = useState('');
   const [estado, setEstado] = useState('');
-
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [fn, setFn] = useState(() => () => {});
 
-  function capitalizeFirstLetter(string: string) {
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-  }
+  // Diálogos
+  const [openResolucion, setOpenResolucion] = useState(false);
+  const [openPersona, setOpenPersona] = useState(false);
+  const [openDeptos, setOpenDeptos] = useState(false);
+
+  useEffect(() => {
+    fetchData(currentUrlResolucion, 'resolucion');
+    fetchData(currentUrlPersona, 'persona');
+    fetchData(currentUrlDepto, 'departamento');
+  }, [currentUrlResolucion, currentUrlPersona, currentUrlDepto]);
+
+  const handleFilterAndPaginate = (url: string, type: 'resolucion' | 'persona' | 'departamento', filters: any) => {
+    let newUrl = `${url}?`;
+    const params = new URLSearchParams();
   
+    // Añadir filtros
+    Object.keys(filters).forEach(key => {
+      if (filters[key]) params.append(key, filters[key].toString());
+    });
+  
+    // Añadir parámetros de paginación si existen
+    if (type === 'resolucion') {
+      if (nextUrlResolucion) {
+        newUrl = nextUrlResolucion.split('?')[0] + '?' + params.toString();
+      } else {
+        newUrl = `${url}?${params.toString()}`;
+      }
+    } else if (type === 'persona') {
+      if (nextUrlPersona) {
+        newUrl = nextUrlPersona.split('?')[0] + '?' + params.toString();
+      } else {
+        newUrl = `${url}?${params.toString()}`;
+      }
+    } else if (type === 'departamento') {
+      if (nextUrlDepto) {
+        newUrl = nextUrlDepto.split('?')[0] + '?' + params.toString();
+      } else {
+        newUrl = `${url}?${params.toString()}`;
+      }
+    }
+  
+    if (type === 'resolucion') {
+      setCurrentUrlResolucion(newUrl);
+      setCurrentPageResolucion(1); // Resetear la página actual al aplicar un filtro
+    } else if (type === 'persona') {
+      setCurrentUrlPersona(newUrl);
+      setCurrentPagePersona(1); // Resetear la página actual al aplicar un filtro
+    } else if (type === 'departamento') {
+      setCurrentUrlDepto(newUrl);
+      setCurrentPageDepto(1); // Resetear la página actual al aplicar un filtro
+    }
+  
+    fetchData(newUrl, type);
+  };
+  
+  const fetchData = async (url: string, type: 'resolucion' | 'persona' | 'departamento') => {
+    try {
+      const response = await axios.get(url);
+      if (type === 'resolucion') {
+        setResoluciones(response.data.results);
+        setNextUrlResolucion(response.data.next);
+        setPrevUrlResolucion(response.data.previous);
+        setTotalItemsResolucion(response.data.count);
+      } else if (type === 'persona') {
+        setPersonas(response.data.results);
+        setNextUrlPersona(response.data.next);
+        setPrevUrlPersona(response.data.previous);
+        setTotalItemsPersona(response.data.count);
+      } else if (type === 'departamento') {
+        setDepartamentos(response.data.results);
+        setNextUrlDepto(response.data.next);
+        setPrevUrlDepto(response.data.previous);
+        setTotalItemsDepto(response.data.count);
+      }
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handlePageChange = async (event: React.ChangeEvent<unknown>, value: number, type: 'resolucion' | 'persona' | 'departamento') => {
+    let newUrl = '';
+    if (type === 'resolucion') {
+      newUrl = value === 1 ? currentUrlResolucion : nextUrlResolucion || '';
+      setCurrentPageResolucion(value);
+      setCurrentUrlResolucion(newUrl);
+    } else if (type === 'persona') {
+      newUrl = value === 1 ? currentUrlPersona : nextUrlPersona || '';
+      setCurrentPagePersona(value);
+      setCurrentUrlPersona(newUrl);
+    } else if (type === 'departamento') {
+      newUrl = value === 1 ? currentUrlDepto : nextUrlDepto || '';
+      setCurrentPageDepto(value);
+      setCurrentUrlDepto(newUrl);
+    }
+
+    if (newUrl) {
+      await fetchData(newUrl, type);
+    }
+  };
+
+  const crearNuevoJefeDepartamento = async () => {
+    const nuevoJefeDepartamento = {
+      departamento: departamento?.id,
+      persona: persona?.id,
+      resolucion: resolucion?.id,
+      observaciones,
+      estado: parseInt(estado),
+    };
+
+    try {
+      await axios.post('http://127.0.0.1:8000/facet/jefe-departamento/', nuevoJefeDepartamento, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      handleOpenModal('Éxito', 'Se creó el jefe de departamento con éxito.', handleConfirmModal);
+    } catch (error) {
+      console.log(error);
+      handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
+    }
+  };
 
   const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
-    setModalTitle(title); // Establecer el título del modal
+    setModalTitle(title);
     setModalMessage(message);
     setModalVisible(true);
     setFn(() => onConfirm);
@@ -115,315 +194,151 @@ const CrearDepartamentoJefe = () => {
     navigate('/dashboard/departamentos/jefes/');
   };
 
-  const handleOpenPersona = () => {
-    setOpenPersona(true);
-  };
-
-  const handleOpenDepto = () => {
-    setOpenDeptos(true);
-  };
-
-  const handleOpenResolucion = () => {
-    setOpenResolucion(true);
-  };
-
-  const handleClose = () => {
-    setOpenPersona(false);
-    setOpenResolucion(false);
-    setOpenDeptos(false);
-  };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseRes = await axios.get('http://127.0.0.1:8000/facet/api/v1/resoluciones/');
-        const responsePers = await axios.get('http://127.0.0.1:8000/facet/api/v1/personas/');
-        const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        setResoluciones(responseRes.data);
-        setPersonas(responsePers.data);
-        setDepartamentos(responseDeptos.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    
-
-    fetchData();
-  }, []);
-
-  const handleConfirmSelection = () => {
-    // Realiza la lógica necesaria con idResolucionSeleccionada
-    console.log('ID de la resolución seleccionada:', idresolucion);
-    console.log('ID de la persona seleccionada:', idPersona);
-    console.log('ID del depto seleccionada:', idDepartamento);
-
-    // Luego, cierra el modal
-    handleClose();
-  };
-
-  const handleFilterResoluciones = (filtro: string) => {
-    // Lógica para filtrar las resoluciones según el término de búsqueda
-    const resolucionesFiltradas = resoluciones.filter((resolucion) =>
-      resolucion.nexpediente.includes(filtro)||
-      resolucion.nresolucion.includes(filtro)
-    );
-    return resolucionesFiltradas;
-  };
-
-  const handleFilterPersonas = (filtro: string) => {
-    // Lógica para filtrar las resoluciones según el término de búsqueda
-    const personasFiltro = personas.filter((persona) =>
-      persona.dni.includes(filtro)||
-      (persona.legajo ?? '').includes(filtro)||
-      persona.nombre.toLowerCase().includes(filtro.toLowerCase())||
-      persona.apellido.toLowerCase().includes(filtro.toLowerCase())
-    );
-    return personasFiltro;
-  };
-
-  const handleFilterDeptos = (filtro: string) => {
-    // Lógica para filtrar las resoluciones según el término de búsqueda
-    const departamentosFiltro = departamentos.filter((departamento) =>
-      departamento.nombre.toLowerCase().includes(filtro.toLowerCase()));
-    return departamentosFiltro;
-  };
-
-  const crearNuevoJefeDepartamento= async () => {
-
-
-    const nuevoJefeDepartamento= {
-      iddepartamento: idDepartamento,
-      idpersona: idPersona,
-      idresolucion: idresolucion,
-      fecha_de_creacion: fechaActual,
-      observaciones: observaciones,
-      estado: 0 | 1, // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    };
-
-
-    try {
-      // Verificar si ya existe un registro con el mismo iddepartamento
-      const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/api/v1/departamentos-tiene-jefe/${idDepartamento}`);
-      console.log(existeRegistro);
-      if (existeRegistro.data) {
-        // No hay registros existentes, puedes proceder con la creación
-        handleOpenModal('Error', 'Ya existe jefe departamento', () => {});
-      }
-    
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
-        // Maneja el error 404 sin detener el flujo principal
-        const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/departamentos-tiene-jefe/', nuevoJefeDepartamento, {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
-        });
-        handleOpenModal('Bien', 'Se creó el jefe de departamento con éxito', handleConfirmModal);
-      } else {
-        // Maneja otros errores
-        console.error(error);
-        handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
-      }
-    }
-    
-  
-    };
-
   return (
-    
-<Container maxWidth="lg">
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-  <Typography variant="h4" gutterBottom>
-    Agregar Jefe Departamento
-  </Typography>
+    <Container maxWidth="lg">
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Agregar Jefe de Departamento
+        </Typography>
 
-
-  {/* Agrega controles de entrada y botones para los filtros */}
-  <Grid container spacing={2}>
-
-      {/* Seleccionar resolucion */}
-      <Grid item xs={4}> 
-      <Button variant="contained" onClick={handleOpenResolucion}>
-        Seleccionar Resolución
-      </Button>
-
-      {/* Modal para seleccionar resolución */}
-      <Dialog open={openResolucion} onClose={handleClose} maxWidth="md" fullWidth >
-        {/* Filtrar resoluciones */}
-        <TextField
-          label="Buscar Resolución o Expediente"
-          value={filtroResolucion}
-          onChange={(e) => setFiltroResolucion(e.target.value)}
-          fullWidth
-        />
-
-        {/* Mostrar lista de resoluciones */}
-        {handleFilterResoluciones(filtroResolucion).map((resolucion) => (
-          <div key={resolucion.idresolucion}>
-            {/* Puedes agregar más detalles o botones según tus necesidades */}
-            <Button
-              onClick={() => {setIdresolucion(resolucion.idresolucion);SetNroResolucion(resolucion.nresolucion)}}
-              style={{ backgroundColor: resolucion.idresolucion === idresolucion ? '#4caf50' : 'inherit', color: resolucion.idresolucion === idresolucion ? 'white' : 'inherit' }}
-            >
-              N° Resolución {resolucion.nresolucion} - N° Expediente {resolucion.nexpediente}
+        <Grid container spacing={2}>
+          {/* Seleccionar Resolución */}
+          <Grid item xs={4}>
+            <Button variant="contained" onClick={() => setOpenResolucion(true)}>
+              Seleccionar Resolución
             </Button>
-          </div>
-        ))}
+            <Dialog open={openResolucion} onClose={() => setOpenResolucion(false)} maxWidth="md" fullWidth>
+              <TextField
+                label="Buscar por Resolución"
+                value={filtroResolucion}
+                onChange={(e) => {
+                  setFiltroResolucion(e.target.value);
+                  handleFilterAndPaginate(currentUrlResolucion, 'resolucion', { 'nresolucion__icontains': e.target.value });
+                }}
+                fullWidth
+              />
+              {resoluciones.map((resolucionFiltro) => (
+                <Button
+                  key={resolucionFiltro.id}
+                  onClick={() => { setResolucion(resolucionFiltro); setFiltroResolucion(''); }}
+                >
+                  {resolucionFiltro.nresolucion} - {resolucionFiltro.nexpediente}
+                </Button>
+              ))}
+              <Pagination
+                count={Math.ceil(totalItemsResolucion / pageSize)}
+                page={currentPageResolucion}
+                onChange={(e, value) => handlePageChange(e, value, 'resolucion')}
+                color="primary"
+                style={{ marginTop: '20px' }}
+              />
+              <Button variant="contained" onClick={() => setOpenResolucion(false)}>Confirmar Selección</Button>
+            </Dialog>
+          </Grid>
 
-        {/* Botón de confirmación para cerrar el modal y realizar la acción */}
-        <Button variant="contained" onClick={handleConfirmSelection}>
-          Confirmar Selección
-        </Button>
-      </Dialog>
-      </Grid>
-
-      <Grid item xs={12}>
-        <TextField
-          label="N° Resolución"
-          value={NroResolucion}
-          fullWidth
-        />
-      </Grid>
-
-      <Grid item xs={4}>
-      <Button variant="contained" onClick={handleOpenPersona}>
-        Seleccionar Persona
-      </Button>
-
-      {/* Modal para seleccionar resolución */}
-      <Dialog open={openPersona} onClose={handleClose} maxWidth="md" fullWidth >
-        {/* Filtrar resoluciones */}
-        <TextField
-          label="Buscar por DNI , Apellido o Legajo"
-          value={filtroPersonas}
-          onChange={(e) => setFiltroPersonas(e.target.value)}
-          fullWidth
-        />
-
-        {/* Mostrar lista de resoluciones */}
-        {handleFilterPersonas(filtroPersonas).map((persona) => (
-          <div key={persona.idpersona}>
-            {/* Puedes agregar más detalles o botones según tus necesidades */}
-            <Button
-              onClick={() => {setIdPersona(persona.idpersona);SetApellido(persona.apellido);SetDni(persona.dni),setNombre(persona.nombre)}}
-              style={{ backgroundColor: persona.idpersona=== idPersona ? '#4caf50' : 'inherit', color: persona.idpersona === idPersona ? 'white' : 'inherit' }}
-            >
-              DNI {persona.dni} - {persona.apellido} {persona.nombre} - Legajo {persona.legajo}
+          {/* Seleccionar Persona */}
+          <Grid item xs={4}>
+            <Button variant="contained" onClick={() => setOpenPersona(true)}>
+              Seleccionar Persona
             </Button>
-          </div>
-        ))}
+            <Dialog open={openPersona} onClose={() => setOpenPersona(false)} maxWidth="md" fullWidth>
+              <TextField
+                label="Buscar por Persona"
+                value={filtroPersonas}
+                onChange={(e) => {
+                  setFiltroPersonas(e.target.value);
+                  handleFilterAndPaginate(currentUrlPersona, 'persona', { 'nombre__icontains': e.target.value });
+                }}
+                fullWidth
+              />
+              {personas.map((personaFiltro) => (
+                <Button
+                  key={personaFiltro.id}
+                  onClick={() => { setPersona(personaFiltro); setFiltroPersonas(''); }}
+                >
+                  {personaFiltro.nombre} {personaFiltro.apellido}
+                </Button>
+              ))}
+              <Pagination
+                count={Math.ceil(totalItemsPersona / pageSize)}
+                page={currentPagePersona}
+                onChange={(e, value) => handlePageChange(e, value, 'persona')}
+                color="primary"
+                style={{ marginTop: '20px' }}
+              />
+              <Button variant="contained" onClick={() => setOpenPersona(false)}>Confirmar Selección</Button>
+            </Dialog>
+          </Grid>
 
-        {/* Botón de confirmación para cerrar el modal y realizar la acción */}
-        <Button variant="contained" onClick={handleConfirmSelection}
-            style={{
-              marginTop: 'auto',
-              marginBottom: '10px',
-              position: 'sticky',
-              bottom: 0,
-              // backgroundColor: , // Ajusta el fondo según tus necesidades
-            }}>
-          Confirmar Selección
-        </Button>
-      </Dialog>
-      </Grid>      
-    
-      <Grid item xs={12}>
-        <TextField
-          label="DNI"
-          value={dni}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          // label="Apellido y Nombre"
-          value={`${apellido} ${nombre}`}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-      <Button variant="contained" onClick={handleOpenDepto}>
-        Seleccionar Departamento
-      </Button>
-
-      {/* Modal para seleccionar resolución */}
-      <Dialog open={openDeptos} onClose={handleClose} maxWidth="md" fullWidth >
-        {/* Filtrar resoluciones */}
-        <TextField
-          label="Buscar por Departamento"
-          value={filtroDeptos}
-          onChange={(e) => setFiltroDeptos(e.target.value)}
-          fullWidth
-        />
-
-        {/* Mostrar lista de resoluciones */}
-        {handleFilterDeptos(filtroDeptos).map((departamento) => (
-          <div key={departamento.iddepartamento}>
-            {/* Puedes agregar más detalles o botones según tus necesidades */}
-            <Button
-              onClick={() => {setIdDepartamento(departamento.iddepartamento);setNombreDepto(departamento.nombre)}}
-              style={{ backgroundColor: departamento.iddepartamento=== idDepartamento ? '#4caf50' : 'inherit', color: departamento.iddepartamento === idDepartamento ? 'white' : 'inherit' }}
-            >
-              {departamento.nombre}
+          {/* Seleccionar Departamento */}
+          <Grid item xs={4}>
+            <Button variant="contained" onClick={() => setOpenDeptos(true)}>
+              Seleccionar Departamento
             </Button>
-          </div>
-        ))}
+            <Dialog open={openDeptos} onClose={() => setOpenDeptos(false)} maxWidth="md" fullWidth>
+              <TextField
+                label="Buscar por Departamento"
+                value={filtroDeptos}
+                onChange={(e) => {
+                  setFiltroDeptos(e.target.value);
+                  handleFilterAndPaginate(currentUrlDepto, 'departamento', { 'nombre__icontains': e.target.value });
+                }}
+                fullWidth
+              />
+              {departamentos.map((departamentoFiltro) => (
+                <Button
+                  key={departamentoFiltro.id}
+                  onClick={() => { setDepartamento(departamentoFiltro); setFiltroDeptos(''); }}
+                >
+                  {departamentoFiltro.nombre}
+                </Button>
+              ))}
+              <Pagination
+                count={Math.ceil(totalItemsDepto / pageSize)}
+                page={currentPageDepto}
+                onChange={(e, value) => handlePageChange(e, value, 'departamento')}
+                color="primary"
+                style={{ marginTop: '20px' }}
+              />
+              <Button variant="contained" onClick={() => setOpenDeptos(false)}>Confirmar Selección</Button>
+            </Dialog>
+          </Grid>
 
-        {/* Botón de confirmación para cerrar el modal y realizar la acción */}
-        <Button variant="contained" onClick={handleConfirmSelection}
-            style={{
-              marginTop: 'auto',
-              marginBottom: '10px',
-              position: 'sticky',
-              bottom: 0,
-              // backgroundColor: , // Ajusta el fondo según tus necesidades
-            }}>
-          Confirmar Selección
-        </Button>
-      </Dialog>
-      </Grid>     
-      <Grid item xs={12}>
-        <TextField
-          label="Departamento"
-          value={nombreDepto}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Observaciones"
-          value={observaciones}
-          onChange={(e) => setObservaciones(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-      <FormControl fullWidth margin="none">
-          <InputLabel id="demo-simple-select-label">Estado </InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={estado}
-            label="Tipo"
-            onChange={(e) => setEstado(e.target.value)}
-          >
-            <MenuItem value={1}>1</MenuItem>
-            <MenuItem value={0}>0</MenuItem>
-          </Select>
-        </FormControl>
+          {/* Otros campos */}
+          <Grid item xs={12}>
+            <TextField label="Resolución" value={resolucion?.nresolucion || ''} fullWidth disabled />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField label="Persona" value={persona?.nombre + ' ' + persona?.apellido || ''} fullWidth disabled />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField label="Departamento" value={departamento?.nombre || ''} fullWidth disabled />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField label="Observaciones" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} fullWidth />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel id="estado-select-label">Estado</InputLabel>
+              <Select
+                labelId="estado-select-label"
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+              >
+                <MenuItem value={1}>Activo</MenuItem>
+                <MenuItem value={0}>Inactivo</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12} marginBottom={2}>
+            <Button variant="contained" onClick={crearNuevoJefeDepartamento}>
+              Crear
+            </Button>
+          </Grid>
         </Grid>
-      <Grid item xs={12} marginBottom={2}>
-        <Button variant="contained" onClick={crearNuevoJefeDepartamento}>
-          Crear
-        </Button>
-      </Grid>
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
-    <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
-
-</Paper>
-</Container>
+        <BasicModal open={modalVisible} onClose={() => handleCloseModal()} title={modalTitle} content={modalMessage} onConfirm={() => fn()} />
+      </Paper>
+    </Container>
   );
 };
 

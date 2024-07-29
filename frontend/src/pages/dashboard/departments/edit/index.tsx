@@ -119,7 +119,7 @@ const EditarDepartamento : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/departamentos/${idDepartamento}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/departamento/${idDepartamento}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },

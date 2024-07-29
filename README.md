@@ -3,4 +3,4 @@
 
 cd backend/facet
  .\venv\Scripts\activate
-
+py manage.py runserver  

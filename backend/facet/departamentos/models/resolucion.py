@@ -7,7 +7,6 @@ class Resolucion(BaseModel):
     tipo = models.CharField(max_length=17,blank=False, null=False)
     adjunto = models.CharField(max_length=256,blank=False, null=False)
     observaciones = models.TextField(blank=True, null=True)
-    fechadecarga = models.DateTimeField(blank=False, null=False)
     fecha = models.DateTimeField(blank=False, null=False)
     estado = models.CharField(max_length=1,blank=False, null=False)
 
