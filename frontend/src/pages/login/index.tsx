@@ -7,36 +7,27 @@ import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { Theme, createTheme, ThemeProvider } from '@mui/material/styles';
-import { Link, useNavigate  } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { toast, Toaster } from 'react-hot-toast';
 
 function Copyright(props: any) {
   return (
     <Typography variant="body2" color="text.secondary" align="center" {...props}>
       {'Copyright © '}
-      {/* <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '} */}
       {new Date().getFullYear()}
       {'.'}
     </Typography>
   );
 }
 
-
-
-// TODO remove, this demo shouldn't need to reset the theme.
-// const defaultTheme = createTheme();
-
 export default function LoginPage() {
-
-
-  const navigate = useNavigate();  // Obtiene la función de navegación
+  const navigate = useNavigate(); // Obtiene la función de navegación
   const [defaultTheme, setDefaultTheme] = useState<Theme | undefined>();
 
   useEffect(() => {
@@ -52,22 +43,39 @@ export default function LoginPage() {
     setDefaultTheme(customTheme);
   }, []);
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
-    navigate('/dashboard/home');
+    const email = data.get('email');
+    const password = data.get('password');
+  
+    try {
+      // Solicita los tokens JWT al backend de Django
+      const response = await axios.post('http://127.0.0.1:8000/api/login/token/', {
+        email,
+        password,
+      });
+  
+      // Guarda los tokens en localStorage
+      localStorage.setItem('access_token', response.data.access);
+      localStorage.setItem('refresh_token', response.data.refresh);
+  
+      // Redirige al dashboard o a la ruta que desees
+      navigate('/dashboard/home');
+    } catch (error) {
+      console.error('Error al autenticar:', error);
+      // Aquí podrías mostrar un mensaje de error al usuario
+    }
   };
+  
 
   if (!defaultTheme) return <div>Loading...</div>;
 
   return (
-    <ThemeProvider theme={defaultTheme} >
+    <ThemeProvider theme={defaultTheme}>
       <Container component="main" maxWidth="xs">
-        <CssBaseline/>
+        <Toaster />
+        <CssBaseline />
         <Box
           sx={{
             marginTop: 8,
@@ -91,7 +99,7 @@ export default function LoginPage() {
               required
               fullWidth
               id="email"
-              label="Correo Electronico"
+              label="Correo Electrónico"
               name="email"
               autoComplete="email"
               autoFocus
@@ -108,7 +116,7 @@ export default function LoginPage() {
             />
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
-              label="Recuerdame"
+              label="Recuérdame"
             />
             <Button
               type="submit"
@@ -125,10 +133,10 @@ export default function LoginPage() {
                 mt: 2, // Agrega un margen superior para separar de los otros elementos
               }}
             >
-          {/* <Link href="#" variant="body2">
-            ¿Olvidó su contraseña?
-          </Link> */}
-        </Box>
+              {/* <Link href="#" variant="body2">
+                ¿Olvidó su contraseña?
+              </Link> */}
+            </Box>
           </Box>
         </Box>
         <Copyright sx={{ mt: 8, mb: 4 }} />
