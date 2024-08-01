@@ -44,9 +44,9 @@ const EditarAsignatura : React.FC = () => {
   type TipoAsignatura = 'Electiva' | 'Obligatoria';
 
   interface Asignatura {
-    idasignatura: number;
-    idarea: number;
-    iddepartamento: number;
+    id: number;
+    area: number;
+    departamento: number;
     codigo: string;
     nombre: string;
     modulo: string;
@@ -74,7 +74,7 @@ const EditarAsignatura : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/asignaturas/${idAsignatura}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`);
         const data = response.data;
         setAsignatura(data);
       } catch (error) {
@@ -88,8 +88,8 @@ const EditarAsignatura : React.FC = () => {
   // Manejar la actualización del estado fuera del efecto
   useEffect(() => {
     if (asignatura) {
-      setIdarea(asignatura.idarea)
-      setIddepartamento(asignatura.iddepartamento)
+      setIdarea(asignatura.area)
+      setIddepartamento(asignatura.departamento)
       setNombre(asignatura.nombre)
       setCodigo(asignatura.codigo)
       setEstado(String(asignatura.estado))
@@ -104,8 +104,8 @@ const EditarAsignatura : React.FC = () => {
   const edicionAsignatura = async () => {
 
         const asignaturaEditada = {
-      idarea: idarea,
-      iddepartamento: iddepartamento, 
+      area: idarea,
+      departamento: iddepartamento, 
       codigo: codigo,    
       nombre: nombre,
       modulo: modulo,
@@ -117,7 +117,8 @@ const EditarAsignatura : React.FC = () => {
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/asignaturas/${idAsignatura}/`, asignaturaEditada, {
+      console.log(asignaturaEditada)
+      const response = await axios.put(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
@@ -135,7 +136,7 @@ const EditarAsignatura : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/asignaturas/${idAsignatura}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },

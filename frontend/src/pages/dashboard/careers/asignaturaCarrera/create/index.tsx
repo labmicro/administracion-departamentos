@@ -23,15 +23,15 @@ const CrearAsignaturaCarrera = () => {
   const navigate = useNavigate();
 
   interface Area {
-    idarea: number;
-    iddepartamento: number;
+    id: number;
+    departamento: number;
     nombre: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
     // Otros campos según sea necesario
   }
 
   interface Departamento {
-    iddepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -43,9 +43,9 @@ const CrearAsignaturaCarrera = () => {
   type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';3
 
   interface Asignatura {
-    idasignatura: number;
-    idarea: number;
-    iddepartamento: number;
+    id: number;
+    area: number;
+    departamento: number;
     codigo: string;
     nombre: string;
     modulo: string;
@@ -56,7 +56,7 @@ const CrearAsignaturaCarrera = () => {
   }
 
   interface Carrera {
-    idcarrera: number;
+    id: number;
     nombre: string;
     tipo: TipoCarrera;
     planestudio: string;
@@ -66,11 +66,9 @@ const CrearAsignaturaCarrera = () => {
   }
 
   interface AsignaturaCarrera {
-    idasignatura_carrera: number;
-    idcarrera: number;
-    idasignatura: number;
-    idarea: number;
-    iddepartamento: number;
+    id: number;
+    carrera: number;
+    asignatura: number;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
     fechadecreacion: Date;
     fechademodificacion: Date; // Aquí indicas que 'fecha' es de tipo Date
@@ -134,8 +132,8 @@ const CrearAsignaturaCarrera = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/asignaturas/');
-        setAsignaturas(response.data);
+        const response = await axios.get('http://127.0.0.1:8000/facet/asignatura/');
+        setAsignaturas(response.data.results);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -167,10 +165,8 @@ const CrearAsignaturaCarrera = () => {
 
   const crearNuevaAsignaturaEnCarrera = async () => {
     const nuevaAsignaturaEnCarrera = {
-      idcarrera: idCarrera,
-      idasignatura: idasignatura,
-      idarea: idarea,
-      iddepartamento: iddepartamento,
+      carrera: idCarrera,
+      asignatura: idasignatura,
       estado: estado, // Estado de la asignatura en carrera
       fecha_de_creacion: fechaActual,
       fecha_de_modificacion: fechaActual,
@@ -179,7 +175,7 @@ const CrearAsignaturaCarrera = () => {
   
     try {
       console.log(nuevaAsignaturaEnCarrera)
-      const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/asignaturas-en-carrera/', nuevaAsignaturaEnCarrera, {
+      const response = await axios.post('http://127.0.0.1:8000/facet/asignatura-carrera/', nuevaAsignaturaEnCarrera, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -219,12 +215,12 @@ const CrearAsignaturaCarrera = () => {
 
         {/* Mostrar lista de resoluciones */}
         {handleFilterAsignaturas(filtroAsignaturas).map((asignatura) => (
-          <div key={asignatura.idasignatura}>
+          <div key={asignatura.id}>
             {/* Puedes agregar más detalles o botones según tus necesidades */}
             <Button
-              onClick={() => {setIdasignatura(asignatura.idasignatura),setIdarea(asignatura.idarea),setIddepartamento(asignatura.iddepartamento),setNombre(asignatura.nombre),
+              onClick={() => {setIdasignatura(asignatura.id),setIdarea(asignatura.id),setNombre(asignatura.nombre),
               setCodigo(asignatura.codigo)}}
-              style={{ backgroundColor: asignatura.idasignatura=== idasignatura ? '#4caf50' : 'inherit', color: asignatura.idasignatura === idasignatura ? 'white' : 'inherit' }}
+              style={{ backgroundColor: asignatura.id=== idasignatura ? '#4caf50' : 'inherit', color: asignatura.id === idasignatura ? 'white' : 'inherit' }}
             >
               {asignatura.codigo} - {asignatura.nombre} 
               {/* - {persona.apellido} {persona.nombre} - Legajo {persona.legajo} */}
@@ -263,22 +259,6 @@ const CrearAsignaturaCarrera = () => {
           disabled
         />
       </Grid>
-      {/* <Grid item xs={12}>
-        <TextField
-          label="Modulo"
-          value={modulo}
-          onChange={(e) => setModulo(e.target.value.toUpperCase())}
-          fullWidth
-        />
-      </Grid>
-        <Grid item xs={12}>
-        <TextField
-          label="Link Programa Adjunto"
-          value={programa}
-          onChange={(e) => setPrograma(e.target.value)}
-          fullWidth
-        />
-      </Grid>   */}
       <Grid item xs={12}>
       <FormControl fullWidth margin="none">
           <InputLabel id="demo-simple-select-label">Estado </InputLabel>

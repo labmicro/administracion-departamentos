@@ -59,7 +59,7 @@ export default function LoginPage() {
       email: data.get('email'),
       password: data.get('password'),
     });
-    navigate('/dashboard');
+    navigate('/dashboard/home');
   };
 
   if (!defaultTheme) return <div>Loading...</div>;

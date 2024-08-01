@@ -5,7 +5,7 @@ from .director import DirectorSerializer
 from .docente import DocenteSerializer
 from .noDocente import NoDocenteSerializer
 from .resolucion import ResolucionSerializer
-from .jefeDepartamento import JefeDepartamentoSerializer
+from .jefeDepartamento import JefeDepartamentoSerializer,JefeDepartamentoCreateSerializer,JefeDepartamentoDetailSerializer
 from .area import AreaSerializer
 from .asignatura import AsignaturaSerializer
 from .asignaturaCarrera import AsignaturaCarreraSerializer

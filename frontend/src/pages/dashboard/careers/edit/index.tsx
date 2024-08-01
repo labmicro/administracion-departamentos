@@ -68,7 +68,7 @@ const EditarCarrera : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/carreras/${idCarrera}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/carrera/${idCarrera}/`);
         const data = response.data;
         setCarrera(data);
       } catch (error) {
@@ -107,7 +107,7 @@ const EditarCarrera : React.FC = () => {
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/carreras/${idCarrera}/`, carreraEditada, {
+      const response = await axios.put(`http://127.0.0.1:8000/facet/carrera/${idCarrera}/`, carreraEditada, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
@@ -125,7 +125,7 @@ const EditarCarrera : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/carreras/${idCarrera}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/carrera/${idCarrera}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },

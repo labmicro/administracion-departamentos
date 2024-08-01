@@ -42,15 +42,15 @@ const EditarArea : React.FC = () => {
   const closeModal = () => setModalOpen(false);
 
   interface Area {
-    idarea: number;
-    iddepartamento: number;
+    id: number;
+    departamento: number;
     nombre: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
     // Otros campos según sea necesario
   }
 
   interface Departamento {
-    iddepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -58,9 +58,9 @@ const EditarArea : React.FC = () => {
     // Otros campos según sea necesario
   }
 
-  const [area, setArea] = useState<Area>();
-  const [departamento, setDepartamento] = useState<Departamento>();
-  const [iddepartamento, setIddepartamento] = useState<number>(0); // Inicializado con un valor numérico, puedes usar 0 u otro valor inicial
+  const [area, setArea] = useState<Area | null>(null); // Mejor usar null para datos no cargados
+  const [departamento, setDepartamento] = useState<Departamento | null>(null);
+  const [iddepartamento, setIddepartamento] = useState<number>(0);
   const [nombre, setNombre] = useState('');
   const [nombreDepto, setNombreDepto] = useState('');
   const [telefono, setTelefono] = useState('');
@@ -75,8 +75,9 @@ const EditarArea : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/areas/${idArea}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/area/${idArea}/`);
         const data = response.data;
+        console.log(response.data)
         setArea(data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -89,12 +90,12 @@ const EditarArea : React.FC = () => {
   // Manejar la actualización del estado fuera del efecto
   useEffect(() => {
     if (area) {
-      setIddepartamento(area.iddepartamento)
+      setIddepartamento(area.departamento)
       setNombre(area.nombre)
       setEstado(String(area.estado))
       const fetchData = async () => {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/departamentos/${area.iddepartamento}`);
+          const response = await axios.get(`http://127.0.0.1:8000/facet/departamento/${area.departamento}/`);
           const data = response.data;
           setDepartamento(data)
         } catch (error) {
@@ -110,7 +111,7 @@ const EditarArea : React.FC = () => {
   const edicionArea = async () => {
 
         const areaEditada = {
-      iddepartamento: iddepartamento,    
+      departamento: iddepartamento,    
       nombre: nombre,
       estado: estado, // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
 
@@ -118,7 +119,7 @@ const EditarArea : React.FC = () => {
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/areas/${idArea}/`, areaEditada, {
+      const response = await axios.put(`http://127.0.0.1:8000/facet/area/${idArea}/`, areaEditada, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
@@ -136,7 +137,7 @@ const EditarArea : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/areas/${idArea}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/area/${idArea}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },
@@ -170,7 +171,7 @@ try {
       </Grid>
       <Grid item xs={12}>
         <TextField
-          value={departamento?.nombre}
+          value={departamento?.nombre || ''} // Proporciona un valor predeterminado
           disabled
           fullWidth
         />

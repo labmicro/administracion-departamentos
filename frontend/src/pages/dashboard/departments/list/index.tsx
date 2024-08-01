@@ -26,6 +26,7 @@ const ListaDepartamentos = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+  console.log(departamentos)
 
   useEffect(() => {
     fetchData(currentUrl);

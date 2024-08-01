@@ -21,15 +21,15 @@ const CrearAsignatura = () => {
   const navigate = useNavigate();
 
   interface Area {
-    idarea: number;
-    iddepartamento: number;
+    id: number;
+    departamento: number;
     nombre: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
     // Otros campos según sea necesario
   }
 
   interface Departamento {
-    iddepartamento: number;
+    id: number;
     nombre: string;
     telefono: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
@@ -40,9 +40,9 @@ const CrearAsignatura = () => {
   type TipoAsignatura = 'Electiva' | 'Obligatoria';
 
   interface Asignatura {
-    idasignatura: number;
-    idarea: number;
-    iddepartamento: number;
+    id: number;
+    area: number;
+    departamento: number;
     codigo: string;
     nombre: string;
     modulo: string;
@@ -93,10 +93,10 @@ const CrearAsignatura = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        setDepartamentos(response.data);
-        const responseareas = await axios.get('http://127.0.0.1:8000/facet/api/v1/areas/');
-        setAreas(responseareas.data);
+        const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+        setDepartamentos(response.data.results);
+        const responseareas = await axios.get('http://127.0.0.1:8000/facet/area/');
+        setAreas(responseareas.data.results);
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -112,8 +112,8 @@ const CrearAsignatura = () => {
 
 
     const nuevaAsignatura= {
-      idarea: idarea,
-      iddepartamento: iddepartamento, 
+      area: idarea,
+      departamento: iddepartamento, 
       codigo: codigo,
       nombre: nombre,
       modulo: modulo,
@@ -124,7 +124,7 @@ const CrearAsignatura = () => {
 
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/api/v1/asignaturas/', nuevaAsignatura, {
+      const response = await axios.post('http://127.0.0.1:8000/facet/asignatura/', nuevaAsignatura, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -181,13 +181,13 @@ const CrearAsignatura = () => {
           value={idarea || ''}
           onChange={(e) => {
             const selectedId = e.target.value as number;
-            const selectedArea = areas.find(area => area.idarea === selectedId);
-            setIdarea(selectedArea?.idarea);
-            setIddepartamento(selectedArea?.iddepartamento);
+            const selectedArea = areas.find(area => area.id === selectedId);
+            setIdarea(selectedArea?.id);
+            setIddepartamento(selectedArea?.departamento);
           }}
           >
           {areas.map((area) => (
-            <MenuItem key={area.idarea} value={area.idarea}>
+            <MenuItem key={area.id} value={area.id}>
               {area.nombre}
             </MenuItem>
           ))}

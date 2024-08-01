@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
+import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
@@ -19,39 +19,34 @@ const ListaAsignaturas = () => {
 
   interface Area {
     id: number;
-    iddepartamento: number;
+    departamento: number;
     nombre: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    estado: 0 | 1;
   }
 
   interface Departamento {
     id: number;
     nombre: string;
     telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1;
     interno: string;
-    // Otros campos según sea necesario
   }
-
 
   interface Asignatura {
     id: number;
-    idarea: number;
-    iddepartamento: number;
+    area: number;
+    departamento: number;
     codigo: string;
     nombre: string;
     modulo: string;
     programa: string;
     tipo: EstadoAsignatura;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    estado: 0 | 1;
   }
 
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
   const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
-  const [asignaturasFiltro, setAsignaturasFiltro] = useState<Asignatura[]>([]);
   const [filtroCodigo, setFiltroCodigo] = useState('');
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -70,11 +65,18 @@ const ListaAsignaturas = () => {
 
   const fetchData = async (url: string) => {
     try {
-      const response = await axios.get(url);
-      setAsignaturas(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
-      setTotalItems(response.data.count);
+      const [asignaturasRes, departamentosRes, areasRes] = await Promise.all([
+        axios.get(url),
+        axios.get('http://127.0.0.1:8000/facet/departamento/'), // URL para obtener departamentos
+        axios.get('http://127.0.0.1:8000/facet/area/') // URL para obtener áreas
+      ]);
+
+      setAsignaturas(asignaturasRes.data.results);
+      setDepartamentos(departamentosRes.data.results);
+      setAreas(areasRes.data.results);
+      setNextUrl(asignaturasRes.data.next);
+      setPrevUrl(asignaturasRes.data.previous);
+      setTotalItems(asignaturasRes.data.count);
       setCurrentPage(1);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -146,155 +148,150 @@ const ListaAsignaturas = () => {
 
   return (
     <Container maxWidth="lg">
-    <div>
-
-    <Link to="/dashboard/asignaturas/crear"> {/* Agrega un enlace a la página deseada */}
-    <Button variant="contained" endIcon={<AddIcon />}>
-      Agregar Asignatura
-    </Button>
-    </Link>
-    <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+      <div>
+        <Link to="/dashboard/asignaturas/crear">
+          <Button variant="contained" endIcon={<AddIcon />}>
+            Agregar Asignatura
+          </Button>
+        </Link>
+        <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
           Descargar Excel
         </Button>
-    </div>
+      </div>
 
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-<Typography variant="h4" gutterBottom>
-  Asignaturas
-</Typography>
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Asignaturas
+        </Typography>
 
-{/* Agrega controles de entrada y botones para los filtros */}
-<Grid container spacing={2}>
-      <Grid item xs={4}>
-        <TextField
-          label="Codigo"
-          value={filtroCodigo}
-          onChange={(e) => setFiltroCodigo(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <TextField
-          label="Nombre"
-          value={filtroNombre}
-          onChange={(e) => setFiltroNombre(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <FormControl fullWidth margin="none">
-          <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={filtroTipo}
-            label="Tipo"
-            onChange={(e) => setFiltroTipo(e.target.value)}
-          >
-            <MenuItem value=""><em>Todos</em></MenuItem>
-            <MenuItem value={"Electiva"}>Electiva</MenuItem>
-            <MenuItem value={"Obligatoria"}>Obligatoria</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <TextField
-          label="Modulo"
-          value={filtroModulo}
-          onChange={(e) => setFiltroModulo(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <Button variant="contained" onClick={filtrarAsignaturas}>
-          Filtrar
-        </Button>
-      </Grid>
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
+        {/* Agrega controles de entrada y botones para los filtros */}
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <TextField
+              label="Codigo"
+              value={filtroCodigo}
+              onChange={(e) => setFiltroCodigo(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Nombre"
+              value={filtroNombre}
+              onChange={(e) => setFiltroNombre(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth margin="none">
+              <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={filtroTipo}
+                label="Tipo"
+                onChange={(e) => setFiltroTipo(e.target.value)}
+              >
+                <MenuItem value=""><em>Todos</em></MenuItem>
+                <MenuItem value={"Electiva"}>Electiva</MenuItem>
+                <MenuItem value={"Obligatoria"}>Obligatoria</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <TextField
+              label="Modulo"
+              value={filtroModulo}
+              onChange={(e) => setFiltroModulo(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <Button variant="contained" onClick={filtrarAsignaturas}>
+              Filtrar
+            </Button>
+          </Grid>
+        </Grid>
 
-<TableContainer component={Paper}>
-<Table>
-  <TableHead>
-  <TableRow className='header-row'>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Codigo</Typography>
-      </TableCell >
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Nombre</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Modulo</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Programa</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Tipo</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Estado</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Area</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Departamento</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Docentes</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        </TableCell>
-      {/* Agrega otras columnas de encabezado según sea necesario */}
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {asignaturas.map((asignatura) => (
-      <TableRow key={asignatura.id}>
-        <TableCell>
-          <Typography variant="body1">{asignatura.codigo}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{asignatura.nombre}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{asignatura.modulo}</Typography>
-        </TableCell>
-        <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-            <Link to={asignatura.programa} target="_blank" style={{ display: 'inline-block', lineHeight: '0' }}>
-              <TextSnippetIcon />
-            </Link>
-          </TableCell>
-        <TableCell>
-          <Typography variant="body1">{asignatura.tipo}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{asignatura.estado}</Typography>
-        </TableCell>
-        <TableCell>
-          {areas.find(area => area.id === asignatura.idarea)?.nombre || 'Area no encontrado'}
-        </TableCell>
-        <TableCell>
-          {departamentos.find(depto => depto.id === asignatura.id)?.nombre || 'Departamento no encontrado'}
-        </TableCell>   
-        <TableCell style={{ textAlign: 'center' }}>
-            <Link to={`/dashboard/asignaturas/docentes/${asignatura.id}`}>
-            <GroupIcon />
-            </Link>
-          </TableCell>       
-        <TableCell style={{ textAlign: 'center' }}>
-            <Link to={`/dashboard/asignaturas/editar/${asignatura.id}/${asignatura.id}`}>
-            <EditIcon />
-            </Link>
-          </TableCell>
-         {/* Agrega otras columnas de datos según sea necesario */}
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
-</TableContainer>
-<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow className='header-row'>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Codigo</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Nombre</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Modulo</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Programa</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Tipo</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Estado</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Area</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Departamento</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Docentes</Typography>
+                </TableCell>
+                <TableCell className='header-cell'></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {asignaturas.map((asignatura) => (
+                <TableRow key={asignatura.id}>
+                  <TableCell>
+                    <Typography variant="body1">{asignatura.codigo}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{asignatura.nombre}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{asignatura.modulo}</Typography>
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
+                    <Link to={asignatura.programa} target="_blank" style={{ display: 'inline-block', lineHeight: '0' }}>
+                      <TextSnippetIcon />
+                    </Link>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{asignatura.tipo}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{asignatura.estado === 1 ? "Activo" : "Inactivo"}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    {areas.find(area => area.id === asignatura.area)?.nombre || 'Área no encontrada'}
+                  </TableCell>
+                  <TableCell>
+                    {departamentos.find(depto => depto.id === asignatura.departamento)?.nombre || 'Departamento no encontrado'}
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'center' }}>
+                    <Link to={`/dashboard/asignaturas/docentes/${asignatura.id}`}>
+                      <GroupIcon />
+                    </Link>
+                  </TableCell>
+                  <TableCell style={{ textAlign: 'center' }}>
+                    <Link to={`/dashboard/asignaturas/editar/${asignatura.id}/${asignatura.id}`}>
+                      <EditIcon />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
@@ -321,8 +318,8 @@ const ListaAsignaturas = () => {
             Siguiente
           </Button>
         </div>
-</Paper>
-</Container>
+      </Paper>
+    </Container>
   );
 };
 

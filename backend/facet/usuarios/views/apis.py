@@ -7,6 +7,8 @@ from ..serializers import  UserSerializer,GroupSerializer, MyTokenObtainPairSeri
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework.pagination import LimitOffsetPagination
 from django.contrib.auth import get_user_model
+from rest_framework.permissions import AllowAny
+
 User = get_user_model()
 
 from rest_framework.views import APIView
@@ -145,6 +147,9 @@ class MyTokenObtainPairView(TokenObtainPairView):
     """
     Serializador del token
     """
+    permission_classes = [AllowAny]  # Permite el acceso sin necesidad de autenticación
+
+    print("entra al token")
     serializer_class = MyTokenObtainPairSerializer
    
 class ValidateRecaptchaView(APIView):

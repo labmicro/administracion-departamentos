@@ -74,7 +74,7 @@ const EditarAsignaturaCarrera : React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/asignaturas/${idAsignatura}`);
+        const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}`);
         const data = response.data;
         setAsignatura(data);
       } catch (error) {
@@ -117,7 +117,7 @@ const EditarAsignaturaCarrera : React.FC = () => {
 
 
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/api/v1/asignaturas/${idAsignatura}/`, asignaturaEditada, {
+      const response = await axios.put(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
@@ -135,7 +135,7 @@ const EditarAsignaturaCarrera : React.FC = () => {
 
 
 try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/asignaturas/${idAsignatura}/`,{
+  const response = await axios.delete(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`,{
     headers: {
       'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
     },

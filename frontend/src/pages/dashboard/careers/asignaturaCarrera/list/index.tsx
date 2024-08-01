@@ -29,7 +29,7 @@ const ListaAsignaturaCarrera = () => {
   }
 
   interface AsignaturaCarrera {    
-    idasignatura_carrera: number;
+    id: number;
     idcarrera: number;
     idasignatura: number;
     idarea: number;
@@ -108,24 +108,26 @@ const ListaAsignaturaCarrera = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        // setAsignaturasCarrera(responseDeptos.data);
 
         // Obtener áreas después de obtener departamentos
-        const responseAreas = await axios.get('http://127.0.0.1:8000/facet/api/v1/areas/');
-        setAreas(responseAreas.data);
-        const responseAsignaturas = await axios.get('http://127.0.0.1:8000/facet/api/v1/asignaturas/');
-        setAsignaturas(responseAsignaturas.data);
-        const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/api/v1/departamentos/');
-        setDepartamentos(responseDeptos.data);
+        const responseAreas = await axios.get('http://127.0.0.1:8000/facet/area/');
+        setAreas(responseAreas.data.results);
+        const responseAsignaturas = await axios.get('http://127.0.0.1:8000/facet/asignatura/');
+        setAsignaturas(responseAsignaturas.data.results);
+        const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+        setDepartamentos(responseDeptos.data.results);
 
-        const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/asignaturas-en-carrera/${idCarrera}`);
-        // const response = await axios.get(`http://127.0.0.1:8000/facet/api/v1/asignaturas-en-carrera/?idcarrera=${idCarrera}`);
-        setAsignaturasCarrera(response.data);
-        setAsignaturasCarreraFiltro(response.data);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
+        // Obtener asignaturas carrera filtradas por idCarrera
+        const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura-carrera/`, {
+          params: {
+            idcarrera: idCarrera
+          }
+        });
+        setAsignaturasCarrera(response.data.results);
+        setAsignaturasCarreraFiltro(response.data.results);
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
     };
 
   
@@ -193,7 +195,7 @@ const ListaAsignaturaCarrera = () => {
 
 
     try {
-      const response = await axios.delete(`http://127.0.0.1:8000/facet/api/v1/asignaturas-en-carrera/${idAsignaturaCarrera}/`,{
+      const response = await axios.delete(`http://127.0.0.1:8000/facet/asignatura-carrera/${idAsignaturaCarrera}/`,{
         headers: {
           'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
         },
@@ -292,15 +294,7 @@ const ListaAsignaturaCarrera = () => {
       <TableCell className='header-cell'>
         <Typography variant="subtitle1">Area</Typography>
       </TableCell>
-      {/* <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Estado</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Area</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Departamento</Typography>
-      </TableCell> */}
+
       <TableCell className='header-cell'>
         </TableCell>
       {/* Agrega otras columnas de encabezado según sea necesario */}
@@ -324,17 +318,6 @@ const ListaAsignaturaCarrera = () => {
         <TableCell>
           <Typography variant="body1">{asignaturaAsociada?.modulo}</Typography>
         </TableCell>
-        {/* <TableCell>
-          <Typography variant="body1">{asignaturaAsociada?.modulo}</Typography>
-        </TableCell> */}
-        {/* <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-            <Link to={asignatura.iddepartamento} target="_blank" style={{ display: 'inline-block', lineHeight: '0' }}>
-              <TextSnippetIcon />
-            </Link>
-          </TableCell> */}
-        {/* <TableCell>
-          <Typography variant="body1">{asignatura.fechadecreacion}</Typography>
-        </TableCell> */}
         <TableCell>
           <Typography variant="body1">{departamentoAsociado?.nombre}</Typography>
         </TableCell>
@@ -348,7 +331,7 @@ const ListaAsignaturaCarrera = () => {
           {departamentos.find(depto => depto.iddepartamento === asignatura.iddepartamento)?.nombre || 'Departamento no encontrado'}
         </TableCell>           */}
        <TableCell>
-            <DeleteIcon onClick={() => handleDelete(asignaturaCarrera.idasignatura_carrera)}/>
+            <DeleteIcon onClick={() => handleDelete(asignaturaCarrera.id)}/>
           </TableCell>
          {/* Agrega otras columnas de datos según sea necesario */}
       </TableRow>
