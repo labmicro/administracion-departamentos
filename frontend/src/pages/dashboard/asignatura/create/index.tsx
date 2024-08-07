@@ -8,6 +8,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import { Link, useNavigate} from 'react-router-dom';
+import Swal from "sweetalert2";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -98,7 +99,11 @@ const CrearAsignatura = () => {
         const responseareas = await axios.get('http://127.0.0.1:8000/facet/area/');
         setAreas(responseareas.data.results);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al obtener los datos.',
+        });
       }
     };
 

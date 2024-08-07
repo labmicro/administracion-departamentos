@@ -4,6 +4,8 @@ import React from 'react';
 import { FaFileDownload } from 'react-icons/fa';
 import axios from 'axios';
 import { saveAs } from 'file-saver';
+import Swal from "sweetalert2";
+
 
 const ExportExcelButton = () => {
     const handleClickExcel = async () => {
@@ -18,7 +20,11 @@ const ExportExcelButton = () => {
 
             saveAs(excelBlob, 'departamentos.xlsx');
         } catch (error) {
-            console.error('Error exporting data:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error al descargar',
+                text: 'Se produjo un error al exportar los datos.',
+              });
         }
     };
 

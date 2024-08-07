@@ -9,6 +9,6 @@ from .jefeDepartamento import JefeDepartamentoSerializer,JefeDepartamentoCreateS
 from .area import AreaSerializer
 from .asignatura import AsignaturaSerializer
 from .asignaturaCarrera import AsignaturaCarreraSerializer
-from .asignaturaDocente import AsignaturaDocenteSerializer
+from .asignaturaDocente import AsignaturaDocenteSerializer, AsignaturaDocenteCreateSerializer, AsignaturaDocenteDetailSerializer
 from .carrera import CarreraSerializer
 from .directorCarrera import DirectorCarreraSerializer

@@ -16,6 +16,8 @@ import Tooltip from '@mui/material/Tooltip';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Swal from "sweetalert2";
+
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -37,7 +39,6 @@ const ListaResoluciones = () => {
   }
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
-  console.log(resoluciones)
   const [filtroNroExpediente, setFiltroNroExpediente] = useState('');
   const [filtroNroResolucion, setFiltroNroResolucion] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -65,7 +66,12 @@ const ListaResoluciones = () => {
       setTotalItems(response.data.count);
       setCurrentPage(1);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      // Muestra un mensaje de error con SweetAlert2
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al obtener los datos.',
+      });
     }
   };
 
@@ -140,7 +146,12 @@ const ListaResoluciones = () => {
         const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         saveAs(excelBlob, 'resoluciones.xlsx');
       } catch (error) {
-        console.error('Error downloading Excel:', error);
+        // Muestra un mensaje de error con SweetAlert2
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al descargar',
+          text: 'Se produjo un error al exportar los datos.',
+        });
       }
     };  
 
@@ -208,7 +219,6 @@ const ListaResoluciones = () => {
           if (date) {
             const fechaSeleccionada = dayjs(date).utc();  // Usa .utc() para evitar problemas de zona horaria
             setFiltroFecha(fechaSeleccionada);
-            // console.log(fechaSeleccionada); // Imprime la fecha en la consola
           }
         }}
       />

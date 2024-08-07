@@ -9,6 +9,7 @@ import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { Link, useParams ,useNavigate } from 'react-router-dom';
+import Swal from "sweetalert2";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -80,7 +81,11 @@ const EditarArea : React.FC = () => {
         console.log(response.data)
         setArea(data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Correo al obtener los datos.',
+        });
       }
     };
   
@@ -99,7 +104,11 @@ const EditarArea : React.FC = () => {
           const data = response.data;
           setDepartamento(data)
         } catch (error) {
-          console.error('Error fetching data:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Error al obtener los datos.',
+          });
         }
       };
       fetchData();
@@ -126,7 +135,6 @@ const EditarArea : React.FC = () => {
       });
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
-      console.error('Error al hacer la solicitud PUT:', error);
       handleOpenModal('Error','NO  se pudo realizar la acción.');
 
     }

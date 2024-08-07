@@ -15,6 +15,7 @@ import { Theme, createTheme, ThemeProvider } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast, Toaster } from 'react-hot-toast';
+import Swal from "sweetalert2";
 
 function Copyright(props: any) {
   return (
@@ -63,8 +64,12 @@ export default function LoginPage() {
       // Redirige al dashboard o a la ruta que desees
       navigate('/dashboard/home');
     } catch (error) {
-      console.error('Error al autenticar:', error);
-      // Aquí podrías mostrar un mensaje de error al usuario
+      // Muestra un mensaje de error con SweetAlert2
+      Swal.fire({
+        icon: 'error',
+        title: 'Error de autenticación',
+        text: 'Correo electrónico o contraseña incorrectos.',
+      });
     }
   };
   

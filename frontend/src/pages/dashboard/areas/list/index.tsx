@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Swal from "sweetalert2";
 
 
 interface Area {
@@ -57,7 +58,11 @@ const ListaAreas = () => {
       setTotalItems(response.data.count);
       setCurrentPage(1);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al obtener los datos.',
+      });
     }
   };
 

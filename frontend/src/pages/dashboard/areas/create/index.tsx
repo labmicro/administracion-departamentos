@@ -8,6 +8,8 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import { Link, useNavigate} from 'react-router-dom';
+import Swal from "sweetalert2";
+
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -73,7 +75,11 @@ const CrearArea = () => {
         const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
         setDepartamentos(response.data.results);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Error al obtener los datos.',
+        });
       }
     };
 
@@ -102,7 +108,6 @@ const CrearArea = () => {
       });
       handleOpenModal('Éxito', 'Se creo el area con éxito.',handleConfirmModal);
     } catch (error) {
-      console.log(error)
       handleOpenModal('Error','NO  se pudo realizar la acción.',() => {});
 
     }
