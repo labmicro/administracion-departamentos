@@ -6,6 +6,7 @@ class AsignaturaDocente(BaseModel):
     condicion = models.CharField(max_length=11)
     cargo = models.CharField(max_length=20)
     dedicacion = models.CharField(max_length=9)
+    fecha_de_inicio = models.DateTimeField(blank=True, null=True)
     fecha_de_vencimiento = models.DateTimeField(blank=True, null=True)
     observaciones = models.TextField()
     estado = models.CharField(max_length=1)

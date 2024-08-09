@@ -14,7 +14,7 @@ const DocenteAsignatura = () => {
       <Routes>
       <Route path="/*" element={<ListaDocenteAsignatura/>}/>
       <Route path="crear/*" element={<CrearDocenteAsignatura/>}/>
-      <Route path="editar/:idPersona" element={<EditarDocenteAsignatura/>}/>
+      <Route path="editar/:idDocenteAsignatura" element={<EditarDocenteAsignatura/>}/>
       </Routes>
       
   );
