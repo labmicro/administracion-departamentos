@@ -10,6 +10,7 @@ class Persona(BaseModel):
     email = models.CharField(blank=True, null=True)
     interno = models.IntegerField(blank=False, null=False)
     legajo = models.CharField(blank=True, null=True)
+    titulo = models.CharField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.apellido,self.nombre}"
