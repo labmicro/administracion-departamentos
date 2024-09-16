@@ -63,10 +63,10 @@ TEMPLATES = [
 
 STATIC_URL = "static/"
 
-STATICFILES_DIRS = [
-    # Tell Django where to look for React's static files (css, js)
-    os.path.join(BASE_DIR, "build/static"),
-]
+# STATICFILES_DIRS = [
+#     # Tell Django where to look for React's static files (css, js)
+#     os.path.join(BASE_DIR, "build/static"),
+# ]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 WSGI_APPLICATION = "administracion.wsgi.application"
