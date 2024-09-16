@@ -33,9 +33,7 @@ REST_FRAMEWORK = {
     "DATE_FORMAT": "%d/%m/%Y",
 }
 CORS_ORIGIN_WHITELIST = [
-    'http://agenciasdequiniela.cajapopular.gov.ar',
-    'https://agenciasdequiniela.cajapopular.gov.ar',
-    'http://juegoscpa.cajapop.org',
+    'https://administracionfacet.site',
 ]
 CORS_ALLOW_METHODS = [
     "DELETE",
@@ -64,3 +62,5 @@ CORS_EXPOSE_HEADERS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
+# Seguridad (CSRF, SSL, etc.)
+CSRF_TRUSTED_ORIGINS = ['https://administracionfacet.site']
