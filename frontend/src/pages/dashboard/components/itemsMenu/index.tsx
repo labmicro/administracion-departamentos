@@ -15,71 +15,72 @@ import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
 import { Link } from 'react-router-dom';
 
-export const ItemsMenu = (
+// Creas un componente React que contenga todo lo que quieres mostrar
+const ItemsMenu = () => (
   <React.Fragment>
-    <Link to="/dashboard/home"> {/* Agrega un enlace a la página deseada */}
-    <ListItemButton>
-      <ListItemIcon>
-        <HomeIcon />
-      </ListItemIcon>
-      <ListItemText primary="Inicio" />
-    </ListItemButton>
+    <Link to="/dashboard/home">
+      <ListItemButton>
+        <ListItemIcon>
+          <HomeIcon />
+        </ListItemIcon>
+        <ListItemText primary="Inicio" />
+      </ListItemButton>
     </Link>
-    <Link to="/dashboard/resoluciones"> 
-    <ListItemButton>
-      <ListItemIcon>
-        <ArticleIcon />
-      </ListItemIcon>
-      <ListItemText primary="Resoluciones" />
-    </ListItemButton>
+    <Link to="/dashboard/resoluciones">
+      <ListItemButton>
+        <ListItemIcon>
+          <ArticleIcon />
+        </ListItemIcon>
+        <ListItemText primary="Resoluciones" />
+      </ListItemButton>
     </Link>
-    <Link to="/dashboard/personas"> 
-    <ListItemButton>
-      <ListItemIcon>
-        <PeopleIcon />
-      </ListItemIcon>
-      <ListItemText primary="Personas" />
-    </ListItemButton>
+    <Link to="/dashboard/personas">
+      <ListItemButton>
+        <ListItemIcon>
+          <PeopleIcon />
+        </ListItemIcon>
+        <ListItemText primary="Personas" />
+      </ListItemButton>
     </Link>
-    <Link to="/dashboard/departamentos"> 
-    <ListItemButton>
-      <ListItemIcon>
-        <ViewComfyIcon />
-      </ListItemIcon>
-      <ListItemText primary="Departamentos" />
-    </ListItemButton>
+    <Link to="/dashboard/departamentos">
+      <ListItemButton>
+        <ListItemIcon>
+          <ViewComfyIcon />
+        </ListItemIcon>
+        <ListItemText primary="Departamentos" />
+      </ListItemButton>
     </Link>
-    <Link to="/dashboard/areas"> 
-    <ListItemButton>
-      <ListItemIcon>
-        <AutoAwesomeMotionIcon />
-      </ListItemIcon>
-      <ListItemText primary="Area" />
-    </ListItemButton>
+    <Link to="/dashboard/areas">
+      <ListItemButton>
+        <ListItemIcon>
+          <AutoAwesomeMotionIcon />
+        </ListItemIcon>
+        <ListItemText primary="Area" />
+      </ListItemButton>
     </Link>
-    <Link to="/dashboard/asignaturas"> 
-    <ListItemButton>
-      <ListItemIcon>
-        <NoteAltIcon />
-      </ListItemIcon>
-      <ListItemText primary="Asignaturas" />
-    </ListItemButton>
+    <Link to="/dashboard/asignaturas">
+      <ListItemButton>
+        <ListItemIcon>
+          <NoteAltIcon />
+        </ListItemIcon>
+        <ListItemText primary="Asignaturas" />
+      </ListItemButton>
     </Link>
-    <Link to="/dashboard/carreras"> 
-    <ListItemButton>
-      <ListItemIcon>
-        <SchoolIcon />
-      </ListItemIcon>
-      <ListItemText primary="Carreras" />
-    </ListItemButton>
+    <Link to="/dashboard/carreras">
+      <ListItemButton>
+        <ListItemIcon>
+          <SchoolIcon />
+        </ListItemIcon>
+        <ListItemText primary="Carreras" />
+      </ListItemButton>
     </Link>
-    <Link to="/dashboard/reportes"> 
-    <ListItemButton>
-      <ListItemIcon>
-        <BarChartIcon />
-      </ListItemIcon>
-      <ListItemText primary="Reportes" />
-    </ListItemButton>
+    <Link to="/dashboard/reportes">
+      <ListItemButton>
+        <ListItemIcon>
+          <BarChartIcon />
+        </ListItemIcon>
+        <ListItemText primary="Reportes" />
+      </ListItemButton>
     </Link>
   </React.Fragment>
 );
@@ -109,3 +110,4 @@ export const secondaryListItems = (
     </ListItemButton>
   </React.Fragment>
 );
+export default ItemsMenu;  // Exportación como componente React

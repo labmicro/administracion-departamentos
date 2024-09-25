@@ -58,7 +58,7 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 
 
 import {Route, Routes,BrowserRouter  as Router} from 'react-router-dom';
-import { ItemsMenu, secondaryListItems } from './components/itemsMenu';
+import ItemsMenu, { secondaryListItems } from './components/itemsMenu';
 import Carreras from './careers';
 import Departamentos from './departments';
 import MiCuenta from './my-account';
@@ -181,7 +181,7 @@ export default function DashboardMenu() {
           </Toolbar>
           <Divider />
           <List component="nav">
-            {ItemsMenu}
+            <ItemsMenu/>
             <Divider sx={{ my: 1 }} />
             {secondaryListItems}
           </List>
