@@ -11,3 +11,5 @@ backend/facet/usuarios/migrations/*
 
 #frontend
 frontend/node_modules
+backend/facet/administracion/.env
+backend/facet/administracion/.env
