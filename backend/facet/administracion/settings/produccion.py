@@ -2,12 +2,12 @@ import os
 from .base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 django_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
 
 # Convierte la cadena en una lista separada por comas
-ALLOWED_HOSTS = django_allowed_hosts.split(",")
+ALLOWED_HOSTS = ['administracionfacet.site', '18.215.115.94', 'localhost', '127.0.0.1']
 
 MIDDLEWARE += [
     'whitenoise.middleware.WhiteNoiseMiddleware',
