@@ -8,7 +8,6 @@ import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
-import { Link, useNavigate} from 'react-router-dom';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
@@ -24,7 +23,7 @@ const CrearDocenteAsignatura = () => {
     color: 'black',
   };
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   
   interface AsignaturaDocente {
@@ -227,8 +226,9 @@ const fetchDataResoluciones = async (url: string) => {
   };
 
   const handleConfirmModal = () => {
-    navigate('/dashboard/asignaturas/docentes/');
-  };
+    window.location.href = '/dashboard/asignaturas/docentes/'; // Cambia a la nueva URL
+};
+
 
   const handleOpenPersona = () => {
     setOpenPersona(true);

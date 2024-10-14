@@ -23,12 +23,13 @@ import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
-import { Link, useParams } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 const ListaDocenteAsignatura = () => {
-  const { idAsignatura } = useParams();
+  const router = useRouter(); // Usa useRouter para obtener la información de enrutamiento
+  const { idAsignatura } = router.query; // Obtén idAsignatura de los parámetros de la ruta
 
   type EstadoAsignatura = 'Electiva' | 'Obligatoria';
   type Condicion = 'Regular' | 'Interino' | 'Transitorio';
@@ -56,9 +57,8 @@ const ListaDocenteAsignatura = () => {
     nombre: string;
     modulo: string;
     programa: string;
-    tipo:TipoAsignatura;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    tipo: TipoAsignatura;
+    estado: 0 | 1;
   }
 
   interface Docente {
@@ -84,7 +84,6 @@ const ListaDocenteAsignatura = () => {
   }
 
   const [asignaturaDocentes, setAsignaturaDocentes] = useState<AsignaturaDocente[]>([]);
-  console.log(asignaturaDocentes)
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [docentes, setDocentes] = useState<Docente[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
@@ -183,11 +182,13 @@ const ListaDocenteAsignatura = () => {
   return (
     <Container maxWidth="lg">
       <div>
-        <Link to={`/dashboard/asignaturas/docentes/${idAsignatura}/crear`}>
-          <Button variant="contained" endIcon={<AddIcon />}>
-            Agregar Docente Asignatura
-          </Button>
-        </Link>
+        <Button
+          variant="contained"
+          endIcon={<AddIcon />}
+          onClick={() => router.push(`/dashboard/asignaturas/docentes/${idAsignatura}/crear`)} // Cambia a usar Next.js
+        >
+          Agregar Docente Asignatura
+        </Button>
         <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
           Descargar Excel
         </Button>
@@ -270,48 +271,50 @@ const ListaDocenteAsignatura = () => {
         </Grid>
 
         <TableContainer component={Paper}>
-  <Table>
-    <TableHead>
-      <TableRow className='header-row'>
-        <TableCell className='header-cell'>
-          <Typography variant="subtitle1">Nombre</Typography>
-        </TableCell>
-        <TableCell className='header-cell'>
-          <Typography variant="subtitle1">Condicion</Typography>
-        </TableCell>
-        <TableCell className='header-cell'>
-          <Typography variant="subtitle1">Cargo</Typography>
-        </TableCell>
-        <TableCell className='header-cell'>
-          <Typography variant="subtitle1">Dedicacion</Typography>
-        </TableCell>
-        <TableCell className='header-cell'>
-          <Typography variant="subtitle1">Acciones</Typography>
-        </TableCell>
-      </TableRow>
-    </TableHead>
-    <TableBody>
-      {asignaturaDocentes.map((docente) => {
-        return (
-          <TableRow key={docente.id}>
-            <TableCell>{docente.docente.persona?.nombre} {docente.docente.persona?.apellido}</TableCell>
-            <TableCell>{docente.condicion}</TableCell>
-            <TableCell>{docente.cargo}</TableCell>
-            <TableCell>{docente.dedicacion}</TableCell>
-            <TableCell>
-              <Link to={`/dashboard/asignaturas/docentes/${idAsignatura}/editar/${docente.id}`}>
-                <Button variant="contained" color="primary" startIcon={<EditIcon />}>
-                  Editar
-                </Button>
-              </Link>
-            </TableCell>
-          </TableRow>
-        );
-      })}
-    </TableBody>
-  </Table>
-</TableContainer>
-
+          <Table>
+            <TableHead>
+              <TableRow className='header-row'>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Nombre</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Condicion</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Cargo</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Dedicacion</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Acciones</Typography>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {asignaturaDocentes.map((docente) => {
+                return (
+                  <TableRow key={docente.id}>
+                    <TableCell>{docente.docente.persona?.nombre} {docente.docente.persona?.apellido}</TableCell>
+                    <TableCell>{docente.condicion}</TableCell>
+                    <TableCell>{docente.cargo}</TableCell>
+                    <TableCell>{docente.dedicacion}</TableCell>
+                    <TableCell>
+                      <Button
+                        variant="contained"
+                        color="primary"
+                        startIcon={<EditIcon />}
+                        onClick={() => router.push(`/dashboard/asignaturas/docentes/${idAsignatura}/editar/${docente.id}`)} // Cambia a usar Next.js
+                      >
+                        Editar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
 
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button

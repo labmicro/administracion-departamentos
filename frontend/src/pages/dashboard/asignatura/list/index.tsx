@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
+import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import GroupIcon from '@mui/icons-material/Group';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Link from 'next/link';
 
 const ListaAsignaturas = () => {
   const h1Style = {
@@ -67,8 +67,8 @@ const ListaAsignaturas = () => {
     try {
       const [asignaturasRes, departamentosRes, areasRes] = await Promise.all([
         axios.get(url),
-        axios.get('http://127.0.0.1:8000/facet/departamento/'), // URL para obtener departamentos
-        axios.get('http://127.0.0.1:8000/facet/area/') // URL para obtener áreas
+        axios.get('http://127.0.0.1:8000/facet/departamento/'),
+        axios.get('http://127.0.0.1:8000/facet/area/')
       ]);
 
       setAsignaturas(asignaturasRes.data.results);
@@ -149,7 +149,7 @@ const ListaAsignaturas = () => {
   return (
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/asignaturas/crear">
+        <Link href="/dashboard/asignaturas/crear">
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Asignatura
           </Button>
@@ -260,7 +260,7 @@ const ListaAsignaturas = () => {
                     <Typography variant="body1">{asignatura.modulo}</Typography>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                    <Link to={asignatura.programa} target="_blank" style={{ display: 'inline-block', lineHeight: '0' }}>
+                    <Link href={asignatura.programa} target="_blank" style={{ display: 'inline-block', lineHeight: '0' }}>
                       <TextSnippetIcon />
                     </Link>
                   </TableCell>
@@ -277,12 +277,12 @@ const ListaAsignaturas = () => {
                     {departamentos.find(depto => depto.id === asignatura.departamento)?.nombre || 'Departamento no encontrado'}
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link to={`/dashboard/asignaturas/docentes/${asignatura.id}`}>
+                    <Link href={`/dashboard/asignaturas/docentes/${asignatura.id}`}>
                       <GroupIcon />
                     </Link>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link to={`/dashboard/asignaturas/editar/${asignatura.id}/${asignatura.id}`}>
+                    <Link href={`/dashboard/asignaturas/editar/${asignatura.id}/${asignatura.id}`}>
                       <EditIcon />
                     </Link>
                   </TableCell>

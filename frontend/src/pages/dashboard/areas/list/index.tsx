@@ -1,21 +1,19 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
+import { Container, Typography, Paper, TextField, Button, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importamos useRouter de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Swal from "sweetalert2";
-
 
 interface Area {
   id: number;
   departamento: number;
   nombre: string;
   estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-  // Otros campos según sea necesario
 }
 
 interface Departamento {
@@ -24,16 +22,13 @@ interface Departamento {
   telefono: string;
   estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
   interno: string;
-  // Otros campos según sea necesario
 }
+
 const ListaAreas = () => {
-  const h1Style = {
-    color: 'black',
-  };
+  const router = useRouter(); // Usamos useRouter de Next.js
 
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
-  const [areasFiltro, setAreasFiltro] = useState<Area[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
@@ -44,10 +39,10 @@ const ListaAreas = () => {
   const [currentPage, setCurrentPage] = useState<number>(1);
 
   useEffect(() => {
-    fetchData(currentUrl,currentUrlDepto);
-  }, [currentUrl,currentUrlDepto]);
+    fetchData(currentUrl, currentUrlDepto);
+  }, [currentUrl, currentUrlDepto]);
 
-  const fetchData = async (url: string,url2: string) => {
+  const fetchData = async (url: string, url2: string) => {
     try {
       const response = await axios.get(url);
       const deptos = await axios.get(url2);
@@ -111,82 +106,74 @@ const ListaAreas = () => {
   return (
     <Container maxWidth="lg">
       <div>
-
-      <Link to="/dashboard/areas/crear"> {/* Agrega un enlace a la página deseada */}
-      <Button variant="contained" endIcon={<AddIcon />}>
-        Agregar Area
-      </Button>
-      </Link>
-      <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/areas/crear')}>
+          Agregar Area
+        </Button>
+        <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
           Descargar Excel
         </Button>
       </div>
 
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-<Typography variant="h4" gutterBottom>
-  Area
-</Typography>
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Area
+        </Typography>
 
-<Grid container spacing={2}marginBottom={2}>
-      <Grid item xs={4}>
-        <TextField
-          label="Nombre"
-          value={filtroNombre}
-          onChange={(e) => setFiltroNombre(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <Button variant="contained" onClick={filtrarAreas}>
-          Filtrar
-        </Button>
-      </Grid>
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
+        <Grid container spacing={2} marginBottom={2}>
+          <Grid item xs={4}>
+            <TextField
+              label="Nombre"
+              value={filtroNombre}
+              onChange={(e) => setFiltroNombre(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <Button variant="contained" onClick={filtrarAreas}>
+              Filtrar
+            </Button>
+          </Grid>
+        </Grid>
 
-<TableContainer component={Paper}>
-<Table>
-  <TableHead>
-    <TableRow className='header-row'>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Nombre</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Departamento</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Estado</Typography>
-      </TableCell>
-        <TableCell className='header-cell'>
-        </TableCell>
-      {/* Agrega otras columnas de encabezado según sea necesario */}
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {areas.map((area) => (
-      
-      <TableRow key={area.id}>
-        <TableCell>
-          <Typography variant="body1">{area.nombre}</Typography>
-        </TableCell>
-        <TableCell>
-          {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
-          </TableCell>
-        <TableCell>
-          <Typography variant="body1">{area.estado}</Typography>
-        </TableCell>
-        <TableCell>
-            <Link to={`/dashboard/areas/editar/${area.id}`}>
-            <EditIcon />
-            </Link>
-          </TableCell>
-         {/* Agrega otras columnas de datos según sea necesario */}
-      </TableRow>
-    ))}
-  </TableBody>
-</Table>
-</TableContainer>
-<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow className='header-row'>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Nombre</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Departamento</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Estado</Typography>
+                </TableCell>
+                <TableCell className='header-cell'></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {areas.map((area) => (
+                <TableRow key={area.id}>
+                  <TableCell>
+                    <Typography variant="body1">{area.nombre}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="body1">{area.estado}</Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Button onClick={() => router.push(`/dashboard/areas/editar/${area.id}`)}>
+                      <EditIcon />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
           <Button
             variant="contained"
             color="primary"
@@ -213,8 +200,8 @@ const ListaAreas = () => {
             Siguiente
           </Button>
         </div>
-</Paper>
-</Container>
+      </Paper>
+    </Container>
   );
 };
 

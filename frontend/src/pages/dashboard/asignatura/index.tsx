@@ -1,24 +1,36 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
+import { useRouter } from 'next/router';
 import CrearAsignatura from './create';
 import ListaAsignaturas from './list';
 import EditarAsignatura from './edit';
 import DocenteAsignatura from './docenteAsignatura';
 
 const Asignaturas = () => {
+  const router = useRouter();
+  const { idAsignatura, idDepartamento } = router.query;
+
   const h1Style = {
     color: 'black',
   };
 
-  return (
+  // Función para renderizar el componente correcto según la ruta
+  const renderComponent = () => {
+    switch (router.pathname) {
+      case '/dashboard/asignaturas/crear':
+        return <CrearAsignatura />;
+      case `/dashboard/asignaturas/editar/[idAsignatura]/[idDepartamento]`:
+        return <EditarAsignatura />;
+      case `/dashboard/asignaturas/docentes/[idAsignatura]`:
+        return <DocenteAsignatura />;
+      default:
+        return <ListaAsignaturas />;
+    }
+  };
 
-      <Routes>
-      <Route path="/*" element={<ListaAsignaturas/>}/>
-      <Route path="crear/*" element={<CrearAsignatura/>}/>
-      <Route path="editar/:idAsignatura/:idDepartamento" element={<EditarAsignatura/>}/>
-      <Route path="docentes/:idAsignatura/*" element={<DocenteAsignatura/>}/>
-      </Routes>
-      
+  return (
+    <div>
+      {renderComponent()}
+    </div>
   );
 };
 
