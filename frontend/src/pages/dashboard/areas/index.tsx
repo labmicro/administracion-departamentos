@@ -1,25 +1,27 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
+import { useRouter } from 'next/router';
 import CrearArea from './create';
 import ListaArea from './list';
 import EditarArea from './edit';
 
 const Areas = () => {
-  const h1Style = {
-    color: 'black',
+  const router = useRouter();
+  const { idArea } = router.query; // Obtenemos el idArea desde la query
+
+  const renderComponent = () => {
+    if (router.pathname === '/dashboard/areas/crear') {
+      return <CrearArea />;
+    } else if (router.pathname === '/dashboard/areas/editar/[idArea]') {
+      return <EditarArea idArea={typeof idArea === 'string' ? idArea : ''} />; // Asegúrate de que idArea sea un string
+    } else {
+      return <ListaArea />;
+    }
   };
 
   return (
-
-      <Routes>
-    
-      <Route path="/*" element={<ListaArea/>}/>
-      <Route path="crear/*" element={<CrearArea/>}/>
-      <Route path="editar/:idArea" Component={EditarArea}/>
-
-
-      </Routes>
-      
+    <div>
+      {renderComponent()}
+    </div>
   );
 };
 

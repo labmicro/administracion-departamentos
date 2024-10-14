@@ -2,28 +2,33 @@ import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
 import { Container, Typography, Paper, TextField, Button, InputLabel, Select, MenuItem, FormControl, Grid } from '@mui/material';
-import dayjs from 'dayjs';  // Asegúrate de tener instalada esta dependencia
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { useRouter } from 'next/router'; // Importamos useRouter de Next.js
+import { useRouter } from 'next/router';
 import Swal from "sweetalert2";
 
 // Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const EditarArea: React.FC = () => {
-  const router = useRouter(); // Usamos useRouter de Next.js
+// Define las props que recibirá el componente
+interface EditarAreaProps {
+  idArea: string; // idArea es un string
+}
+
+const EditarArea: React.FC<EditarAreaProps> = ({ idArea }) => {
+  const router = useRouter();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState(''); // Nuevo estado para el título del modal
+  const [modalTitle, setModalTitle] = useState('');
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
   const handleOpenModal = (title: string, message: string) => {
-    setModalTitle(title); // Establecer el título del modal
+    setModalTitle(title);
     setModalMessage(message);
     setModalVisible(true);
   };
@@ -31,70 +36,21 @@ const EditarArea: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    router.push('/dashboard/areas/'); // Cambiamos a router.push
+    router.push('/dashboard/areas/');
   };
 
-  const { idArea } = useRouter().query; // Obtenemos el id desde la query
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const closeModal = () => setModalOpen(false);
-
-  interface Area {
-    id: number;
-    departamento: number;
-    nombre: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-  }
-
-  interface Departamento {
-    id: number;
-    nombre: string;
-    telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    interno: string;
-  }
-
-  const [area, setArea] = useState<Area | null>(null); // Mejor usar null para datos no cargados
-  const [departamento, setDepartamento] = useState<Departamento | null>(null);
+  const [area, setArea] = useState<any | null>(null);
   const [iddepartamento, setIddepartamento] = useState<number>(0);
   const [nombre, setNombre] = useState('');
-  const [estado, setEstado] = useState('');
-
-  function capitalizeFirstLetter(string: string) {
-    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
-  }
+  const [estado, setEstado] = useState<number | ''>(0);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/area/${idArea}/`);
-        const data = response.data;
-        setArea(data);
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error al obtener los datos.',
-        });
-      }
-    };
-
-    if (idArea) {
-      fetchData();
-    }
-  }, [idArea]);
-
-  // Manejar la actualización del estado fuera del efecto
-  useEffect(() => {
-    if (area) {
-      setIddepartamento(area.departamento);
-      setNombre(area.nombre);
-      setEstado(String(area.estado));
-      const fetchData = async () => {
+      if (idArea) { // Verifica que idArea no sea undefined
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/departamento/${area.departamento}/`);
+          const response = await axios.get(`http://127.0.0.1:8000/facet/area/${idArea}/`);
           const data = response.data;
-          setDepartamento(data);
+          setArea(data);
         } catch (error) {
           Swal.fire({
             icon: 'error',
@@ -102,14 +58,23 @@ const EditarArea: React.FC = () => {
             text: 'Error al obtener los datos.',
           });
         }
-      };
-      fetchData();
+      }
+    };
+
+    fetchData();
+  }, [idArea]);
+
+  useEffect(() => {
+    if (area) {
+      setIddepartamento(area.departamento);
+      setNombre(area.nombre);
+      setEstado(area.estado);
     }
   }, [area]);
 
   const edicionArea = async () => {
     const areaEditada = {
-      departamento: iddepartamento,    
+      departamento: iddepartamento,
       nombre: nombre,
       estado: estado,
     };
@@ -124,7 +89,7 @@ const EditarArea: React.FC = () => {
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
     }
-  }
+  };
 
   const eliminarArea = async () => {
     try {
@@ -137,7 +102,7 @@ const EditarArea: React.FC = () => {
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
     }
-  }
+  };
 
   return (
     <Container maxWidth="lg">
@@ -151,13 +116,13 @@ const EditarArea: React.FC = () => {
             <TextField
               label="Nombre"
               value={nombre}
-              onChange={(e) => setNombre(capitalizeFirstLetter(e.target.value))}
+              onChange={(e) => setNombre(e.target.value)}
               fullWidth
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
-              value={departamento?.nombre || ''}
+              value={area?.departamento || ''}
               disabled
               fullWidth
             />
@@ -170,7 +135,7 @@ const EditarArea: React.FC = () => {
                 id="demo-simple-select"
                 value={estado}
                 label="Tipo"
-                onChange={(e) => setEstado(e.target.value)}
+                onChange={(e) => setEstado(Number(e.target.value))}
               >
                 <MenuItem value={1}>1</MenuItem>
                 <MenuItem value={0}>0</MenuItem>
