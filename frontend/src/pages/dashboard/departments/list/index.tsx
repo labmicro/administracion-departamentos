@@ -1,11 +1,28 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid, Select, MenuItem, InputLabel, FormControl } from '@mui/material';
+import {
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  Grid,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 interface Departamento {
   id: number;
@@ -16,6 +33,7 @@ interface Departamento {
 }
 
 const ListaDepartamentos = () => {
+  const router = useRouter(); // Usamos useRouter para manejar la navegación
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroEstado, setFiltroEstado] = useState<string | number>('');
@@ -26,7 +44,6 @@ const ListaDepartamentos = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
-  console.log(departamentos)
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -67,7 +84,6 @@ const ListaDepartamentos = () => {
     try {
       let allDepartamentos: Departamento[] = [];
 
-      // Usar la URL de filtrado actual si hay un filtro aplicado
       let url = `http://127.0.0.1:8000/facet/departamento/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
@@ -81,29 +97,19 @@ const ListaDepartamentos = () => {
       }
       url += params.toString();
 
-      // Iterar hasta que no haya más páginas
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
 
         allDepartamentos = [...allDepartamentos, ...results];
-        url = next; // Actualizar la URL para la siguiente página
+        url = next;
       }
 
-      // Crear un libro de Excel
       const workbook = XLSX.utils.book_new();
-
-      // Convertir los datos en una hoja de cálculo
       const worksheet = XLSX.utils.json_to_sheet(allDepartamentos);
-
-      // Agregar la hoja de cálculo al libro de Excel
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamentos');
-
-      // Generar un archivo Excel (blob)
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-
-      // Guardar el archivo usando file-saver
       saveAs(excelBlob, 'departamentos.xlsx');
     } catch (error) {
       console.error('Error downloading Excel:', error);
@@ -113,18 +119,12 @@ const ListaDepartamentos = () => {
   return (
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/departamentos/crear">
-          <Button variant="contained" endIcon={<AddIcon />}>
-            Agregar Departamento
-          </Button>
-        </Link>
-
-        <Link to="/dashboard/departamentos/jefes">
-          <Button variant="contained" color='info' style={{ marginLeft: '10px' }}>
-            Jefes
-          </Button>
-        </Link>
-
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/departamentos/crear')}>
+          Agregar Departamento
+        </Button>
+        <Button variant="contained" color="info" style={{ marginLeft: '10px' }} onClick={() => router.push('/dashboard/departamentos/jefes')}>
+          Jefes
+        </Button>
         <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
           Descargar Excel
         </Button>
@@ -160,7 +160,7 @@ const ListaDepartamentos = () => {
           </Grid>
           <Grid item xs={4}>
             <TextField
-              label="Telefono"
+              label="Teléfono"
               value={filtroTelefono}
               onChange={(e) => setFiltroTelefono(e.target.value)}
               fullWidth
@@ -181,7 +181,7 @@ const ListaDepartamentos = () => {
                   <Typography variant="subtitle1">Nombre</Typography>
                 </TableCell>
                 <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Telefono</Typography>
+                  <Typography variant="subtitle1">Teléfono</Typography>
                 </TableCell>
                 <TableCell className='header-cell'>
                   <Typography variant="subtitle1">Estado</Typography>
@@ -189,8 +189,7 @@ const ListaDepartamentos = () => {
                 <TableCell className='header-cell'>
                   <Typography variant="subtitle1">Interno</Typography>
                 </TableCell>
-                <TableCell className='header-cell'>
-                </TableCell>
+                <TableCell className='header-cell'></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -209,9 +208,9 @@ const ListaDepartamentos = () => {
                     <Typography variant="body1">{departamento.interno}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Link to={`/dashboard/departamentos/editar/${departamento.id}`}>
+                    <Button onClick={() => router.push(`/dashboard/departamentos/editar/${departamento.id}`)}>
                       <EditIcon />
-                    </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

@@ -13,77 +13,68 @@ import ViewComfyIcon from '@mui/icons-material/ViewComfy';
 import HomeIcon from '@mui/icons-material/Home';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import AutoAwesomeMotionIcon from '@mui/icons-material/AutoAwesomeMotion';
-import { Link } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
-// Creas un componente React que contenga todo lo que quieres mostrar
-const ItemsMenu = () => (
-  <React.Fragment>
-    <Link to="/dashboard/home">
-      <ListItemButton>
+const ItemsMenu = () => {
+  const router = useRouter(); // Usamos useRouter para manejar la navegación
+
+  const handleNavigation = (path: string) => {
+    router.push(path); // Navega a la ruta especificada
+  };
+
+  return (
+    <React.Fragment>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/home')}>
         <ListItemIcon>
           <HomeIcon />
         </ListItemIcon>
         <ListItemText primary="Inicio" />
       </ListItemButton>
-    </Link>
-    <Link to="/dashboard/resoluciones">
-      <ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/resoluciones')}>
         <ListItemIcon>
           <ArticleIcon />
         </ListItemIcon>
         <ListItemText primary="Resoluciones" />
       </ListItemButton>
-    </Link>
-    <Link to="/dashboard/personas">
-      <ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/personas')}>
         <ListItemIcon>
           <PeopleIcon />
         </ListItemIcon>
         <ListItemText primary="Personas" />
       </ListItemButton>
-    </Link>
-    <Link to="/dashboard/departamentos">
-      <ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/departamentos')}>
         <ListItemIcon>
           <ViewComfyIcon />
         </ListItemIcon>
         <ListItemText primary="Departamentos" />
       </ListItemButton>
-    </Link>
-    <Link to="/dashboard/areas">
-      <ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/areas')}>
         <ListItemIcon>
           <AutoAwesomeMotionIcon />
         </ListItemIcon>
         <ListItemText primary="Area" />
       </ListItemButton>
-    </Link>
-    <Link to="/dashboard/asignaturas">
-      <ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/asignaturas')}>
         <ListItemIcon>
           <NoteAltIcon />
         </ListItemIcon>
         <ListItemText primary="Asignaturas" />
       </ListItemButton>
-    </Link>
-    <Link to="/dashboard/carreras">
-      <ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/carreras')}>
         <ListItemIcon>
           <SchoolIcon />
         </ListItemIcon>
         <ListItemText primary="Carreras" />
       </ListItemButton>
-    </Link>
-    <Link to="/dashboard/reportes">
-      <ListItemButton>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/reportes')}>
         <ListItemIcon>
           <BarChartIcon />
         </ListItemIcon>
         <ListItemText primary="Reportes" />
       </ListItemButton>
-    </Link>
-  </React.Fragment>
-);
+    </React.Fragment>
+  );
+};
 
 export const secondaryListItems = (
   <React.Fragment>
@@ -110,4 +101,5 @@ export const secondaryListItems = (
     </ListItemButton>
   </React.Fragment>
 );
-export default ItemsMenu;  // Exportación como componente React
+
+export default ItemsMenu;

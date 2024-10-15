@@ -1,26 +1,20 @@
+// src/pages/dashboard/careers/asignaturaCarrera/index.tsx
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
-import CrearAsignaturaCarrera from './create';
-import ListaAsignaturaCarrera from './list';
-import EditarAsignaturaCarrera from './edit';
-
+import { useRouter } from 'next/router';
+import ListaAsignaturaCarrera from './list'; // Asegúrate de que la ruta es correcta
 
 const AsignaturaCarrera = () => {
-  const h1Style = {
-    color: 'black',
-  };
+  const router = useRouter();
+  const { idCarrera } = router.query; // Obtenemos el idCarrera de la URL
 
   return (
-
-      <Routes>
-
-      {/* <Route path="/:idCarrera/*" Component={ListaAsignaturaCarrera}/>     */}
-      <Route path="/*" element={<ListaAsignaturaCarrera/>}/>
-      <Route path="crear/*" Component={CrearAsignaturaCarrera}/>
-      <Route path="editar/:idCarrera" Component={EditarAsignaturaCarrera}/>
-
-      </Routes>
-      
+    <div>
+      <h1 style={{ color: 'black' }}>Asignaturas de la Carrera {idCarrera}</h1>
+      <button onClick={() => router.push(`/dashboard/careers/asignaturaCarrera/create`)}> {/* Navega a crear */}
+        Agregar Asignatura
+      </button>
+      <ListaAsignaturaCarrera />
+    </div>
   );
 };
 

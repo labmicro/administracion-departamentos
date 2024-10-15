@@ -1,21 +1,39 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid} from '@mui/material';
+import {
+  Container,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  Grid,
+} from '@mui/material';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { Link, useParams ,useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 const ListaAsignaturaCarrera = () => {
   const h1Style = {
     color: 'black',
   };
 
-  const { idCarrera } = useParams();
+  const router = useRouter();
+  const { idCarrera } = router.query; // Obtener idCarrera de la URL
 
   type EstadoAsignatura = 'Electiva' | 'Obligatoria';
   type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
@@ -24,29 +42,26 @@ const ListaAsignaturaCarrera = () => {
     idarea: number;
     iddepartamento: number;
     nombre: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    estado: 0 | 1; 
   }
 
-  interface AsignaturaCarrera {    
+  interface AsignaturaCarrera {
     id: number;
     idcarrera: number;
     idasignatura: number;
     idarea: number;
     iddepartamento: number;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1; 
     fechadecreacion: Date;
-    fechademodificacion: Date; // Aquí indicas que 'fecha' es de tipo Date
-    // Otros campos según sea necesario
+    fechademodificacion: Date; 
   }
 
   interface Departamento {
     iddepartamento: number;
     nombre: string;
     telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1; 
     interno: string;
-    // Otros campos según sea necesario
   }
 
   interface Carrera {
@@ -55,8 +70,7 @@ const ListaAsignaturaCarrera = () => {
     tipo: TipoCarrera;
     planestudio: string;
     sitio: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    estado: 0 | 1; 
   }
 
   interface Asignatura {
@@ -68,10 +82,9 @@ const ListaAsignaturaCarrera = () => {
     modulo: string;
     programa: string;
     tipo: EstadoAsignatura;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    estado: 0 | 1; 
   }
-  const navigate = useNavigate();
+
   const [idAsignaturaCarrera, setIdAsignaturaCarrera] = useState<number>();
   const [asignaturasCarrera, setAsignaturasCarrera] = useState<AsignaturaCarrera[]>([]);
   const [areas, setAreas] = useState<Area[]>([]);
@@ -85,12 +98,11 @@ const ListaAsignaturaCarrera = () => {
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState(''); // Nuevo estado para el título del modal
+  const [modalTitle, setModalTitle] = useState('');
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
-
   const handleOpenModal = (title: string, message: string) => {
-    setModalTitle(title); // Establecer el título del modal
+    setModalTitle(title);
     setModalMessage(message);
     setModalVisible(true);
   };
@@ -98,18 +110,12 @@ const ListaAsignaturaCarrera = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    navigate(`/dashboard/carreras/asignaturas/${idCarrera}`);
+    router.push(`/dashboard/careers/asignaturas/${idCarrera}`);
   };
-
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const closeModal = () => setModalOpen(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-
-        // Obtener áreas después de obtener departamentos
         const responseAreas = await axios.get('http://127.0.0.1:8000/facet/area/');
         setAreas(responseAreas.data.results);
         const responseAsignaturas = await axios.get('http://127.0.0.1:8000/facet/asignatura/');
@@ -117,7 +123,6 @@ const ListaAsignaturaCarrera = () => {
         const responseDeptos = await axios.get('http://127.0.0.1:8000/facet/departamento/');
         setDepartamentos(responseDeptos.data.results);
 
-        // Obtener asignaturas carrera filtradas por idCarrera
         const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura-carrera/`, {
           params: {
             idcarrera: idCarrera
@@ -125,12 +130,10 @@ const ListaAsignaturaCarrera = () => {
         });
         setAsignaturasCarrera(response.data.results);
         setAsignaturasCarreraFiltro(response.data.results);
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
     };
-
-  
 
     fetchData();
   }, [idCarrera]);
@@ -139,14 +142,13 @@ const ListaAsignaturaCarrera = () => {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    margin: '16px 0', // Puedes ajustar según sea necesario
-  };
-  
-  const buttonStyle = {
-    marginLeft: '8px', // Puedes ajustar según sea necesario
+    margin: '16px 0',
   };
 
-  // --Paginado
+  const buttonStyle = {
+    marginLeft: '8px',
+  };
+
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
   const indexOfLastItem = currentPage * itemsPerPage;
@@ -157,31 +159,20 @@ const ListaAsignaturaCarrera = () => {
   const handleChangePage = (newPage: number) => {
     setCurrentPage(newPage);
   };
-  
 
   const filtrarAsignaturas = () => {
-
-    // Implementa la lógica de filtrado aquí usando los estados de los filtros
-    // Puedes utilizar resoluciones.filter(...) para filtrar el array según los valores de los filtros
-    // Luego, actualiza el estado de resoluciones con el nuevo array filtrado
-
-     // Aplica la lógica de filtrado aquí utilizando la función filter
-     const asignaturasFiltradas = asignaturasCarrera.filter((asignaturaCarrera) => {
-      // Aplica condiciones de filtrado según los valores de los filtros
+    const asignaturasFiltradas = asignaturasCarrera.filter((asignaturaCarrera) => {
       const asignatura = asignaturas.find(asignatura => asignatura.idasignatura === asignaturaCarrera.idasignatura);
-      if (!asignatura) return false; // Si no se encuentra la asignatura, no la incluyas en los resultados del filtro
-      
-      // Aplica condiciones de filtrado según las propiedades de la asignatura
+      if (!asignatura) return false; 
+
       const cumpleCodigo = asignatura.codigo.toLowerCase().includes(filtroCodigo.toLowerCase());
       const cumpleNombre = asignatura.nombre.toLowerCase().includes(filtroNombre.toLowerCase());
       const cumpleTipo = (asignatura.tipo.includes(filtroTipo) || filtroTipo === "Todos");
       const cumpleModulo = asignatura.modulo.toLowerCase().includes(filtroModulo.toLowerCase());
-  
-      // Retorna true si la asignatura cumple con todas las condiciones de filtrado
+
       return cumpleCodigo && cumpleNombre && cumpleTipo && cumpleModulo;
     });
 
-    // Actualiza el estado de resoluciones con el nuevo array filtrado
     setAsignaturasCarreraFiltro(asignaturasFiltradas);
     setCurrentPage(1);
   };
@@ -189,168 +180,154 @@ const ListaAsignaturaCarrera = () => {
   const handleDelete = (id: number) => {
     setIdAsignaturaCarrera(id);
     setConfirmarEliminacion(true);
-};
+  };
 
   const eliminarCarrera = async () => {
-
-
     try {
-      const response = await axios.delete(`http://127.0.0.1:8000/facet/asignatura-carrera/${idAsignaturaCarrera}/`,{
+      await axios.delete(`http://127.0.0.1:8000/facet/asignatura-carrera/${idAsignaturaCarrera}/`, {
         headers: {
-          'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
+          'Content-Type': 'application/json',
         },
       });
       handleOpenModal('Asignatura Eliminada', 'La acción se realizó con éxito.');
     } catch (error) {
-      console.error('Error al hacer la solicitud PUT:', error);
-      handleOpenModal('Error','NO  se pudo realizar la acción.');
-    
+      console.error('Error al hacer la solicitud DELETE:', error);
+      handleOpenModal('Error', 'NO se pudo realizar la acción.');
     }
-    
-    }
+  };
 
   return (
     <Container maxWidth="lg">
-    <div>
-
-    <Link to={`/dashboard/carreras/asignaturas/${idCarrera}/crear/`}> {/* Agrega un enlace a la página deseada */}
-    <Button variant="contained" endIcon={<AddIcon />}>
-      Agregar Asignatura
-    </Button>
-    </Link>
-    </div>
-
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-<Typography variant="h4" gutterBottom>
-  Asignaturas de Carrera
-</Typography>
-
-{/* Agrega controles de entrada y botones para los filtros */}
-<Grid container spacing={2}>
-      <Grid item xs={4}>
-        <TextField
-          label="Codigo"
-          value={filtroCodigo}
-          onChange={(e) => setFiltroCodigo(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <TextField
-          label="Nombre"
-          value={filtroNombre}
-          onChange={(e) => setFiltroNombre(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4}>
-        <FormControl fullWidth margin="none">
-          <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={filtroTipo}
-            label="Tipo"
-            onChange={(e) => setFiltroTipo(e.target.value)}
-          >
-            <MenuItem value={"Todos"}>Todos</MenuItem>
-            <MenuItem value={"Electiva"}>Electiva</MenuItem>
-            <MenuItem value={"Obligatoria"}>Obligatoria</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <TextField
-          label="Modulo"
-          value={filtroModulo}
-          onChange={(e) => setFiltroModulo(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={4} marginBottom={2}>
-        <Button variant="contained" onClick={filtrarAsignaturas}>
-          Filtrar
+      <div>
+        <Button
+          variant="contained"
+          endIcon={<AddIcon />}
+          onClick={() => router.push(`/dashboard/careers/asignaturaCarrera/create`)} // Navegación a la página de creación
+        >
+          Agregar Asignatura
         </Button>
-      </Grid>
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
+      </div>
 
-<TableContainer component={Paper}>
-<Table>
-  <TableHead>
-  <TableRow className='header-row'>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Codigo</Typography>
-      </TableCell >
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Asignatura</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Modulo</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Departamento</Typography>
-      </TableCell>
-      <TableCell className='header-cell'>
-        <Typography variant="subtitle1">Area</Typography>
-      </TableCell>
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Asignaturas de Carrera
+        </Typography>
 
-      <TableCell className='header-cell'>
-        </TableCell>
-      {/* Agrega otras columnas de encabezado según sea necesario */}
-    </TableRow>
-  </TableHead>
-  <TableBody>
-    {currentItems.map((asignaturaCarrera) => {
-          // Buscar la persona con el idpersona correspondient
-      const asignaturaAsociada = asignaturas.find((asignatura)=> asignatura.idasignatura === asignaturaCarrera.idasignatura)
-      const departamentoAsociado = departamentos.find((departamento)=> departamento.iddepartamento === asignaturaCarrera.iddepartamento)
-      const areaAsociado = areas.find((area)=> area.idarea === asignaturaCarrera.idarea)
-          
-    return (
-      <TableRow key={asignaturaCarrera.idasignatura}>
-        <TableCell>
-          <Typography variant="body1">{asignaturaAsociada?.codigo}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{asignaturaAsociada?.nombre}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{asignaturaAsociada?.modulo}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{departamentoAsociado?.nombre}</Typography>
-        </TableCell>
-        <TableCell>
-          <Typography variant="body1">{areaAsociado?.nombre}</Typography>
-        </TableCell>
-        {/* <TableCell>
-          {areas.find(area => area.idarea === asignatura.idarea)?.nombre || 'Area no encontrado'}
-        </TableCell> */}
-        {/* <TableCell>
-          {departamentos.find(depto => depto.iddepartamento === asignatura.iddepartamento)?.nombre || 'Departamento no encontrado'}
-        </TableCell>           */}
-       <TableCell>
-            <DeleteIcon onClick={() => handleDelete(asignaturaCarrera.id)}/>
-          </TableCell>
-         {/* Agrega otras columnas de datos según sea necesario */}
-      </TableRow>
-          );
-        })}
-  </TableBody>
-</Table>
-</TableContainer>
-<BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
-    <ModalConfirmacion
-        open={confirmarEliminacion}
-        onClose={() => setConfirmarEliminacion(false)}
-        onConfirm={() => {
-          setConfirmarEliminacion(false);
-          eliminarCarrera();
-        }}
-      />
-</Paper>
-<div style={paginationContainerStyle}>
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <TextField
+              label="Código"
+              value={filtroCodigo}
+              onChange={(e) => setFiltroCodigo(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Nombre"
+              value={filtroNombre}
+              onChange={(e) => setFiltroNombre(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <FormControl fullWidth margin="none">
+              <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={filtroTipo}
+                label="Tipo"
+                onChange={(e) => setFiltroTipo(e.target.value)}
+              >
+                <MenuItem value={"Todos"}>Todos</MenuItem>
+                <MenuItem value={"Electiva"}>Electiva</MenuItem>
+                <MenuItem value={"Obligatoria"}>Obligatoria</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={4}>
+            <TextField
+              label="Módulo"
+              value={filtroModulo}
+              onChange={(e) => setFiltroModulo(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Button variant="contained" onClick={filtrarAsignaturas}>
+              Filtrar
+            </Button>
+          </Grid>
+        </Grid>
+
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow className='header-row'>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Código</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Asignatura</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Módulo</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Departamento</Typography>
+                </TableCell>
+                <TableCell className='header-cell'>
+                  <Typography variant="subtitle1">Área</Typography>
+                </TableCell>
+                <TableCell className='header-cell'></TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {currentItems.map((asignaturaCarrera) => {
+                const asignaturaAsociada = asignaturas.find(asignatura => asignatura.idasignatura === asignaturaCarrera.idasignatura);
+                const departamentoAsociado = departamentos.find(departamento => departamento.iddepartamento === asignaturaCarrera.iddepartamento);
+                const areaAsociado = areas.find(area => area.idarea === asignaturaCarrera.idarea);
+                
+                return (
+                  <TableRow key={asignaturaCarrera.idasignatura}>
+                    <TableCell>
+                      <Typography variant="body1">{asignaturaAsociada?.codigo}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">{asignaturaAsociada?.nombre}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">{asignaturaAsociada?.modulo}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">{departamentoAsociado?.nombre}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">{areaAsociado?.nombre}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <DeleteIcon onClick={() => handleDelete(asignaturaCarrera.id)} />
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
+        <ModalConfirmacion
+          open={confirmarEliminacion}
+          onClose={() => setConfirmarEliminacion(false)}
+          onConfirm={() => {
+            setConfirmarEliminacion(false);
+            eliminarCarrera();
+          }}
+        />
+      </Paper>
+
+      <div style={paginationContainerStyle}>
         <Typography>Página {currentPage} de {totalPages}</Typography>
         <div>
           <Button
@@ -373,7 +350,7 @@ const ListaAsignaturaCarrera = () => {
           </Button>
         </div>
       </div>
-</Container>
+    </Container>
   );
 };
 

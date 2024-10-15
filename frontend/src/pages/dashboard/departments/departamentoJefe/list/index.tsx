@@ -5,7 +5,7 @@ import { Container, Grid, Paper, Table, TableBody, TableCell, TableContainer, Ta
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { Link } from 'react-router-dom';
+import Link from 'next/link'; // Cambiado para usar Link de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -134,73 +134,71 @@ const ListaDepartamentosJefe = () => {
     }
     url += params.toString();
     setCurrentUrl(url);
-};
+  };
 
-const descargarExcel = async () => {
-  try {
-    let allDeptoJefes: DepartamentoJefe[] = [];
+  const descargarExcel = async () => {
+    try {
+      let allDeptoJefes: DepartamentoJefe[] = [];
 
-    let url = `http://127.0.0.1:8000/facet/jefe-departamento/?`;
-    const params = new URLSearchParams();
-    if (filtroNombre !== '') {
-      params.append('jefe__persona__nombre__icontains', filtroNombre);
-    }
-    if (filtroDni !== '') {
-      params.append('jefe__persona__dni__icontains', filtroDni);
-    }
-    if (filtroEstado !== '') {
-      params.append('jefe__estado', filtroEstado.toString());
-    }
-    if (filtroApellido !== '') {
-      params.append('jefe__persona__apellido__icontains', filtroApellido);
-    }
-    if (filtroLegajo !== '') {
-      params.append('jefe__persona__legajo__icontains', filtroLegajo);
-    }
-    if (filtroDepartamento !== '') {
-      params.append('departamento__nombre__icontains', filtroDepartamento);
-    }
-    if (filtroResolucion !== '') {
-      params.append('resolucion__nresolucion__icontains', filtroResolucion);
-    }
-    url += params.toString();
+      let url = `http://127.0.0.1:8000/facet/jefe-departamento/?`;
+      const params = new URLSearchParams();
+      if (filtroNombre !== '') {
+        params.append('jefe__persona__nombre__icontains', filtroNombre);
+      }
+      if (filtroDni !== '') {
+        params.append('jefe__persona__dni__icontains', filtroDni);
+      }
+      if (filtroEstado !== '') {
+        params.append('jefe__estado', filtroEstado.toString());
+      }
+      if (filtroApellido !== '') {
+        params.append('jefe__persona__apellido__icontains', filtroApellido);
+      }
+      if (filtroLegajo !== '') {
+        params.append('jefe__persona__legajo__icontains', filtroLegajo);
+      }
+      if (filtroDepartamento !== '') {
+        params.append('departamento__nombre__icontains', filtroDepartamento);
+      }
+      if (filtroResolucion !== '') {
+        params.append('resolucion__nresolucion__icontains', filtroResolucion);
+      }
+      url += params.toString();
 
-    while (url) {
-      const response = await axios.get(url);
-      const { results, next } = response.data;
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
 
-      allDeptoJefes = [...allDeptoJefes, ...results];
-      url = next;
+        allDeptoJefes = [...allDeptoJefes, ...results];
+        url = next;
+      }
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(allDeptoJefes.map((item) => ({
+        'Nombre': item.jefe.persona.nombre,
+        'Apellido': item.jefe.persona.apellido,
+        'Departamento': item.departamento.nombre,
+        'Resolución': item.resolucion.nresolucion,
+        'Fecha de Inicio': item.fecha_de_inicio,
+        'Fecha de Fin': item.fecha_de_fin,
+        'Estado': item.estado === 1 ? 'Activo' : 'Inactivo',
+        'Observaciones': item.observaciones
+      })));
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamento Jefes');
+      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(excelBlob, 'departamento_jefes.xlsx');
+    } catch (error) {
+      console.error('Error downloading Excel:', error);
     }
-
-    const workbook = XLSX.utils.book_new();
-    const worksheet = XLSX.utils.json_to_sheet(allDeptoJefes.map((item) => ({
-      'Nombre': item.jefe.persona.nombre,
-      'Apellido': item.jefe.persona.apellido,
-      'Departamento': item.departamento.nombre,
-      'Resolución': item.resolucion.nresolucion,
-      'Fecha de Inicio': item.fecha_de_inicio,
-      'Fecha de Fin': item.fecha_de_fin,
-      'Estado': item.estado === 1 ? 'Activo' : 'Inactivo',
-      'Observaciones': item.observaciones
-    })));
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamento Jefes');
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-    saveAs(excelBlob, 'departamento_jefes.xlsx');
-  } catch (error) {
-    console.error('Error downloading Excel:', error);
-  }
-};
-
-
+  };
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/departamentos/jefes/crear">
+        <Link href="/dashboard/departamentos/jefes/crear" passHref>
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Jefe
           </Button>
@@ -241,29 +239,29 @@ const descargarExcel = async () => {
             />
           </Grid>
           <Grid item xs={4} marginBottom={2}>
-          <TextField
-            label="Legajo"
-            value={filtroLegajo}
-            onChange={(e) => setFiltroLegajo(e.target.value)}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={4} marginBottom={2}>
-          <TextField
-            label="Departamento"
-            value={filtroDepartamento}
-            onChange={(e) => setFiltroDepartamento(e.target.value)}
-            fullWidth
-          />
-        </Grid>
-        <Grid item xs={4} marginBottom={2}>
-          <TextField
-            label="Resolución"
-            value={filtroResolucion}
-            onChange={(e) => setFiltroResolucion(e.target.value)}
-            fullWidth
-          />
-        </Grid>
+            <TextField
+              label="Legajo"
+              value={filtroLegajo}
+              onChange={(e) => setFiltroLegajo(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <TextField
+              label="Departamento"
+              value={filtroDepartamento}
+              onChange={(e) => setFiltroDepartamento(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={4} marginBottom={2}>
+            <TextField
+              label="Resolución"
+              value={filtroResolucion}
+              onChange={(e) => setFiltroResolucion(e.target.value)}
+              fullWidth
+            />
+          </Grid>
           <Grid item xs={4} marginBottom={2}>
             <Button variant="contained" onClick={filtrarJefesDepartamentos}>
               Filtrar
@@ -315,13 +313,13 @@ const descargarExcel = async () => {
                   <TableCell>{deptoJefe.fecha_de_fin}</TableCell>
                   <TableCell>{deptoJefe.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
                   <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
-                  <Tooltip title={deptoJefe.observaciones}>
-                    <VisibilityIcon/>
-                  </Tooltip>
-                    </TableCell>
-                    <TableCell>
+                    <Tooltip title={deptoJefe.observaciones}>
+                      <VisibilityIcon/>
+                    </Tooltip>
+                  </TableCell>
+                  <TableCell>
                     <Tooltip title="Editar">
-                      <Link to={`/dashboard/departamentos/jefes/editar/${deptoJefe.id}`}>
+                      <Link href={`/dashboard/departamentos/jefes/editar/${deptoJefe.id}`} passHref>
                         <EditIcon />
                       </Link>
                     </Tooltip>
@@ -345,7 +343,7 @@ const descargarExcel = async () => {
             Anterior
           </Button>
           <Typography variant="body1">
-            Página {currentPage} de {totalPages}
+            Página {currentPage} de {Math.ceil(totalItems / pageSize)}
           </Typography>
           <Button
             variant="contained"

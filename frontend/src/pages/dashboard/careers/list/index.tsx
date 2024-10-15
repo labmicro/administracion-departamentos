@@ -5,7 +5,7 @@ import { Container, Table, TableBody, TableCell, TableContainer, TableHead, Tabl
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import NoteAltIcon from '@mui/icons-material/NoteAlt';
-import { Link } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 
@@ -21,6 +21,7 @@ interface Carrera {
 }
 
 const ListaCarreras = () => {
+  const router = useRouter(); // Usamos useRouter de Next.js
   const [carreras, setCarreras] = useState<Carrera[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
@@ -113,11 +114,13 @@ const ListaCarreras = () => {
   return (
     <Container maxWidth="md">
       <div>
-        <Link to="/dashboard/carreras/crear">
-          <Button variant="contained" endIcon={<AddIcon />}>
-            Agregar Carrera
-          </Button>
-        </Link>
+        <Button
+          variant="contained"
+          endIcon={<AddIcon />}
+          onClick={() => router.push('/dashboard/carreras/crear')} // Navegación a la página de creación
+        >
+          Agregar Carrera
+        </Button>
         <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
           Descargar Excel
         </Button>
@@ -222,17 +225,17 @@ const ListaCarreras = () => {
                     <Typography variant="body1">{carrera.sitio}</Typography>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link to={`/dashboard/carreras/asignaturas/${carrera.id}`}>
+                    <Button onClick={() => router.push(`/dashboard/carreras/asignaturas/${carrera.id}`)}>
                       <NoteAltIcon />
-                    </Link>
+                    </Button>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
                     <Typography variant="body1">{carrera.estado}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Link to={`/dashboard/carreras/editar/${carrera.id}`}>
+                    <Button onClick={() => router.push(`/dashboard/carreras/editar/${carrera.id}`)}>
                       <EditIcon />
-                    </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}
