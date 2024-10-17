@@ -7,16 +7,15 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
-// Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const EditarResolucion: React.FC = () => {
-  const router = useRouter();
-  const { idResolucion } = router.query; // Obtiene el id de la resolución de la ruta
+interface EditarResolucionProps {
+  idResolucion: string; // Asegúrate de que este tipo se ajuste a tu lógica
+}
 
+const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
@@ -31,10 +30,9 @@ const EditarResolucion: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    router.push('/dashboard/resoluciones/'); // Navegar a la lista de resoluciones
   };
 
-  const [resolucion, setResolucion] = useState<any>(null); // Cambia el tipo según sea necesario
+  const [resolucion, setResolucion] = useState<any>(null);
   const [nroExpediente, setNroExpediente] = useState('');
   const [nroResolucion, setNroResolucion] = useState('');
   const [tipo, setTipo] = useState('');
@@ -45,11 +43,10 @@ const EditarResolucion: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (idResolucion) { // Asegúrate de que idResolucion esté definido
+      if (idResolucion) {
         try {
           const response = await axios.get(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`);
           setResolucion(response.data);
-          // Asignar valores a los campos del formulario
           setNroExpediente(response.data.nexpediente);
           setNroResolucion(response.data.nresolucion);
           setTipo(response.data.tipo);
