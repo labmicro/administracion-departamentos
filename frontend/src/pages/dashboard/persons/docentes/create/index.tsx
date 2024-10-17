@@ -2,12 +2,10 @@ import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
 import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import BasicModal from '@/utils/modal';
 
 const CrearDocente = () => {
-  const navigate = useNavigate();
-
+  // Define los estados necesarios
   interface Persona {
     id: number;
     nombre: string;
@@ -22,8 +20,8 @@ const CrearDocente = () => {
 
   const [idPersona, setIdPersona] = useState<number>(0);
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [apellido, SetApellido] = useState('');
-  const [dni, SetDni] = useState('');
+  const [apellido, setApellido] = useState('');
+  const [dni, setDni] = useState('');
   const [filtroPersonas, setFiltroPersonas] = useState('');
   const [openPersona, setOpenPersona] = useState(false);
   const [nombre, setNombre] = useState('');
@@ -44,10 +42,6 @@ const CrearDocente = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-  };
-
-  const handleConfirmModal = () => {
-    navigate('/dashboard/personas/docentes/');
   };
 
   const handleOpenPersona = () => {
@@ -104,7 +98,7 @@ const CrearDocente = () => {
               'Content-Type': 'application/json',
             },
           });
-          handleOpenModal('Bien', 'Se creó el docente con éxito', handleConfirmModal);
+          handleOpenModal('Bien', 'Se creó el docente con éxito', () => {});
         } catch (postError) {
           console.error(postError);
           handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
@@ -142,8 +136,8 @@ const CrearDocente = () => {
                   <Button
                     onClick={() => {
                       setIdPersona(persona.id);
-                      SetApellido(persona.apellido);
-                      SetDni(persona.dni);
+                      setApellido(persona.apellido);
+                      setDni(persona.dni);
                       setNombre(persona.nombre);
                     }}
                     style={{ backgroundColor: persona.id === idPersona ? '#4caf50' : 'inherit', color: persona.id === idPersona ? 'white' : 'inherit' }}

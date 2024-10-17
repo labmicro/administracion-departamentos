@@ -10,20 +10,12 @@ const Resoluciones = () => {
   };
 
   return (
-    // <div>
-    //   <header>
-    //     <h1 style={h1Style}>Bienvenido a la Gestigón de Resoluciones</h1>
-    //   </header>
-    // </div>
 
 
       <Routes>
-      {/* <Route path="/" element={<LoginPage />}/> */}
       <Route path="/*" element={<ListaResoluciones/>}/>
       <Route path="crear/*" element={<CrearResolucion/>}/>
-      {/* <Route path="editar/*" element={<EditarResolucion/>}/> */}
        <Route path="editar/:idResolucion" Component={EditarResolucion} />
-      {/* <Route path="about" element={<AboutPage />} /> */}
       </Routes>
       
   );

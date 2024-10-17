@@ -1,34 +1,29 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, List, ListItem, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, 
-Typography, Paper,TextField,Button,InputLabel,Select ,MenuItem,FormControl,Grid, Modal, Box} from '@mui/material';
-import { LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs';  // Asegúrate de tener instalada esta dependencia
+import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl } from '@mui/material';
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { Link, useParams ,useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 // Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-const EditarResolucion : React.FC = () => {
-
-  const navigate = useNavigate();
+const EditarResolucion: React.FC = () => {
+  const router = useRouter();
+  const { idResolucion } = router.query; // Obtiene el id de la resolución de la ruta
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [modalTitle, setModalTitle] = useState(''); // Nuevo estado para el título del modal
+  const [modalTitle, setModalTitle] = useState('');
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
 
-  
   const handleOpenModal = (title: string, message: string) => {
-    setModalTitle(title); // Establecer el título del modal
+    setModalTitle(title);
     setModalMessage(message);
     setModalVisible(true);
   };
@@ -36,243 +31,157 @@ const EditarResolucion : React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    navigate('/dashboard/resoluciones/');
+    router.push('/dashboard/resoluciones/'); // Navegar a la lista de resoluciones
   };
 
-  const { idResolucion } = useParams();
-
-  const [modalOpen, setModalOpen] = useState(false);
-  const closeModal = () => setModalOpen(false);
-
-  interface Resolucion {
-    id: number;
-    nexpediente: string;
-    nresolucion: string;
-    tipo: string;
-    fecha_creacion: Date;
-    fecha: Date; // Aquí indicas que 'fecha' es de tipo Date
-    adjunto:string;
-    observaciones:string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
-  }
-
-  const [resolucion, setResolucion] = useState<Resolucion>();
+  const [resolucion, setResolucion] = useState<any>(null); // Cambia el tipo según sea necesario
   const [nroExpediente, setNroExpediente] = useState('');
   const [nroResolucion, setNroResolucion] = useState('');
   const [tipo, setTipo] = useState('');
   const [adjunto, setAdjunto] = useState('');
   const [fecha, setFecha] = useState<dayjs.Dayjs | null>(null);
-  const [fechaCarga, setFechaCarga] = useState<dayjs.Dayjs | null>(null);
   const [observaciones, setObservaciones] = useState('');
-  const [estado, setEstado] = useState('');
+  const [estado, setEstado] = useState<string>('0');
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`);
-        const resolucionData = response.data;
-        setResolucion(resolucionData);
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      if (idResolucion) { // Asegúrate de que idResolucion esté definido
+        try {
+          const response = await axios.get(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`);
+          setResolucion(response.data);
+          // Asignar valores a los campos del formulario
+          setNroExpediente(response.data.nexpediente);
+          setNroResolucion(response.data.nresolucion);
+          setTipo(response.data.tipo);
+          setAdjunto(response.data.adjunto);
+          setFecha(dayjs(response.data.fecha));
+          setObservaciones(response.data.observaciones);
+          setEstado(String(response.data.estado));
+        } catch (error) {
+          console.error('Error fetching data:', error);
+        }
       }
     };
-  
+
     fetchData();
   }, [idResolucion]);
-  
-  // Manejar la actualización del estado fuera del efecto
-  useEffect(() => {
-    if (resolucion) {
-      setNroExpediente(resolucion.nexpediente);
-      setNroResolucion(resolucion.nresolucion);
-      setTipo(resolucion.tipo);
-      setAdjunto(resolucion.adjunto);  
-      // Define el formato de las fechas recibidas
-      const formatoFecha = 'DD/MM/YYYY HH:mm:ss';
-  
-      // Parsear la fecha con el formato especificado
-      const fechaDayjs = dayjs(resolucion.fecha, formatoFecha);
-      if (fechaDayjs.isValid()) {
-        setFecha(fechaDayjs);
-      } else {
-        console.error('Fecha inválida para "fecha":', resolucion.fecha);
-      }
-  
-      const fechaCargaDayjs = dayjs(resolucion.fecha_creacion, formatoFecha);
-      if (fechaCargaDayjs.isValid()) {
-        setFechaCarga(fechaCargaDayjs);
-      } else {
-        console.error('Fecha inválida para "fecha_creacion":', resolucion.fecha_creacion);
-      }
-  
-      setEstado(String(resolucion.estado));
-      setObservaciones(resolucion.observaciones);
-    }
-  }, [resolucion]);
 
   const edicionResolucion = async () => {
-
-        const resolucionEditada = {
-      nexpediente: nroExpediente, // Puedes usar el operador de fusión nula (||) para manejar el caso en que sea nulo
+    const resolucionEditada = {
+      nexpediente: nroExpediente,
       nresolucion: nroResolucion,
       tipo: tipo || "",
-      adjunto: adjunto, // Puedes asignar el valor que corresponda
-      observaciones: observaciones, // Puedes asignar el valor que corresponda
-      fechadecarga: fechaCarga ? fechaCarga.toISOString() : null, // Convierte la fecha a formato ISO si existe
-      fecha: fecha ? fecha.toISOString() : null, // Convierte la fecha a formato ISO si existe
-      estado: estado, // Puedes asignar el valor que corresponde
+      adjunto: adjunto,
+      observaciones: observaciones,
+      fecha: fecha ? fecha.toISOString() : null,
+      estado: estado,
     };
 
-
     try {
-      const response = await axios.put(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`, resolucionEditada, {
+      await axios.put(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`, resolucionEditada, {
         headers: {
-          'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
+          'Content-Type': 'application/json',
         },
       });
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
-      handleOpenModal('Error','NO  se pudo realizar la acción.');
-
+      handleOpenModal('Error', 'NO se pudo realizar la acción.');
     }
-
-  }
+  };
 
   const eliminarResolucion = async () => {
-
-
-try {
-  const response = await axios.delete(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`,{
-    headers: {
-      'Content-Type': 'application/json', // Ajusta el tipo de contenido según sea necesario
-    },
-  });
-  handleOpenModal('Resolución Eliminada', 'La acción se realizó con éxito.');
-} catch (error) {
-  
-  handleOpenModal('Error','NO  se pudo realizar la acción.');
-
-}
-
-}
+    try {
+      await axios.delete(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      handleOpenModal('Resolución Eliminada', 'La acción se realizó con éxito.');
+    } catch (error) {
+      handleOpenModal('Error', 'NO se pudo realizar la acción.');
+    }
+  };
 
   return (
-    
-<Container maxWidth="lg">
-<Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-  <Typography variant="h4" gutterBottom>
-    Resoluciones
-  </Typography>
+    <Container maxWidth="lg">
+      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+        <Typography variant="h4" gutterBottom>
+          Editar Resolución
+        </Typography>
 
-  {/* Agrega controles de entrada y botones para los filtros */}
-  <Grid container spacing={2}>
-      <Grid item xs={12}>
-        <TextField
-          label="Nro Expediente"
-          value={nroExpediente}
-          onChange={(e) => setNroExpediente(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Nro Resolución"
-          value={nroResolucion}
-          onChange={(e) => setNroResolucion(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <FormControl fullWidth margin="none">
-          <InputLabel id="demo-simple-select-label">Tipo</InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={tipo}
-            label="Tipo"
-            onChange={(e) => setTipo(e.target.value)}
-          >
-            <MenuItem value={"Todos"}>Todos</MenuItem>
-            <MenuItem value={"Rector"}>Rector</MenuItem>
-            <MenuItem value={"Decano"}>Decano</MenuItem>
-            <MenuItem value={"Consejo_Superior"}>Consejo Superior</MenuItem>
-            <MenuItem value={"Consejo_Directivo"}>Consejo Directivo</MenuItem>
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Link Documento Adjunto"
-          value={adjunto}
-          onChange={(e) => setAdjunto(e.target.value)}
-          fullWidth
-        />
-      </Grid>
-      <Grid item xs={12}>
-      <FormControl fullWidth margin="none">
-          <InputLabel id="demo-simple-select-label">Estado </InputLabel>
-          <Select
-            labelId="demo-simple-select-label"
-            id="demo-simple-select"
-            value={estado}
-            label="Tipo"
-            onChange={(e) => setEstado(e.target.value)}
-          >
-            <MenuItem value={1}>1</MenuItem>
-            <MenuItem value={0}>0</MenuItem>
-          </Select>
-        </FormControl>
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <TextField
+              label="Nro Expediente"
+              value={nroExpediente}
+              onChange={(e) => setNroExpediente(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Nro Resolución"
+              value={nroResolucion}
+              onChange={(e) => setNroResolucion(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Tipo"
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Link Documento Adjunto"
+              value={adjunto}
+              onChange={(e) => setAdjunto(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormControl fullWidth>
+              <InputLabel>Estado</InputLabel>
+              <Select
+                value={estado}
+                onChange={(e) => setEstado(e.target.value)}
+              >
+                <MenuItem value={1}>Activo</MenuItem>
+                <MenuItem value={0}>Inactivo</MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Observaciones"
+              value={observaciones}
+              onChange={(e) => setObservaciones(e.target.value)}
+              fullWidth
+            />
+          </Grid>
+          <Grid item xs={12} marginBottom={2}>
+            <Button variant="contained" onClick={edicionResolucion}>
+              Editar
+            </Button>
+            <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" color="error" style={{ marginLeft: '8px' }}>
+              Eliminar
+            </Button>
+          </Grid>
         </Grid>
-      <Grid item xs={12} marginBottom={2}>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DatePicker
-        label="Fecha"
-        value={fecha}
-        onChange={(date) => {
-          if (date) {
-            const fechaSeleccionada = dayjs(date).utc();  // Usa .utc() para evitar problemas de zona horaria
-            setFecha(fechaSeleccionada);
-          }
-        }}
-      />
-      </LocalizationProvider>
-      </Grid>
-      <Grid item xs={12}>
-        <TextField
-          label="Observaciones"
-          value={observaciones}
-          onChange={(e) => setObservaciones(e.target.value)}
-          fullWidth
+        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
+        <ModalConfirmacion
+          open={confirmarEliminacion}
+          onClose={() => setConfirmarEliminacion(false)}
+          onConfirm={() => {
+            setConfirmarEliminacion(false);
+            eliminarResolucion();
+          }}
         />
-      </Grid>
-      <Grid item xs={12} marginBottom={2}>
-      <Grid>
-        
-      </Grid>
-        <Button variant="contained" onClick={edicionResolucion}>
-          Editar
-        </Button>
-        <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" style={{ marginLeft: '8px' }} color='error'>
-          Eliminar
-        </Button>
-        
-      </Grid>
-
-      {/* <TextField label="Fecha" value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)} />       */}
-    </Grid>
-    <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
-    <ModalConfirmacion
-        open={confirmarEliminacion}
-        onClose={() => setConfirmarEliminacion(false)}
-        onConfirm={() => {
-          setConfirmarEliminacion(false);
-          eliminarResolucion();
-        }}
-      />
-        
-</Paper>
-</Container>
+      </Paper>
+    </Container>
   );
 };
 

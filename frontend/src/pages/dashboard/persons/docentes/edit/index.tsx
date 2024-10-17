@@ -1,22 +1,18 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl } from '@mui/material';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router';
 
-// Habilita los plugins
-dayjs.extend(utc);
-dayjs.extend(timezone);
+// Define las props que aceptará el componente
+interface EditarDocenteProps {
+  id: string; // La prop id que se pasará al componente
+}
 
-const EditarDocente: React.FC = () => {
-  const navigate = useNavigate();
-  const { idPersona } = useParams();
-
+const EditarDocente: React.FC<EditarDocenteProps> = ({ id }) => {
+  const router = useRouter();
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
@@ -33,7 +29,7 @@ const EditarDocente: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    navigate('/dashboard/personas/docentes/');
+    router.push('/dashboard/personas/docentes/');
   };
 
   interface Docente {
@@ -45,20 +41,19 @@ const EditarDocente: React.FC = () => {
   const [docente, setDocente] = useState<Docente>();
   const [nombre, setNombre] = useState('');
   const [apellido, setApellido] = useState('');
-  const [dni, SetDni] = useState('');
+  const [dni, setDni] = useState('');
   const [observaciones, setObservaciones] = useState('');
   const [estado, setEstado] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/docente/${idPersona}/`);
-        console.log(response.data)
-        setPersona(response.data.persona)
+        const response = await axios.get(`http://127.0.0.1:8000/facet/docente/${id}/`);
+        setPersona(response.data.persona);
         const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/${response.data.persona}/`);
         setNombre(responsePers.data.nombre);
         setApellido(responsePers.data.apellido);
-        SetDni(responsePers.data.dni);
+        setDni(responsePers.data.dni);
         setDocente(response.data);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -66,7 +61,7 @@ const EditarDocente: React.FC = () => {
     };
 
     fetchData();
-  }, [idPersona]);
+  }, [id]);
 
   useEffect(() => {
     if (docente) {
@@ -83,7 +78,7 @@ const EditarDocente: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/docente/${idPersona}/`, docenteEditado, {
+      await axios.put(`http://127.0.0.1:8000/facet/docente/${id}/`, docenteEditado, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -91,13 +86,13 @@ const EditarDocente: React.FC = () => {
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
-      console.error(error)
+      console.error(error);
     }
   };
 
   const eliminarDocente = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/docente/${idPersona}/`, {
+      await axios.delete(`http://127.0.0.1:8000/facet/docente/${id}/`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -154,7 +149,7 @@ const EditarDocente: React.FC = () => {
             </Button>
           </Grid>
         </Grid>
-        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
+        <BasicModal open={modalVisible} onClose={handleCloseModal} title="Modal Title" content={modalMessage} onConfirm={fn} />
         <ModalConfirmacion
           open={confirmarEliminacion}
           onClose={() => setConfirmarEliminacion(false)}

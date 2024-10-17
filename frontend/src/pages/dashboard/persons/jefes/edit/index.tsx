@@ -1,27 +1,18 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
-import dayjs from 'dayjs';
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
+import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl } from '@mui/material';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
-// Habilita los plugins
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
-const EditarJefe: React.FC = () => {
-  const navigate = useNavigate();
-  const { idPersona } = useParams();
+const EditarJefe: React.FC<{ idPersona: string }> = ({ idPersona }) => {
+  const router = useRouter();
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
-  const [fn, setFn] = useState(() => () => {});
   const [persona, setPersona] = useState<number>(0);
 
   const handleOpenModal = (title: string, message: string) => {
@@ -33,7 +24,7 @@ const EditarJefe: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    navigate('/dashboard/personas/jefes/');
+    router.push('/dashboard/personas/jefes/'); // Navegar a la lista de jefes
   };
 
   interface Jefe {
@@ -53,8 +44,7 @@ const EditarJefe: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`http://127.0.0.1:8000/facet/jefe/${idPersona}/`);
-        console.log(response.data)
-        setPersona(response.data.persona)
+        setPersona(response.data.persona);
         const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/${response.data.persona.id}/`);
         setNombre(responsePers.data.nombre);
         setApellido(responsePers.data.apellido);
@@ -65,7 +55,9 @@ const EditarJefe: React.FC = () => {
       }
     };
 
-    fetchData();
+    if (idPersona) { // Verifica que idPersona esté definido
+      fetchData();
+    }
   }, [idPersona]);
 
   useEffect(() => {
@@ -91,7 +83,7 @@ const EditarJefe: React.FC = () => {
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
-      console.error(error)
+      console.error(error);
     }
   };
 
@@ -154,7 +146,7 @@ const EditarJefe: React.FC = () => {
             </Button>
           </Grid>
         </Grid>
-        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
+        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
         <ModalConfirmacion
           open={confirmarEliminacion}
           onClose={() => setConfirmarEliminacion(false)}

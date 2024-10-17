@@ -1,5 +1,5 @@
 import React from 'react';
-import {Route, Routes,Navigate, useLocation,BrowserRouter  as Router} from 'react-router-dom';
+import { useRouter } from 'next/router';
 import CrearPersona from './create';
 import ListaPersonas from './list';
 import EditarPersona from './edit';
@@ -8,23 +8,33 @@ import Docentes from './docentes';
 import NoDocentes from './noDocentes';
 
 const Personas = () => {
-  const h1Style = {
-    color: 'black',
+  const router = useRouter();
+  const { path } = router.query;
+
+  const renderContent = () => {
+    if (!path) return <ListaPersonas />; // Renderiza la lista de personas por defecto
+
+    // Verifica el path y renderiza el componente correspondiente
+    switch (path) {
+      case 'crear':
+        return <CrearPersona />;
+      case 'editar':
+        return <EditarPersona />;
+      case 'jefes':
+        return <Jefes />;
+      case 'docentes':
+        return <Docentes />;
+      case 'nodocentes':
+        return <NoDocentes />;
+      default:
+        return <ListaPersonas />;
+    }
   };
 
   return (
-
-      <Routes>
-    
-      <Route path="/*" element={<ListaPersonas/>}/>
-      <Route path="crear/*" element={<CrearPersona/>}/>
-      <Route path="editar/:idPersona" Component={EditarPersona}/>
-      <Route path="jefes/*" element={<Jefes/>}/>
-      <Route path="docentes/*" element={<Docentes/>}/>
-      <Route path="nodocentes/*" element={<NoDocentes/>}/>
-
-      </Routes>
-      
+    <div>
+      {renderContent()}
+    </div>
   );
 };
 

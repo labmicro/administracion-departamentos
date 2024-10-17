@@ -2,28 +2,15 @@ import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
 import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import BasicModal from '@/utils/modal';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 const CrearNoDocente = () => {
-  const navigate = useNavigate();
-
-  interface Persona {
-    id: number;
-    nombre: string;
-    apellido: string;
-    telefono: string;
-    dni: string;
-    estado: 0 | 1;
-    email: string;
-    interno: string;
-    legajo: string;
-  }
-
+  const router = useRouter();
   const [idPersona, setIdPersona] = useState<number>(0);
-  const [personas, setPersonas] = useState<Persona[]>([]);
-  const [apellido, SetApellido] = useState('');
-  const [dni, SetDni] = useState('');
+  const [personas, setPersonas] = useState<any[]>([]); // Cambia el tipo según sea necesario
+  const [apellido, setApellido] = useState('');
+  const [dni, setDni] = useState('');
   const [filtroPersonas, setFiltroPersonas] = useState('');
   const [openPersona, setOpenPersona] = useState(false);
   const [nombre, setNombre] = useState('');
@@ -47,7 +34,7 @@ const CrearNoDocente = () => {
   };
 
   const handleConfirmModal = () => {
-    navigate('/dashboard/personas/nodocentes/');
+    router.push('/dashboard/personas/nodocentes/'); // Cambia a la ruta de lista de no docentes
   };
 
   const handleOpenPersona = () => {
@@ -137,18 +124,18 @@ const CrearNoDocente = () => {
                 fullWidth
               />
 
-              {handleFilterPersonas(filtroPersonas).map((persona) => (
-                <div key={persona.id}>
+              {handleFilterPersonas(filtroPersonas).map((personafilter) => (
+                <div key={personafilter.id}>
                   <Button
                     onClick={() => {
-                      setIdPersona(persona.id);
-                      SetApellido(persona.apellido);
-                      SetDni(persona.dni);
-                      setNombre(persona.nombre);
+                      setIdPersona(personafilter.id);
+                      setApellido(personafilter.apellido);
+                      setDni(personafilter.dni);
+                      setNombre(personafilter.nombre);
                     }}
-                    style={{ backgroundColor: persona.id === idPersona ? '#4caf50' : 'inherit', color: persona.id === idPersona ? 'white' : 'inherit' }}
+                    style={{ backgroundColor: personafilter.id === idPersona ? '#4caf50' : 'inherit', color: personafilter.id === idPersona ? 'white' : 'inherit' }}
                   >
-                    DNI {persona.dni} - {persona.apellido} {persona.nombre} - Legajo {persona.legajo}
+                    DNI {personafilter.dni} - {personafilter.apellido} {personafilter.nombre} - Legajo {personafilter.legajo}
                   </Button>
                 </div>
               ))}

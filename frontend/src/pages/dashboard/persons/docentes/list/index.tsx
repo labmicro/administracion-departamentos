@@ -4,9 +4,9 @@ import axios from 'axios';
 import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, FormControl, InputLabel, Select, MenuItem, Grid } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import Link from 'next/link';
 
 const ListaDocentes = () => {
   const h1Style = {
@@ -23,7 +23,6 @@ const ListaDocentes = () => {
     email: string;
     interno: string;
     legajo: string;
-    // Otros campos según sea necesario
   }
 
   interface Docente {
@@ -31,16 +30,15 @@ const ListaDocentes = () => {
     persona: number;
     observaciones: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
   }
 
-  const [Docentes, setDocentes] = useState<Docente[]>([]);
+  const [docentes, setDocentes] = useState<Docente[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [filtroDni, setFiltroDni] = useState('');
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroApellido, setFiltroApellido] = useState('');
   const [filtroLegajo, setFiltroLegajo] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Agregado
+  const [filtroEstado, setFiltroEstado] = useState<string | number>(''); 
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/docente/');
@@ -91,7 +89,7 @@ const ListaDocentes = () => {
   };
 
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(Docentes.map((docente) => {
+    const ws = XLSX.utils.json_to_sheet(docentes.map((docente) => {
       const persona = personas.find((p) => p.id === docente.persona);
       return {
         Nombre: persona?.nombre || '',
@@ -113,7 +111,7 @@ const ListaDocentes = () => {
   return (
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/personas/docentes/crear">
+        <Link href="/dashboard/personas/docentes/crear">
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Docente
           </Button>
@@ -215,11 +213,11 @@ const ListaDocentes = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {Docentes.map((docente) => {
+              {docentes.map((docente) => {
                 const persona = personas.find((p) => p.id === docente.persona);
 
                 if (!persona) {
-                  return null; // Si la persona no se encuentra, omite este Docente
+                  return null; // Si la persona no se encuentra, omite este docente
                 }
 
                 return (
@@ -231,7 +229,7 @@ const ListaDocentes = () => {
                     <TableCell>{docente.observaciones}</TableCell>
                     <TableCell>{docente.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
                     <TableCell>
-                      <Link to={`/dashboard/personas/docentes/editar/${docente.id}`}>
+                      <Link href={`/dashboard/personas/docentes/editar/${docente.id}`}>
                         <EditIcon />
                       </Link>
                     </TableCell>

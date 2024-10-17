@@ -6,9 +6,10 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { Link } from 'react-router-dom';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 const ListaNoDocentes = () => {
+  const router = useRouter(); // Usamos useRouter para manejar la navegación
   const h1Style = {
     color: 'black',
   };
@@ -113,11 +114,9 @@ const ListaNoDocentes = () => {
   return (
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/personas/nodocentes/crear">
-          <Button variant="contained" endIcon={<AddIcon />}>
-            Agregar No Docente
-          </Button>
-        </Link>
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/personas/nodocentes/crear')}>
+          Agregar No Docente
+        </Button>
         <Button
           variant="contained"
           color="secondary"
@@ -229,11 +228,11 @@ const ListaNoDocentes = () => {
                     <TableCell>{persona.dni}</TableCell>
                     <TableCell>{persona.legajo}</TableCell>
                     <TableCell>{NoDocente.observaciones}</TableCell>
-                    <TableCell>{NoDocente.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                    <TableCell>{NoDocente.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
                     <TableCell>
-                      <Link to={`/dashboard/personas/nodocentes/editar/${NoDocente.id}`}>
+                      <Button onClick={() => router.push(`/dashboard/personas/nodocentes/editar/${NoDocente.id}`)}>
                         <EditIcon />
-                      </Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );

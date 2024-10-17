@@ -4,11 +4,13 @@ import axios from 'axios';
 import { Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography, Paper, TextField, Button, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
-import { Link } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 const ListaJefes = () => {
+  const router = useRouter(); // Usamos useRouter para manejar la navegación
+
   const h1Style = {
     color: 'black',
   };
@@ -23,7 +25,6 @@ const ListaJefes = () => {
     email: string;
     interno: string;
     legajo: string;
-    // Otros campos según sea necesario
   }
 
   interface Jefe {
@@ -40,7 +41,6 @@ const ListaJefes = () => {
   const [filtroApellido, setFiltroApellido] = useState('');
   const [filtroLegajo, setFiltroLegajo] = useState('');
   const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Añadido
-  console.log("festadoi",filtroEstado)
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe/');
@@ -110,11 +110,9 @@ const ListaJefes = () => {
   return (
     <Container maxWidth="lg">
       <div>
-        <Link to="/dashboard/personas/jefes/crear">
-          <Button variant="contained" endIcon={<AddIcon />}>
-            Agregar Jefe
-          </Button>
-        </Link>
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/personas/jefes/crear')}>
+          Agregar Jefe
+        </Button>
         <Button
           variant="contained"
           color="secondary"
@@ -221,9 +219,9 @@ const ListaJefes = () => {
                   <TableCell>{jefe.observaciones}</TableCell>
                   <TableCell>{jefe.estado}</TableCell>
                   <TableCell>
-                    <Link to={`/dashboard/personas/jefes/editar/${jefe.id}`}>
+                    <Button onClick={() => router.push(`/dashboard/personas/jefes/editar/${jefe.id}`)}>
                       <EditIcon />
-                    </Link>
+                    </Button>
                   </TableCell>
                 </TableRow>
               ))}

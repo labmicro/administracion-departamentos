@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
 import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
 import BasicModal from '@/utils/modal';
 import dayjs from 'dayjs';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 
 const CrearJefe = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   interface Persona {
     id: number;
@@ -19,14 +19,14 @@ const CrearJefe = () => {
     email: string;
     interno: string;
     legajo: string;
-    fecha_creacion:string;
+    fecha_creacion: string;
   }
+
   interface Jefe {
-    id:number;
+    id: number;
     persona: Persona;
     observaciones: string;
     estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
   }
 
   const [persona, setPersona] = useState<Persona>();
@@ -56,7 +56,7 @@ const CrearJefe = () => {
   };
 
   const handleConfirmModal = () => {
-    navigate('/dashboard/personas/jefes/');
+    router.push('/dashboard/personas/jefes/'); // Navega a la lista de jefes
   };
 
   const handleOpenPersona = () => {
@@ -108,7 +108,6 @@ const CrearJefe = () => {
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
         try {
-          console.log(nuevoJefe)
           await axios.post('http://127.0.0.1:8000/facet/jefe/', nuevoJefe, {
             headers: {
               'Content-Type': 'application/json',
@@ -156,7 +155,7 @@ const CrearJefe = () => {
                       SetDni(personafilter.dni);
                       setNombre(personafilter.nombre);
                     }}
-                    style={{ backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit', color: personafilter.id === persona?.id? 'white' : 'inherit' }}
+                    style={{ backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit', color: personafilter.id === persona?.id ? 'white' : 'inherit' }}
                   >
                     DNI {personafilter.dni} - {personafilter.apellido} {personafilter.nombre} - Legajo {personafilter.legajo}
                   </Button>
