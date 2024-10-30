@@ -36,13 +36,13 @@ const ItemsMenu = () => {
         </ListItemIcon>
         <ListItemText primary="Resoluciones" />
       </ListItemButton>
-      <ListItemButton onClick={() => handleNavigation('/dashboard/personas')}>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/persons')}>
         <ListItemIcon>
           <PeopleIcon />
         </ListItemIcon>
         <ListItemText primary="Personas" />
       </ListItemButton>
-      <ListItemButton onClick={() => handleNavigation('/dashboard/departamentos')}>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/departments')}>
         <ListItemIcon>
           <ViewComfyIcon />
         </ListItemIcon>
@@ -54,13 +54,13 @@ const ItemsMenu = () => {
         </ListItemIcon>
         <ListItemText primary="Area" />
       </ListItemButton>
-      <ListItemButton onClick={() => handleNavigation('/dashboard/asignaturas')}>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/asignatura')}>
         <ListItemIcon>
           <NoteAltIcon />
         </ListItemIcon>
         <ListItemText primary="Asignaturas" />
       </ListItemButton>
-      <ListItemButton onClick={() => handleNavigation('/dashboard/carreras')}>
+      <ListItemButton onClick={() => handleNavigation('/dashboard/careers')}>
         <ListItemIcon>
           <SchoolIcon />
         </ListItemIcon>
@@ -76,30 +76,5 @@ const ItemsMenu = () => {
   );
 };
 
-export const secondaryListItems = (
-  <React.Fragment>
-    <ListSubheader component="div" inset>
-      Reportes Guardados
-    </ListSubheader>
-    <ListItemButton>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Reporte 1" />
-    </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Reporte 2" />
-    </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Reporte 3" />
-    </ListItemButton>
-  </React.Fragment>
-);
 
 export default ItemsMenu;

@@ -6,7 +6,8 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import { useRouter } from 'next/router'; 
+import DashboardMenu from '../../../../dashboard';
 
 const ListaNoDocentes = () => {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
@@ -112,6 +113,7 @@ const ListaNoDocentes = () => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
         <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/personas/nodocentes/crear')}>
@@ -270,6 +272,7 @@ const ListaNoDocentes = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

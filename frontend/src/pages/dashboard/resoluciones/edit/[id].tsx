@@ -2,42 +2,32 @@ import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
 import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl } from '@mui/material';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
+import { useRouter } from 'next/router';
+import DashboardMenu from '../..';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-interface EditarResolucionProps {
-  idResolucion: string; // Asegúrate de que este tipo se ajuste a tu lógica
-}
+const EditarResolucion = () => {
+  const router = useRouter();
+  const { id: idResolucion } = router.query;
 
-const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
+  const [redirectAfterClose, setRedirectAfterClose] = useState(false); // Controla la redirección
 
-  const handleOpenModal = (title: string, message: string) => {
-    setModalTitle(title);
-    setModalMessage(message);
-    setModalVisible(true);
-  };
-
-  const handleCloseModal = () => {
-    setModalVisible(false);
-    setModalMessage('');
-  };
-
-  const [resolucion, setResolucion] = useState<any>(null);
   const [nroExpediente, setNroExpediente] = useState('');
   const [nroResolucion, setNroResolucion] = useState('');
   const [tipo, setTipo] = useState('');
   const [adjunto, setAdjunto] = useState('');
-  const [fecha, setFecha] = useState<dayjs.Dayjs | null>(null);
+  const [fecha, setFecha] = useState<Dayjs | null>(null);
   const [observaciones, setObservaciones] = useState('');
   const [estado, setEstado] = useState<string>('0');
 
@@ -46,12 +36,16 @@ const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => 
       if (idResolucion) {
         try {
           const response = await axios.get(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`);
-          setResolucion(response.data);
+          console.log(response);
+
           setNroExpediente(response.data.nexpediente);
           setNroResolucion(response.data.nresolucion);
           setTipo(response.data.tipo);
           setAdjunto(response.data.adjunto);
-          setFecha(dayjs(response.data.fecha));
+
+          const parsedFecha = dayjs(response.data.fecha, "DD/MM/YYYY HH:mm:ss");
+          setFecha(parsedFecha.isValid() ? parsedFecha : null);
+
           setObservaciones(response.data.observaciones);
           setEstado(String(response.data.estado));
         } catch (error) {
@@ -70,7 +64,7 @@ const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => 
       tipo: tipo || "",
       adjunto: adjunto,
       observaciones: observaciones,
-      fecha: fecha ? fecha.toISOString() : null,
+      fecha: fecha && fecha.isValid() ? fecha.toISOString() : "",
       estado: estado,
     };
 
@@ -80,9 +74,26 @@ const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => 
           'Content-Type': 'application/json',
         },
       });
+      setRedirectAfterClose(true); // Activa la redirección después de cerrar el modal
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
+      console.log(error);
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
+    }
+  };
+
+  const handleOpenModal = (title: string, message: string) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setModalMessage('');
+    if (redirectAfterClose) {
+      router.push('/dashboard/resoluciones/');
+      setRedirectAfterClose(false); // Restablece la bandera
     }
   };
 
@@ -93,6 +104,7 @@ const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => 
           'Content-Type': 'application/json',
         },
       });
+      setRedirectAfterClose(true); // Activa la redirección después de cerrar el modal
       handleOpenModal('Resolución Eliminada', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
@@ -100,6 +112,7 @@ const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => 
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -179,6 +192,7 @@ const EditarResolucion: React.FC<EditarResolucionProps> = ({ idResolucion }) => 
         />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

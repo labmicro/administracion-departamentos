@@ -7,7 +7,8 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import { useRouter } from 'next/router'; 
+import DashboardMenu from '../../../../dashboard';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -101,6 +102,7 @@ const EditarNoDocente: React.FC = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -157,6 +159,7 @@ const EditarNoDocente: React.FC = () => {
         />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

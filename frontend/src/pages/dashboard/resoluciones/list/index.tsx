@@ -22,7 +22,7 @@ import {
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
-import dayjs from 'dayjs'; // Asegúrate de tener instalada esta dependencia
+import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import TextSnippetIcon from '@mui/icons-material/TextSnippet';
@@ -33,9 +33,9 @@ import Tooltip from '@mui/material/Tooltip';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Swal from 'sweetalert2';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import { useRouter } from 'next/router';
+import DashboardMenu from '../..';
 
-// Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
@@ -45,12 +45,11 @@ const ListaResoluciones = () => {
     nexpediente: string;
     nresolucion: string;
     tipo: string;
-    fecha_creacion: Date;
-    fecha: Date; // Aquí indicas que 'fecha' es de tipo Date
+    fecha_creacion: string;
+    fecha: string;
     adjunto: string;
     observaciones: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-    // Otros campos según sea necesario
+    estado: 0 | 1;
   }
 
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
@@ -58,7 +57,7 @@ const ListaResoluciones = () => {
   const [filtroNroResolucion, setFiltroNroResolucion] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('');
   const [filtroFecha, setFiltroFecha] = useState<dayjs.Dayjs | null>(null);
-  const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Agregado
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
   const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/resolucion/');
@@ -66,7 +65,7 @@ const ListaResoluciones = () => {
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
 
-  const router = useRouter(); // Usamos useRouter para manejar la navegación
+  const router = useRouter();
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -81,7 +80,6 @@ const ListaResoluciones = () => {
       setTotalItems(response.data.count);
       setCurrentPage(1);
     } catch (error) {
-      // Muestra un mensaje de error con SweetAlert2
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -117,8 +115,6 @@ const ListaResoluciones = () => {
     setCurrentUrl(url);
   };
 
-  const totalPages = Math.ceil(totalItems / pageSize);
-
   const descargarExcel = async () => {
     try {
       let allResoluciones: Resolucion[] = [];
@@ -138,7 +134,7 @@ const ListaResoluciones = () => {
         params.append('nresolucion__icontains', filtroNroResolucion);
       }
       if (filtroFecha) {
-        params.append('fecha__date', filtroFecha.format('YYYY-MM-DD')); // Formato ISO8601 para la fecha exacta
+        params.append('fecha__date', filtroFecha.format('YYYY-MM-DD'));
       }
       url += params.toString();
 
@@ -157,7 +153,6 @@ const ListaResoluciones = () => {
       const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
       saveAs(excelBlob, 'resoluciones.xlsx');
     } catch (error) {
-      // Muestra un mensaje de error con SweetAlert2
       Swal.fire({
         icon: 'error',
         title: 'Error al descargar',
@@ -166,10 +161,13 @@ const ListaResoluciones = () => {
     }
   };
 
+  const totalPages = Math.ceil(totalItems / pageSize);
+
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Button variant="contained" onClick={() => router.push('/dashboard/resoluciones/crear')} endIcon={<AddIcon />}>
+        <Button variant="contained" onClick={() => router.push('/dashboard/resoluciones/create')} endIcon={<AddIcon />}>
           Agregar Resolución
         </Button>
         <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
@@ -182,7 +180,6 @@ const ListaResoluciones = () => {
           Resoluciones
         </Typography>
 
-        {/* Agrega controles de entrada y botones para los filtros */}
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <TextField
@@ -225,7 +222,7 @@ const ListaResoluciones = () => {
                 value={filtroFecha}
                 onChange={(date) => {
                   if (date) {
-                    const fechaSeleccionada = dayjs(date).utc(); // Usa .utc() para evitar problemas de zona horaria
+                    const fechaSeleccionada = dayjs(date).utc();
                     setFiltroFecha(fechaSeleccionada);
                   }
                 }}
@@ -243,43 +240,22 @@ const ListaResoluciones = () => {
           <Table>
             <TableHead>
               <TableRow className='header-row'>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Nro Expediente</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Nro Resolución</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Tipo</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Fecha</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Carga</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Estado</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Adjunto</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Observaciones</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                </TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Nro Expediente</Typography></TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Nro Resolución</Typography></TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Tipo</Typography></TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Fecha</Typography></TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Carga</Typography></TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Estado</Typography></TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Adjunto</Typography></TableCell>
+                <TableCell className='header-cell'><Typography variant="subtitle1">Observaciones</Typography></TableCell>
+                <TableCell className='header-cell'></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {resoluciones.map((resolucion) => (
                 <TableRow key={resolucion.id}>
-                  <TableCell>
-                    <Typography variant="body1">{resolucion.nexpediente}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1">{resolucion.nresolucion}</Typography>
-                  </TableCell>
+                  <TableCell><Typography variant="body1">{resolucion.nexpediente}</Typography></TableCell>
+                  <TableCell><Typography variant="body1">{resolucion.nresolucion}</Typography></TableCell>
                   <TableCell>
                     <Typography variant="body1">
                       {resolucion.tipo === 'Consejo_Superior' ? 'Consejo Superior' :
@@ -288,17 +264,19 @@ const ListaResoluciones = () => {
                   </TableCell>
                   <TableCell>
                     <Typography variant="body1">
-                      {resolucion.fecha ? dayjs(resolucion.fecha).format('DD/MM/YYYY') : 'No disponible'}
+                      {dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
+                        ? dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").format('DD/MM/YYYY')
+                        : 'No disponible'}
                     </Typography>
                   </TableCell>
                   <TableCell>
                     <Typography variant="body1">
-                      {resolucion.fecha_creacion ? dayjs(resolucion.fecha_creacion).format('DD/MM/YYYY') : 'No disponible'}
+                      {dayjs(resolucion.fecha_creacion, "DD/MM/YYYY HH:mm:ss").isValid()
+                        ? dayjs(resolucion.fecha_creacion, "DD/MM/YYYY").format('DD/MM/YYYY')
+                        : 'No disponible'}
                     </Typography>
                   </TableCell>
-                  <TableCell>
-                    <Typography variant="body1">{resolucion.estado}</Typography>
-                  </TableCell>
+                  <TableCell><Typography variant="body1">{resolucion.estado}</Typography></TableCell>
                   <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     <a href={resolucion.adjunto} target="_blank" rel="noopener noreferrer" style={{ display: 'inline-block', lineHeight: '0' }}>
                       <TextSnippetIcon />
@@ -310,7 +288,7 @@ const ListaResoluciones = () => {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    <Button onClick={() => router.push(`/dashboard/resoluciones/editar/${resolucion.id}`)}>
+                    <Button onClick={() => router.push(`/dashboard/resoluciones/edit/${resolucion.id}`)}>
                       <EditIcon />
                     </Button>
                   </TableCell>
@@ -349,6 +327,7 @@ const ListaResoluciones = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

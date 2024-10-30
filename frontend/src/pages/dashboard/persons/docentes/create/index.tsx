@@ -1,10 +1,34 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 import BasicModal from '@/utils/modal';
+import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import DashboardMenu from '../../../../dashboard';
 
 const CrearDocente = () => {
+  const router = useRouter();
   // Define los estados necesarios
   interface Persona {
     id: number;
@@ -18,10 +42,10 @@ const CrearDocente = () => {
     legajo: string;
   }
 
-  const [idPersona, setIdPersona] = useState<number>(0);
+  const [persona, setPersona] = useState<Persona>();
   const [personas, setPersonas] = useState<Persona[]>([]);
-  const [apellido, setApellido] = useState('');
-  const [dni, setDni] = useState('');
+  const [apellido, SetApellido] = useState('');
+  const [dni, SetDni] = useState('');
   const [filtroPersonas, setFiltroPersonas] = useState('');
   const [openPersona, setOpenPersona] = useState(false);
   const [nombre, setNombre] = useState('');
@@ -69,6 +93,10 @@ const CrearDocente = () => {
     handleClose();
   };
 
+  const handleConfirmModal = () => {
+    router.push('/dashboard/persons/docentes/'); // Navega a la lista de jefes
+  };
+
   const handleFilterPersonas = (filtro: string) => {
     return personas.filter((persona) =>
       persona.dni.includes(filtro) ||
@@ -80,13 +108,13 @@ const CrearDocente = () => {
 
   const crearNuevoDocenteDepartamento = async () => {
     const nuevoDocente = {
-      persona: idPersona,
+      persona: persona?.id,
       observaciones: observaciones,
       estado: estado as 0 | 1,
     };
 
     try {
-      const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/docente/${idPersona}/`);
+      const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/docente/${persona?.id}/`);
       if (existeRegistro.data) {
         handleOpenModal('Error', 'Ya existe docente departamento', () => {});
       }
@@ -98,7 +126,7 @@ const CrearDocente = () => {
               'Content-Type': 'application/json',
             },
           });
-          handleOpenModal('Bien', 'Se creó el docente con éxito', () => {});
+          handleOpenModal('Bien', 'Se creó el docente con éxito', handleConfirmModal);
         } catch (postError) {
           console.error(postError);
           handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
@@ -111,6 +139,7 @@ const CrearDocente = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -124,33 +153,68 @@ const CrearDocente = () => {
             </Button>
 
             <Dialog open={openPersona} onClose={handleClose} maxWidth="md" fullWidth>
-              <TextField
-                label="Buscar por DNI, Apellido o Legajo"
-                value={filtroPersonas}
-                onChange={(e) => setFiltroPersonas(e.target.value)}
-                fullWidth
-              />
+  <DialogTitle>Seleccionar Persona</DialogTitle>
+  <DialogContent>
+    <TextField
+      label="Buscar por DNI, Apellido o Legajo"
+      value={filtroPersonas}
+      onChange={(e) => setFiltroPersonas(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
 
-              {handleFilterPersonas(filtroPersonas).map((persona) => (
-                <div key={persona.id}>
-                  <Button
-                    onClick={() => {
-                      setIdPersona(persona.id);
-                      setApellido(persona.apellido);
-                      setDni(persona.dni);
-                      setNombre(persona.nombre);
-                    }}
-                    style={{ backgroundColor: persona.id === idPersona ? '#4caf50' : 'inherit', color: persona.id === idPersona ? 'white' : 'inherit' }}
-                  >
-                    DNI {persona.dni} - {persona.apellido} {persona.nombre} - Legajo {persona.legajo}
-                  </Button>
-                </div>
-              ))}
-
-              <Button variant="contained" onClick={handleConfirmSelection} style={{ marginTop: 'auto', marginBottom: '10px', position: 'sticky', bottom: 0 }}>
-                Confirmar Selección
-              </Button>
-            </Dialog>
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>DNI</TableCell>
+            <TableCell>Apellido</TableCell>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Legajo</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {handleFilterPersonas(filtroPersonas).map((personafilter) => (
+            <TableRow key={personafilter.id}>
+              <TableCell>{personafilter.dni}</TableCell>
+              <TableCell>{personafilter.apellido}</TableCell>
+              <TableCell>{personafilter.nombre}</TableCell>
+              <TableCell>{personafilter.legajo}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setPersona(personafilter);
+                    SetApellido(personafilter.apellido);
+                    SetDni(personafilter.dni);
+                    setNombre(personafilter.nombre);
+                  }}
+                  style={{
+                    backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit',
+                    color: personafilter.id === persona?.id ? 'white' : 'inherit',
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleClose}>Cerrar</Button>
+    <Button
+      variant="contained"
+      onClick={handleConfirmSelection}
+      style={{ marginTop: '10px' }}
+    >
+      Confirmar Selección
+    </Button>
+  </DialogActions>
+</Dialog>
           </Grid>
 
           <Grid item xs={12}>
@@ -186,6 +250,7 @@ const CrearDocente = () => {
         <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

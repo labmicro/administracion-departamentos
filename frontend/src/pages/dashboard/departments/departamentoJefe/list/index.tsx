@@ -8,6 +8,8 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import Link from 'next/link'; // Cambiado para usar Link de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import DashboardMenu from '../../../../dashboard';
+
 
 const ListaDepartamentosJefe = () => {
   const h1Style = {
@@ -196,9 +198,10 @@ const ListaDepartamentosJefe = () => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Link href="/dashboard/departamentos/jefes/crear" passHref>
+        <Link href="/dashboard/departments/departamentoJefe/create" passHref>
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Jefe
           </Button>
@@ -319,7 +322,7 @@ const ListaDepartamentosJefe = () => {
                   </TableCell>
                   <TableCell>
                     <Tooltip title="Editar">
-                      <Link href={`/dashboard/departamentos/jefes/editar/${deptoJefe.id}`} passHref>
+                      <Link href={`/dashboard/departments/jefes/editar/${deptoJefe.id}`} passHref>
                         <EditIcon />
                       </Link>
                     </Tooltip>
@@ -359,6 +362,7 @@ const ListaDepartamentosJefe = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

@@ -1,3 +1,5 @@
+// src/pages/dashboard/index.tsx
+
 import * as React from 'react';
 import { styled, createTheme, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -7,15 +9,18 @@ import MuiAppBar, { AppBarProps as MuiAppBarProps } from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import List from '@mui/material/List';
 import Typography from '@mui/material/Typography';
-import Divider from '@mui/material/Divider';
 import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
-import Container from '@mui/material/Container';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-import ItemsMenu, { secondaryListItems } from './components/itemsMenu';
-import Link from 'next/link'; // Importa Link de Next.js
+import ItemsMenu from './components/itemsMenu'; // Asegúrate de que la ruta sea correcta
+import { Container } from '@mui/material';
+
+// Define las propiedades del componente
+interface DashboardMenuProps {
+  children: React.ReactNode; // Asegúrate de incluir children aquí
+}
 
 const drawerWidth: number = 240;
 
@@ -69,7 +74,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 const defaultTheme = createTheme();
 
-export default function DashboardMenu() {
+const DashboardMenu: React.FC<DashboardMenuProps> = ({ children }) => {
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -101,32 +106,19 @@ export default function DashboardMenu() {
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>
-          <Toolbar
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'flex-end',
-              px: [1],
-            }}
-          >
+          <Toolbar sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', px: [1] }}>
             <IconButton onClick={toggleDrawer}>
               <ChevronLeftIcon />
             </IconButton>
           </Toolbar>
-          <Divider />
           <List component="nav">
-            <ItemsMenu />
-            <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
+            <ItemsMenu /> {/* Aquí se renderiza el menú lateral */}
           </List>
         </Drawer>
         <Box
           component="main"
           sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
+            backgroundColor: (theme) => theme.palette.mode === 'light' ? theme.palette.grey[100] : theme.palette.grey[900],
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
@@ -134,19 +126,12 @@ export default function DashboardMenu() {
         >
           <Toolbar />
           <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-            {/* Rutas de Next.js usando Link */}
-            <Link href="/home">Home</Link>
-            <Link href="/carreras">Carreras</Link>
-            <Link href="/departamentos">Departamentos</Link>
-            <Link href="/micuenta">Mi Cuenta</Link>
-            <Link href="/personas">Personas</Link>
-            <Link href="/reportes">Reportes</Link>
-            <Link href="/areas">Áreas</Link>
-            <Link href="/asignaturas">Asignaturas</Link>
-            <Link href="/resoluciones">Resoluciones</Link>
+            {children} {/* Aquí se renderiza el contenido basado en la ruta actual */}
           </Container>
         </Box>
       </Box>
     </ThemeProvider>
   );
-}
+};
+
+export default DashboardMenu;

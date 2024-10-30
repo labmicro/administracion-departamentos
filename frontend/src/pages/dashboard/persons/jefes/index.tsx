@@ -1,24 +1,20 @@
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
-import ListaJefe from './list';
+import React from 'react';
+import { useRouter } from 'next/router';
 import CrearJefe from './create';
-import EditarJefe from './edit';
+import ListaJefe from './list';
 
 const Jefes = () => {
-  const router = useRouter(); // Usamos useRouter para manejar la navegación
-  const { idPersona } = router.query; // Obtiene el id de la persona de la ruta
+  const router = useRouter();
 
   const renderContent = () => {
-    // Verifica si idPersona es un string antes de pasarlo
-    if (typeof idPersona === 'string') {
-      return <EditarJefe idPersona={idPersona} />; // Renderiza EditarJefe si hay un id
-    } else if (router.pathname.endsWith('/crear')) {
-      return <CrearJefe />; // Renderiza CrearJefe si el path es de crear
+    if (router.pathname.endsWith('/crear')) {
+      return <CrearJefe />;
     } else {
-      return <ListaJefe />; // Renderiza la lista por defecto
+      return <ListaJefe />;
     }
   };
 
-  return <>{renderContent()}</>; // Renderiza el contenido correspondiente
+  return <>{renderContent()}</>;
 };
 
 export default Jefes;

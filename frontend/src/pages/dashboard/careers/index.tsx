@@ -8,10 +8,6 @@ const Carreras = () => {
 
   return (
     <div>
-      <h1 style={{ color: 'black' }}>Carreras</h1>
-      <button onClick={() => router.push('/dashboard/careers/create')}>
-        Agregar Carrera
-      </button>
       <ListaCarreras />
     </div>
   );

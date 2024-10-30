@@ -27,7 +27,8 @@ import dayjs from 'dayjs'; // Asegúrate de tener instalada esta dependencia
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
-import { useRouter } from 'next/router'; // Cambiado de react-router-dom a next/router
+import { useRouter } from 'next/router';
+import DashboardMenu from '../../../dashboard';
 import Swal from 'sweetalert2';
 
 // Habilita los plugins
@@ -122,6 +123,7 @@ const CrearArea = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -181,6 +183,7 @@ const CrearArea = () => {
         <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

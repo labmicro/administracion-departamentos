@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router';
+import DashboardMenu from '../../../dashboard';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -62,7 +63,7 @@ const CrearPersona = () => {
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/personas/');
+    router.push('/dashboard/persons/');
   };
 
   const crearNuevaPersona = async () => {
@@ -91,6 +92,7 @@ const CrearPersona = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -179,6 +181,7 @@ const CrearPersona = () => {
         <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

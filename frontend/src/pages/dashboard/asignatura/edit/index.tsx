@@ -10,6 +10,7 @@ import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useParams } from 'next/navigation'; // Cambiado para Next.js
 import { useRouter } from 'next/router'; // Importa useRouter
 import Swal from "sweetalert2";
+import DashboardMenu from '../../../dashboard';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -124,6 +125,7 @@ const EditarAsignatura: React.FC = () => {
   }
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -212,6 +214,7 @@ const EditarAsignatura: React.FC = () => {
         />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

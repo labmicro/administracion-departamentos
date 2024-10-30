@@ -1,13 +1,28 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Typography, Paper, TextField, Button, Grid, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from '@mui/material';
+import {
+  Container,
+  Typography,
+  Paper,
+  TextField,
+  Button,
+  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import { useRouter } from 'next/router'; // Importamos useRouter de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Swal from "sweetalert2";
+import DashboardMenu from '../../../dashboard';
+import Link from 'next/link'; // Asegúrate de importar Link de Next.js
 
 interface Area {
   id: number;
@@ -104,104 +119,110 @@ const ListaAreas = () => {
   };
 
   return (
-    <Container maxWidth="lg">
-      <div>
-        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/areas/crear')}>
-          Agregar Area
-        </Button>
-        <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
-          Descargar Excel
-        </Button>
-      </div>
-
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <Typography variant="h4" gutterBottom>
-          Area
-        </Typography>
-
-        <Grid container spacing={2} marginBottom={2}>
-          <Grid item xs={4}>
-            <TextField
-              label="Nombre"
-              value={filtroNombre}
-              onChange={(e) => setFiltroNombre(e.target.value)}
-              fullWidth
-            />
-          </Grid>
-          <Grid item xs={4} marginBottom={2}>
-            <Button variant="contained" onClick={filtrarAreas}>
-              Filtrar
+    <DashboardMenu>
+      <Container maxWidth="lg">
+        <div>
+          <Link href="/dashboard/areas/create" passHref>
+            <Button variant="contained" endIcon={<AddIcon />}>
+              Agregar Area
             </Button>
-          </Grid>
-        </Grid>
-
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow className='header-row'>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Nombre</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Departamento</Typography>
-                </TableCell>
-                <TableCell className='header-cell'>
-                  <Typography variant="subtitle1">Estado</Typography>
-                </TableCell>
-                <TableCell className='header-cell'></TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {areas.map((area) => (
-                <TableRow key={area.id}>
-                  <TableCell>
-                    <Typography variant="body1">{area.nombre}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body1">{area.estado}</Typography>
-                  </TableCell>
-                  <TableCell>
-                    <Button onClick={() => router.push(`/dashboard/areas/editar/${area.id}`)}>
-                      <EditIcon />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              prevUrl && setCurrentUrl(prevUrl);
-              setCurrentPage(currentPage - 1);
-            }}
-            disabled={!prevUrl}
-          >
-            Anterior
-          </Button>
-          <Typography variant="body1">
-            Página {currentPage} de {totalPages}
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => {
-              nextUrl && setCurrentUrl(nextUrl);
-              setCurrentPage(currentPage + 1);
-            }}
-            disabled={!nextUrl}
-          >
-            Siguiente
+          </Link>
+          <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+            Descargar Excel
           </Button>
         </div>
-      </Paper>
-    </Container>
+
+        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+          <Typography variant="h4" gutterBottom>
+            Area
+          </Typography>
+
+          <Grid container spacing={2} marginBottom={2}>
+            <Grid item xs={4}>
+              <TextField
+                label="Nombre"
+                value={filtroNombre}
+                onChange={(e) => setFiltroNombre(e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={4} marginBottom={2}>
+              <Button variant="contained" onClick={filtrarAreas}>
+                Filtrar
+              </Button>
+            </Grid>
+          </Grid>
+
+          <TableContainer component={Paper}>
+            <Table>
+              <TableHead>
+                <TableRow className='header-row'>
+                  <TableCell className='header-cell'>
+                    <Typography variant="subtitle1">Nombre</Typography>
+                  </TableCell>
+                  <TableCell className='header-cell'>
+                    <Typography variant="subtitle1">Departamento</Typography>
+                  </TableCell>
+                  <TableCell className='header-cell'>
+                    <Typography variant="subtitle1">Estado</Typography>
+                  </TableCell>
+                  <TableCell className='header-cell'></TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {areas.map((area) => (
+                  <TableRow key={area.id}>
+                    <TableCell>
+                      <Typography variant="body1">{area.nombre}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      {departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado'}
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="body1">{area.estado}</Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Link href={`/dashboard/areas/edit/${area.id}`} passHref>
+                        <Button>
+                          <EditIcon />
+                        </Button>
+                      </Link>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                prevUrl && setCurrentUrl(prevUrl);
+                setCurrentPage(currentPage - 1);
+              }}
+              disabled={!prevUrl}
+            >
+              Anterior
+            </Button>
+            <Typography variant="body1">
+              Página {currentPage} de {totalPages}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => {
+                nextUrl && setCurrentUrl(nextUrl);
+                setCurrentPage(currentPage + 1);
+              }}
+              disabled={!nextUrl}
+            >
+              Siguiente
+            </Button>
+          </div>
+        </Paper>
+      </Container>
+    </DashboardMenu>
   );
 };
 

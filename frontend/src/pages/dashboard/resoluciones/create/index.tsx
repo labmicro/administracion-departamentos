@@ -22,6 +22,7 @@ import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import DashboardMenu from '../..';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -95,6 +96,7 @@ const CrearResolucion = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -183,6 +185,7 @@ const CrearResolucion = () => {
         <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

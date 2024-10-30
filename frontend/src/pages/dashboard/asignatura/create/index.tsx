@@ -10,6 +10,7 @@ import BasicModal from '@/utils/modal';
 import Link from 'next/link'; // Cambiado para Next.js
 import { useRouter } from 'next/router'; // Importa useRouter
 import Swal from "sweetalert2";
+import DashboardMenu from '../../../dashboard';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -131,6 +132,7 @@ const CrearAsignatura = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -229,6 +231,7 @@ const CrearAsignatura = () => {
         <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

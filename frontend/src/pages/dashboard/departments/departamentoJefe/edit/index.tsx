@@ -8,6 +8,8 @@ import { useRouter } from 'next/router';
 import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import DashboardMenu from '../../../../dashboard';
+
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -89,10 +91,11 @@ const EditarDepartamentoJefe: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    router.push('/dashboard/departamentos/jefes/'); // Redirige después de cerrar el modal
+    router.push('/dashboard/departments/jefes/'); // Redirige después de cerrar el modal
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -158,6 +161,7 @@ const EditarDepartamentoJefe: React.FC = () => {
         />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

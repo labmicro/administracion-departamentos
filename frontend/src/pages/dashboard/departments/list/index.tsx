@@ -23,6 +23,7 @@ import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import DashboardMenu from '../..';
 
 interface Departamento {
   id: number;
@@ -117,12 +118,13 @@ const ListaDepartamentos = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/departamentos/crear')}>
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/departments/create')}>
           Agregar Departamento
         </Button>
-        <Button variant="contained" color="info" style={{ marginLeft: '10px' }} onClick={() => router.push('/dashboard/departamentos/jefes')}>
+        <Button variant="contained" color="info" style={{ marginLeft: '10px' }} onClick={() => router.push('/dashboard/departments/departamentoJefe')}>
           Jefes
         </Button>
         <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
@@ -208,7 +210,7 @@ const ListaDepartamentos = () => {
                     <Typography variant="body1">{departamento.interno}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Button onClick={() => router.push(`/dashboard/departamentos/editar/${departamento.id}`)}>
+                    <Button onClick={() => router.push(`/dashboard/departments/edit/${departamento.id}`)}>
                       <EditIcon />
                     </Button>
                   </TableCell>
@@ -247,6 +249,7 @@ const ListaDepartamentos = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

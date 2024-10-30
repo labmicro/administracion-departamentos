@@ -26,6 +26,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import DashboardMenu from '../../../dashboard';
 
 interface Persona {
   id: number;
@@ -53,6 +54,7 @@ const ListaPersonas = () => {
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
+
 
   useEffect(() => {
     fetchData(currentUrl);
@@ -135,24 +137,25 @@ const ListaPersonas = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Link href="/dashboard/personas/crear" passHref>
+        <Link href="/dashboard/persons/create" style={{ marginLeft: '10px' }} passHref>
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Persona
           </Button>
         </Link>
-        <Link href="/dashboard/personas/jefes" passHref>
+        <Link href="/dashboard/persons/jefes" style={{ marginLeft: '10px' }} passHref>
           <Button variant="contained" color="info">
             Jefes
           </Button>
         </Link>
-        <Link href="/dashboard/personas/docentes" passHref>
+        <Link href="/dashboard/persons/docentes" style={{ marginLeft: '10px' }} passHref>
           <Button variant="contained" color="info">
             Docentes
           </Button>
         </Link>
-        <Link href="/dashboard/personas/nodocentes" passHref>
+        <Link href="/dashboard/persons/noDocentes" style={{ marginLeft: '10px' }} passHref>
           <Button variant="contained" color="info">
             No Docentes
           </Button>
@@ -280,7 +283,7 @@ const ListaPersonas = () => {
                     <Typography variant="body1">{persona.legajo}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Link href={`/dashboard/personas/editar/${persona.id}`} passHref>
+                    <Link href={`/dashboard/persons/edit/${persona.id}`} passHref>
                       <EditIcon />
                     </Link>
                   </TableCell>
@@ -319,6 +322,7 @@ const ListaPersonas = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

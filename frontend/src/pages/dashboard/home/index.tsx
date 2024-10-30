@@ -8,7 +8,7 @@ const Home = () => {
   return (
     <div>
       <header>
-        <h1 style={h1Style}>Bienvenido a la Gestigón de Departamentos home</h1>
+        <h1 style={h1Style}>Bienvenido a la Gestigón de Departamentos homeee</h1>
       </header>
     </div>
   );

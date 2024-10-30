@@ -7,6 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
+import DashboardMenu from '../../../../dashboard';
 
 const ListaDocentes = () => {
   const h1Style = {
@@ -109,9 +110,10 @@ const ListaDocentes = () => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Link href="/dashboard/personas/docentes/crear">
+        <Link href="/dashboard/persons/docentes/create">
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Docente
           </Button>
@@ -229,7 +231,7 @@ const ListaDocentes = () => {
                     <TableCell>{docente.observaciones}</TableCell>
                     <TableCell>{docente.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
                     <TableCell>
-                      <Link href={`/dashboard/personas/docentes/editar/${docente.id}`}>
+                      <Link href={`/dashboard/persons/docentes/edit/${docente.id}`}>
                         <EditIcon />
                       </Link>
                     </TableCell>
@@ -269,6 +271,7 @@ const ListaDocentes = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

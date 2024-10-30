@@ -11,7 +11,7 @@ const AppWrapper = () => {
     // Lógica de redirección basada en autenticación
     const isAuthenticated = localStorage.getItem('access_token'); // Verifica si hay un token de acceso
     if (isAuthenticated) {
-      router.push('/dashboard/home'); // Redirige al Dashboard si está autenticado
+      router.push('/dashboard'); // Redirige al Dashboard si está autenticado
     } else {
       router.push('/login'); // De lo contrario, redirige a la página de login
     }

@@ -11,6 +11,7 @@ import BasicModal from '@/utils/modal';
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import DashboardMenu from '../../../../dashboard';
 
 
 
@@ -390,7 +391,7 @@ const fetchDataResoluciones = async (url: string) => {
     };
 
   return (
-    
+<DashboardMenu>
 <Container maxWidth="lg">
 <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
   <Typography variant="h4" gutterBottom>
@@ -846,6 +847,7 @@ const fetchDataResoluciones = async (url: string) => {
 
 </Paper>
 </Container>
+</DashboardMenu>
   );
 };
 

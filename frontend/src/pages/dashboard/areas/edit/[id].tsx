@@ -9,18 +9,14 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router';
 import Swal from "sweetalert2";
+import DashboardMenu from '../..';
 
-// Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
 
-// Define las props que recibirá el componente
-interface EditarAreaProps {
-  idArea: string; // idArea es un string
-}
-
-const EditarArea: React.FC<EditarAreaProps> = ({ idArea }) => {
+const EditarArea = () => {
   const router = useRouter();
+  const { id: idArea } = router.query; // Captura el idArea directamente de la URL
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -105,6 +101,7 @@ const EditarArea: React.FC<EditarAreaProps> = ({ idArea }) => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -162,6 +159,7 @@ const EditarArea: React.FC<EditarAreaProps> = ({ idArea }) => {
         />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

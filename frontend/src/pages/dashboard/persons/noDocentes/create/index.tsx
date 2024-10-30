@@ -3,7 +3,8 @@ import './styles.css';
 import axios from 'axios';
 import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
 import BasicModal from '@/utils/modal';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import { useRouter } from 'next/router'; 
+import DashboardMenu from '../../../../dashboard';
 
 const CrearNoDocente = () => {
   const router = useRouter();
@@ -104,6 +105,7 @@ const CrearNoDocente = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -179,6 +181,7 @@ const CrearNoDocente = () => {
         <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

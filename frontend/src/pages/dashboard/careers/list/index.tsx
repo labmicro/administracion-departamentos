@@ -8,6 +8,7 @@ import NoteAltIcon from '@mui/icons-material/NoteAlt';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
+import DashboardMenu from '../../../dashboard';
 
 type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
 
@@ -112,6 +113,7 @@ const ListaCarreras = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="md">
       <div>
         <Button
@@ -272,6 +274,7 @@ const ListaCarreras = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

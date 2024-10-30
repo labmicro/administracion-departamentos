@@ -26,6 +26,8 @@ import GroupIcon from '@mui/icons-material/Group';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import DashboardMenu from '../../../../dashboard';
+
 
 const ListaDocenteAsignatura = () => {
   const router = useRouter(); // Usa useRouter para obtener la información de enrutamiento
@@ -180,6 +182,7 @@ const ListaDocenteAsignatura = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
         <Button
@@ -345,6 +348,7 @@ const ListaDocenteAsignatura = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

@@ -57,7 +57,7 @@ export default function LoginPage() {
       localStorage.setItem('access_token', response.data.access);
       localStorage.setItem('refresh_token', response.data.refresh);
   
-      router.push('/dashboard/home'); // Redirige al Dashboard después de iniciar sesión
+      router.push('/dashboard'); // Redirige al Dashboard después de iniciar sesión
     } catch (error) {
       Swal.fire({
         icon: 'error',

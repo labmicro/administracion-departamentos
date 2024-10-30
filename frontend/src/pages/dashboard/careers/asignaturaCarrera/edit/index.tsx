@@ -19,6 +19,8 @@ import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import dayjs from 'dayjs';  
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
+import DashboardMenu from '../../../../dashboard';
+
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -137,6 +139,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -230,6 +233,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
         />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

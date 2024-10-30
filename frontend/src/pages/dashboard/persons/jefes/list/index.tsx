@@ -6,14 +6,11 @@ import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import { useRouter } from 'next/router';
+import DashboardMenu from '../../../../dashboard';
 
 const ListaJefes = () => {
-  const router = useRouter(); // Usamos useRouter para manejar la navegación
-
-  const h1Style = {
-    color: 'black',
-  };
+  const router = useRouter();
 
   interface Persona {
     id: number;
@@ -21,7 +18,7 @@ const ListaJefes = () => {
     apellido: string;
     telefono: string;
     dni: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1;
     email: string;
     interno: string;
     legajo: string;
@@ -31,19 +28,18 @@ const ListaJefes = () => {
     id: number;
     persona: Persona;
     observaciones: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1;
   }
 
   const [jefes, setJefes] = useState<Jefe[]>([]);
-  const [personas, setPersonas] = useState<Persona[]>([]);
   const [filtroDni, setFiltroDni] = useState('');
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroApellido, setFiltroApellido] = useState('');
   const [filtroLegajo, setFiltroLegajo] = useState('');
-  const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Añadido
+  const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe/');
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe/list_jefes_persona/');
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -55,21 +51,15 @@ const ListaJefes = () => {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      setJefes(response.data.results);
-      setNextUrl(response.data.next);
-      setPrevUrl(response.data.previous);
-      setTotalItems(response.data.count);
+      setJefes(response.data);
       setCurrentPage(1);
-
-      const personasResponse = await axios.get('http://127.0.0.1:8000/facet/persona/');
-      setPersonas(personasResponse.data.results);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
   const filtrarJefes = () => {
-    let url = `http://127.0.0.1:8000/facet/jefe/?`;
+    let url = `http://127.0.0.1:8000/facet/jefe/list_jefes_persona/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('persona__nombre__icontains', filtroNombre);
@@ -89,7 +79,6 @@ const ListaJefes = () => {
     url += params.toString();
     setCurrentUrl(url);
   };
-
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(jefes.map(jefe => ({
       Nombre: jefe.persona.nombre,
@@ -108,9 +97,10 @@ const ListaJefes = () => {
   const totalPages = Math.ceil(totalItems / pageSize);
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/personas/jefes/crear')}>
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/persons/jefes/create')}>
           Agregar Jefe
         </Button>
         <Button
@@ -219,7 +209,7 @@ const ListaJefes = () => {
                   <TableCell>{jefe.observaciones}</TableCell>
                   <TableCell>{jefe.estado}</TableCell>
                   <TableCell>
-                    <Button onClick={() => router.push(`/dashboard/personas/jefes/editar/${jefe.id}`)}>
+                    <Button onClick={() => router.push(`/dashboard/persons/jefes/edit/${jefe.id}`)}>
                       <EditIcon />
                     </Button>
                   </TableCell>
@@ -258,6 +248,7 @@ const ListaJefes = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

@@ -1,10 +1,32 @@
 import { useEffect, useState } from 'react';
 import './styles.css';
 import axios from 'axios';
-import { Container, Grid, Paper, Typography, TextField, Button, InputLabel, Select, MenuItem, FormControl, Dialog } from '@mui/material';
+import {
+  Container,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  InputLabel,
+  Select,
+  MenuItem,
+  FormControl,
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+} from '@mui/material';
 import BasicModal from '@/utils/modal';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import DashboardMenu from '../../../../dashboard';
 
 const CrearJefe = () => {
   const router = useRouter();
@@ -56,7 +78,7 @@ const CrearJefe = () => {
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/personas/jefes/'); // Navega a la lista de jefes
+    router.push('/dashboard/persons/jefes/'); // Navega a la lista de jefes
   };
 
   const handleOpenPersona = () => {
@@ -95,11 +117,11 @@ const CrearJefe = () => {
 
   const crearNuevoJefeDepartamento = async () => {
     const nuevoJefe = {
-      persona: persona,
+      persona: persona?.id, // Envía solo el ID
       observaciones: observaciones,
       estado: estado as 0 | 1,
     };
-
+  
     try {
       const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/jefe/${persona?.id}/`);
       if (existeRegistro.data) {
@@ -107,6 +129,7 @@ const CrearJefe = () => {
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
+        console.log(nuevoJefe);
         try {
           await axios.post('http://127.0.0.1:8000/facet/jefe/', nuevoJefe, {
             headers: {
@@ -116,7 +139,7 @@ const CrearJefe = () => {
           handleOpenModal('Bien', 'Se creó el jefe con éxito', handleConfirmModal);
         } catch (postError) {
           console.error(postError);
-          handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
+          handleOpenModal('Error', 'NO se pudo realizar la acción2.', () => {});
         }
       } else {
         console.error(error);
@@ -126,6 +149,7 @@ const CrearJefe = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -139,33 +163,69 @@ const CrearJefe = () => {
             </Button>
 
             <Dialog open={openPersona} onClose={handleClose} maxWidth="md" fullWidth>
-              <TextField
-                label="Buscar por DNI, Apellido o Legajo"
-                value={filtroPersonas}
-                onChange={(e) => setFiltroPersonas(e.target.value)}
-                fullWidth
-              />
+  <DialogTitle>Seleccionar Persona</DialogTitle>
+  <DialogContent>
+    <TextField
+      label="Buscar por DNI, Apellido o Legajo"
+      value={filtroPersonas}
+      onChange={(e) => setFiltroPersonas(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
 
-              {handleFilterPersonas(filtroPersonas).map((personafilter) => (
-                <div key={personafilter.id}>
-                  <Button
-                    onClick={() => {
-                      setPersona(personafilter);
-                      SetApellido(personafilter.apellido);
-                      SetDni(personafilter.dni);
-                      setNombre(personafilter.nombre);
-                    }}
-                    style={{ backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit', color: personafilter.id === persona?.id ? 'white' : 'inherit' }}
-                  >
-                    DNI {personafilter.dni} - {personafilter.apellido} {personafilter.nombre} - Legajo {personafilter.legajo}
-                  </Button>
-                </div>
-              ))}
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>DNI</TableCell>
+            <TableCell>Apellido</TableCell>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Legajo</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {handleFilterPersonas(filtroPersonas).map((personafilter) => (
+            <TableRow key={personafilter.id}>
+              <TableCell>{personafilter.dni}</TableCell>
+              <TableCell>{personafilter.apellido}</TableCell>
+              <TableCell>{personafilter.nombre}</TableCell>
+              <TableCell>{personafilter.legajo}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setPersona(personafilter);
+                    SetApellido(personafilter.apellido);
+                    SetDni(personafilter.dni);
+                    setNombre(personafilter.nombre);
+                  }}
+                  style={{
+                    backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit',
+                    color: personafilter.id === persona?.id ? 'white' : 'inherit',
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleClose}>Cerrar</Button>
+    <Button
+      variant="contained"
+      onClick={handleConfirmSelection}
+      style={{ marginTop: '10px' }}
+    >
+      Confirmar Selección
+    </Button>
+  </DialogActions>
+</Dialog>
 
-              <Button variant="contained" onClick={handleConfirmSelection} style={{ marginTop: 'auto', marginBottom: '10px', position: 'sticky', bottom: 0 }}>
-                Confirmar Selección
-              </Button>
-            </Dialog>
           </Grid>
 
           <Grid item xs={12}>
@@ -201,6 +261,7 @@ const CrearJefe = () => {
         <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

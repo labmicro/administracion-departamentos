@@ -1,5 +1,3 @@
-// src/components/Layout.tsx
-
 import React, { ReactNode } from 'react';
 import Header from './header';
 import Menu from './menu';

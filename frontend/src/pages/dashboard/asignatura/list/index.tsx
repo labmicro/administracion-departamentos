@@ -9,6 +9,7 @@ import GroupIcon from '@mui/icons-material/Group';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
+import DashboardMenu from '../../../dashboard';
 
 const ListaAsignaturas = () => {
   const h1Style = {
@@ -147,6 +148,7 @@ const ListaAsignaturas = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <div>
         <Link href="/dashboard/asignaturas/crear">
@@ -320,6 +322,7 @@ const ListaAsignaturas = () => {
         </div>
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 

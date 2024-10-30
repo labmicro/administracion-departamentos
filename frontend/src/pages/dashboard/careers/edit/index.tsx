@@ -8,10 +8,15 @@ import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import DashboardMenu from '../../../dashboard';
 
 // Habilita los plugins
 dayjs.extend(utc);
 dayjs.extend(timezone);
+
+interface EditarCarreraProps {
+  idCarrera: string;
+}
 
 const EditarCarrera: React.FC = () => {
   const router = useRouter(); // Usamos useRouter de Next.js
@@ -125,6 +130,7 @@ const EditarCarrera: React.FC = () => {
   };
 
   return (
+    <DashboardMenu>
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
@@ -207,6 +213,7 @@ const EditarCarrera: React.FC = () => {
         />
       </Paper>
     </Container>
+    </DashboardMenu>
   );
 };
 
