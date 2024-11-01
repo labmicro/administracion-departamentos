@@ -151,7 +151,7 @@ const ListaAsignaturas = () => {
     <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Link href="/dashboard/asignaturas/crear">
+        <Link href="/dashboard/asignatura/create">
           <Button variant="contained" endIcon={<AddIcon />}>
             Agregar Asignatura
           </Button>
@@ -279,12 +279,12 @@ const ListaAsignaturas = () => {
                     {departamentos.find(depto => depto.id === asignatura.departamento)?.nombre || 'Departamento no encontrado'}
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link href={`/dashboard/asignaturas/docentes/${asignatura.id}`}>
+                    <Link href={`/dashboard/asignatura/docenteAsignatura/${asignatura.id}`}>
                       <GroupIcon />
                     </Link>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Link href={`/dashboard/asignaturas/editar/${asignatura.id}/${asignatura.id}`}>
+                    <Link href={`/dashboard/asignatura/edit/${asignatura.id}`}>
                       <EditIcon />
                     </Link>
                   </TableCell>

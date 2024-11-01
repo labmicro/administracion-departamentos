@@ -9,7 +9,7 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router';
 import Swal from "sweetalert2";
-import DashboardMenu from '../..';
+import DashboardMenu from '../../../dashboard';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);

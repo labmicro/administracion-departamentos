@@ -147,7 +147,7 @@ const ListaDocenteAsignatura: React.FC<ListaDocenteAsignaturaProps> = ({ idAsign
             Docentes Asignatura
           </Typography>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={2} marginBottom={2}>
             <Grid item xs={4}>
               <TextField
                 label="Nombre"
@@ -202,8 +202,8 @@ const ListaDocenteAsignatura: React.FC<ListaDocenteAsignaturaProps> = ({ idAsign
               </FormControl>
             </Grid>
             <Grid item xs={4}>
-              <Button variant="contained" color="primary" onClick={filtrarAsignaturaDocentes}>
-                Aplicar Filtros
+              <Button variant="contained" onClick={filtrarAsignaturaDocentes}>
+                Filtrar
               </Button>
             </Grid>
           </Grid>
@@ -212,11 +212,11 @@ const ListaDocenteAsignatura: React.FC<ListaDocenteAsignaturaProps> = ({ idAsign
             <Table>
               <TableHead>
                 <TableRow className="header-row">
-                  <TableCell>Nombre</TableCell>
-                  <TableCell>Condicion</TableCell>
-                  <TableCell>Cargo</TableCell>
-                  <TableCell>Dedicacion</TableCell>
-                  <TableCell>Acciones</TableCell>
+                  <TableCell className="header-cell">Nombre</TableCell>
+                  <TableCell className="header-cell">Condicion</TableCell>
+                  <TableCell className="header-cell">Cargo</TableCell>
+                  <TableCell className="header-cell">Dedicacion</TableCell>
+                  <TableCell className="header-cell">Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>

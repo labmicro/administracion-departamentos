@@ -3,62 +3,46 @@ import './styles.css';
 import axios from 'axios';
 import {
   Container,
-  List,
-  ListItem,
+  Grid,
+  Paper,
+  Typography,
+  TextField,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
-  Paper,
-  TextField,
-  Button,
+  FormControl,
   InputLabel,
   Select,
   MenuItem,
-  FormControl,
-  Grid,
-  Modal,
-  Box,
 } from '@mui/material';
-import dayjs from 'dayjs'; // Asegúrate de tener instalada esta dependencia
-import utc from 'dayjs/plugin/utc';
-import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../dashboard';
 import Swal from 'sweetalert2';
 
-// Habilita los plugins
-dayjs.extend(utc);
-dayjs.extend(timezone);
-
 const CrearArea = () => {
-  const h1Style = {
-    color: 'black',
-  };
-
-  const router = useRouter(); // Obtiene el router de Next.js
-
-  interface Area {
-    id: number;
-    iddepartamento: number;
-    nombre: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
-  }
+  const router = useRouter();
 
   interface Departamento {
     id: number;
     nombre: string;
     telefono: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1;
     interno: string;
   }
 
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-  const [iddepartamento, setIddepartamento] = useState<number>(0); // Inicializado con un valor numérico
+  const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState<Departamento | null>(null);
+  const [filtroDepartamentos, setFiltroDepartamentos] = useState('');
+  const [openDepartamentoModal, setOpenDepartamentoModal] = useState(false);
   const [nombre, setNombre] = useState('');
   const [estado, setEstado] = useState('');
   const [modalVisible, setModalVisible] = useState(false);
@@ -83,11 +67,19 @@ const CrearArea = () => {
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/areas/'); // Cambiado de navigate a router.push
+    router.push('/dashboard/areas/');
+  };
+
+  const handleOpenDepartamentoModal = () => {
+    setOpenDepartamentoModal(true);
+  };
+
+  const handleCloseDepartamentoModal = () => {
+    setOpenDepartamentoModal(false);
   };
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchDepartamentos = async () => {
       try {
         const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
         setDepartamentos(response.data.results);
@@ -95,25 +87,40 @@ const CrearArea = () => {
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'Error al obtener los datos.',
+          text: 'Error al obtener los departamentos.',
         });
       }
     };
 
-    fetchData();
+    fetchDepartamentos();
   }, []);
 
-  const crearNuevoDepartamento = async () => {
+  const handleFilterDepartamentos = (filtro: string) => {
+    return departamentos.filter((departamento) =>
+      departamento.nombre.toLowerCase().includes(filtro.toLowerCase())
+    );
+  };
+
+  const crearNuevaArea = async () => {
+    if (!departamentoSeleccionado) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Advertencia',
+        text: 'Debe seleccionar un departamento.',
+      });
+      return;
+    }
+
     const nuevaArea = {
-      departamento: iddepartamento,
+      departamento: departamentoSeleccionado.id,
       nombre: nombre,
-      estado: estado, // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+      estado: estado,
     };
 
     try {
       const response = await axios.post('http://127.0.0.1:8000/facet/area/', nuevaArea, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          'Content-Type': 'application/json',
         },
       });
       handleOpenModal('Éxito', 'Se creó el área con éxito.', handleConfirmModal);
@@ -122,67 +129,119 @@ const CrearArea = () => {
     }
   };
 
+  const confirmarSeleccionDepartamento = () => {
+    handleCloseDepartamentoModal();
+  };
+
   return (
     <DashboardMenu>
-    <Container maxWidth="lg">
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <Typography variant="h4" gutterBottom>
-          Área
-        </Typography>
+      <Container maxWidth="lg">
+        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+          <Typography variant="h4" gutterBottom>
+            Área
+          </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <TextField
-              label="Nombre"
-              value={nombre}
-              onChange={(e) => setNombre(capitalizeFirstLetter(e.target.value))}
-              fullWidth
-            />
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <Button variant="contained" onClick={handleOpenDepartamentoModal}>
+                Seleccionar Departamento
+              </Button>
+
+              <Dialog open={openDepartamentoModal} onClose={handleCloseDepartamentoModal} maxWidth="md" fullWidth>
+                <DialogTitle>Seleccionar Departamento</DialogTitle>
+                <DialogContent>
+                  <TextField
+                    label="Buscar por Nombre"
+                    value={filtroDepartamentos}
+                    onChange={(e) => setFiltroDepartamentos(e.target.value)}
+                    fullWidth
+                    margin="normal"
+                  />
+
+                  <TableContainer component={Paper}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Nombre</TableCell>
+                          <TableCell>Teléfono</TableCell>
+                          <TableCell>Estado</TableCell>
+                          <TableCell>Seleccionar</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {handleFilterDepartamentos(filtroDepartamentos).map((departamento) => (
+                          <TableRow key={departamento.id}>
+                            <TableCell>{departamento.nombre}</TableCell>
+                            <TableCell>{departamento.telefono}</TableCell>
+                            <TableCell>{departamento.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                            <TableCell>
+                              <Button
+                                variant="outlined"
+                                onClick={() => setDepartamentoSeleccionado(departamento)}
+                                style={{
+                                  backgroundColor:
+                                    departamentoSeleccionado?.id === departamento.id ? '#4caf50' : 'inherit',
+                                  color: departamentoSeleccionado?.id === departamento.id ? 'white' : 'inherit',
+                                }}
+                              >
+                                Seleccionar
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </DialogContent>
+                <DialogActions>
+                  <Button onClick={handleCloseDepartamentoModal}>Cerrar</Button>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    onClick={confirmarSeleccionDepartamento}
+                    disabled={!departamentoSeleccionado}
+                  >
+                    Confirmar Selección
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField disabled label="Departamento" value={departamentoSeleccionado?.nombre || ''} fullWidth />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Nombre"
+                value={nombre}
+                onChange={(e) => setNombre(capitalizeFirstLetter(e.target.value))}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth margin="none">
+                <InputLabel id="estado-label">Estado</InputLabel>
+                <Select
+                  labelId="estado-label"
+                  id="estado-select"
+                  value={estado}
+                  label="Estado"
+                  onChange={(e) => setEstado(e.target.value)}
+                >
+                  <MenuItem value={1}>1</MenuItem>
+                  <MenuItem value={0}>0</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} marginBottom={2}>
+              <Button variant="contained" onClick={crearNuevaArea}>
+                Crear
+              </Button>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth margin="none">
-              <InputLabel id="demo-simple-select-label">Departamento</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={iddepartamento || ''}
-                onChange={(e) => {
-                  const selectedId = e.target.value as number;
-                  setIddepartamento(selectedId);
-                }}
-              >
-                {departamentos.map((departamento) => (
-                  <MenuItem key={departamento.id} value={departamento.id}>
-                    {departamento.nombre}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth margin="none">
-              <InputLabel id="demo-simple-select-label">Estado</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                value={estado}
-                label="Tipo"
-                onChange={(e) => setEstado(e.target.value)}
-              >
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={0}>0</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} marginBottom={2}>
-            <Button variant="contained" onClick={crearNuevoDepartamento}>
-              Crear
-            </Button>
-          </Grid>
-        </Grid>
-        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
-      </Paper>
-    </Container>
+          <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
+        </Paper>
+      </Container>
     </DashboardMenu>
   );
 };

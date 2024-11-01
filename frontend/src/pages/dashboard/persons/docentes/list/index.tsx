@@ -98,7 +98,7 @@ const ListaDocentes = () => {
         DNI: persona?.dni || '',
         Legajo: persona?.legajo || '',
         Observaciones: docente.observaciones,
-        Estado: docente.estado === 1 ? 'Activo' : 'Inactivo',
+        Estado: docente.estado,
       };
     }));
     const wb = XLSX.utils.book_new();
@@ -229,7 +229,7 @@ const ListaDocentes = () => {
                     <TableCell>{persona.dni}</TableCell>
                     <TableCell>{persona.legajo}</TableCell>
                     <TableCell>{docente.observaciones}</TableCell>
-                    <TableCell>{docente.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                    <TableCell>{docente.estado}</TableCell>
                     <TableCell>
                       <Link href={`/dashboard/persons/docentes/edit/${docente.id}`}>
                         <EditIcon />

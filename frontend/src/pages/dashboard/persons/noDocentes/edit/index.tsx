@@ -16,7 +16,7 @@ dayjs.extend(timezone);
 
 const EditarNoDocente: React.FC = () => {
   const router = useRouter();
-  const { idPersona } = router.query; // Obtiene el id de la persona de la ruta
+  const { id } = router.query; // Obtén el id directamente de la URL
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -32,9 +32,9 @@ const EditarNoDocente: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (idPersona) { // Asegúrate de que idPersona esté definido
+      if (id) { // Asegúrate de que id esté definido
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/nodocente/${idPersona}/`);
+          const response = await axios.get(`http://127.0.0.1:8000/facet/nodocente/${id}/`);
           setNoDocente(response.data);
           const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/${response.data.persona}/`);
           setNombre(responsePers.data.nombre);
@@ -47,7 +47,7 @@ const EditarNoDocente: React.FC = () => {
     };
 
     fetchData();
-  }, [idPersona]);
+  }, [id]);
 
   useEffect(() => {
     if (nodocente) {
@@ -64,7 +64,7 @@ const EditarNoDocente: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/nodocente/${idPersona}/`, nodocenteEditado, {
+      await axios.put(`http://127.0.0.1:8000/facet/nodocente/${id}/`, nodocenteEditado, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -78,7 +78,7 @@ const EditarNoDocente: React.FC = () => {
 
   const eliminarNoDocente = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/nodocente/${idPersona}/`, {
+      await axios.delete(`http://127.0.0.1:8000/facet/nodocente/${id}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

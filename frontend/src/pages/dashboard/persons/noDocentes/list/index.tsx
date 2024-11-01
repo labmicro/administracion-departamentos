@@ -101,7 +101,7 @@ const ListaNoDocentes = () => {
         DNI: persona?.dni || '',
         Legajo: persona?.legajo || '',
         Observaciones: noDocente.observaciones,
-        Estado: noDocente.estado === 1 ? 'Activo' : 'Inactivo',
+        Estado: noDocente.estado,
       };
     }));
     const wb = XLSX.utils.book_new();
@@ -116,7 +116,7 @@ const ListaNoDocentes = () => {
     <DashboardMenu>
     <Container maxWidth="lg">
       <div>
-        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/personas/nodocentes/crear')}>
+        <Button variant="contained" endIcon={<AddIcon />} onClick={() => router.push('/dashboard/persons/noDocentes/create')}>
           Agregar No Docente
         </Button>
         <Button
@@ -230,7 +230,7 @@ const ListaNoDocentes = () => {
                     <TableCell>{persona.dni}</TableCell>
                     <TableCell>{persona.legajo}</TableCell>
                     <TableCell>{NoDocente.observaciones}</TableCell>
-                    <TableCell>{NoDocente.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                    <TableCell>{NoDocente.estado}</TableCell>
                     <TableCell>
                       <Button onClick={() => router.push(`/dashboard/personas/nodocentes/editar/${NoDocente.id}`)}>
                         <EditIcon />
