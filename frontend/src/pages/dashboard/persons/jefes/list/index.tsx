@@ -79,20 +79,61 @@ const ListaJefes = () => {
     url += params.toString();
     setCurrentUrl(url);
   };
-  const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(jefes.map(jefe => ({
-      Nombre: jefe.persona.nombre,
-      Apellido: jefe.persona.apellido,
-      DNI: jefe.persona.dni,
-      Legajo: jefe.persona.legajo,
-      Observaciones: jefe.observaciones,
-      Estado: jefe.estado === 1 ? 'Activo' : 'Inactivo',
-    })));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Jefes');
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'jefes.xlsx');
+
+  const exportToExcel = async () => {
+    try {
+      let allJefes: Jefe[] = [];
+      let url = `http://127.0.0.1:8000/facet/jefe/?`;
+      const params = new URLSearchParams();
+  
+      if (filtroNombre !== '') {
+        params.append('persona__nombre__icontains', filtroNombre);
+      }
+      if (filtroDni !== '') {
+        params.append('persona__dni__icontains', filtroDni);
+      }
+      if (filtroEstado !== '') {
+        params.append('estado', filtroEstado.toString());
+      }
+      if (filtroApellido !== '') {
+        params.append('persona__apellido__icontains', filtroApellido);
+      }
+      if (filtroLegajo !== '') {
+        params.append('persona__legajo__icontains', filtroLegajo);
+      }
+      url += params.toString();
+  
+      // Procesa cada página mientras exista `url`
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
+  
+        allJefes = [...allJefes, ...results];
+        url = next;
+      }
+  
+      // Crear el archivo Excel con los datos obtenidos
+      const ws = XLSX.utils.json_to_sheet(
+        allJefes.map((jefe) => ({
+          Nombre: jefe.persona.nombre,
+          Apellido: jefe.persona.apellido,
+          DNI: jefe.persona.dni,
+          Legajo: jefe.persona.legajo,
+          Observaciones: jefe.observaciones,
+          Estado: jefe.estado === 1 ? 'Activo' : 'Inactivo',
+        }))
+      );
+  
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Jefes');
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      const excelBlob = new Blob([wbout], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      saveAs(excelBlob, 'jefes.xlsx');
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
+    }
   };
+
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -105,11 +146,11 @@ const ListaJefes = () => {
         </Button>
         <Button
           variant="contained"
-          color="secondary"
+          color="primary"
           onClick={exportToExcel}
           style={{ marginLeft: '16px' }}
         >
-          Exportar a Excel
+          Descargar Excel
         </Button>
       </div>
 

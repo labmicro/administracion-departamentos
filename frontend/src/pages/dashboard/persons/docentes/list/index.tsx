@@ -89,23 +89,42 @@ const ListaDocentes = () => {
     setCurrentUrl(url);
   };
 
-  const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(docentes.map((docente) => {
-      const persona = personas.find((p) => p.id === docente.persona);
-      return {
-        Nombre: persona?.nombre || '',
-        Apellido: persona?.apellido || '',
-        DNI: persona?.dni || '',
-        Legajo: persona?.legajo || '',
-        Observaciones: docente.observaciones,
-        Estado: docente.estado,
-      };
-    }));
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Docentes');
-    const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-    saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'docentes.xlsx');
+  const exportToExcel = async () => {
+    try {
+      let allDocentes: Docente[] = [];
+      let url = `http://127.0.0.1:8000/facet/docente/`; // Asegúrate de que la URL sea correcta
+  
+      // Fetch all pages of docentes
+      while (url) {
+        const response = await axios.get(url);
+        const { results, next } = response.data;
+        allDocentes = [...allDocentes, ...results];
+        url = next; // Update URL for the next page
+      }
+  
+      const ws = XLSX.utils.json_to_sheet(
+        allDocentes.map((docente) => {
+          const persona = personas.find((p) => p.id === docente.persona);
+          return {
+            Nombre: persona?.nombre || '',
+            Apellido: persona?.apellido || '',
+            DNI: persona?.dni || '',
+            Legajo: persona?.legajo || '',
+            Observaciones: docente.observaciones,
+            Estado: docente.estado === 1 ? 'Activo' : 'Inactivo',
+          };
+        })
+      );
+  
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Docentes');
+      const wbout = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+      saveAs(new Blob([wbout], { type: 'application/octet-stream' }), 'docentes.xlsx');
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
+    }
   };
+  
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -120,11 +139,11 @@ const ListaDocentes = () => {
         </Link>
         <Button
           variant="contained"
-          color="secondary"
+          color="primary"
           onClick={exportToExcel}
           style={{ marginLeft: '16px' }}
         >
-          Exportar a Excel
+          Descargar Excel
         </Button>
       </div>
 

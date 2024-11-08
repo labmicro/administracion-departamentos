@@ -119,7 +119,7 @@ const ListaCarreras = () => {
         <Button
           variant="contained"
           endIcon={<AddIcon />}
-          onClick={() => router.push('/dashboard/carreras/crear')} // Navegación a la página de creación
+          onClick={() => router.push('/dashboard/careers/create')} // Navegación a la página de creación
         >
           Agregar Carrera
         </Button>
@@ -227,7 +227,7 @@ const ListaCarreras = () => {
                     <Typography variant="body1">{carrera.sitio}</Typography>
                   </TableCell>
                   <TableCell style={{ textAlign: 'center' }}>
-                    <Button onClick={() => router.push(`/dashboard/carreras/asignaturas/${carrera.id}`)}>
+                    <Button onClick={() => router.push(`/dashboard/careers/asignaturaCarrera/${carrera.id}`)}>
                       <NoteAltIcon />
                     </Button>
                   </TableCell>
@@ -235,7 +235,7 @@ const ListaCarreras = () => {
                     <Typography variant="body1">{carrera.estado}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Button onClick={() => router.push(`/dashboard/carreras/editar/${carrera.id}`)}>
+                    <Button onClick={() => router.push(`/dashboard/careers/edit/${carrera.id}`)}>
                       <EditIcon />
                     </Button>
                   </TableCell>

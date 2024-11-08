@@ -12,7 +12,7 @@ const Asignaturas = () => {
     if (path === 'crear') {
       return <CrearAsignatura />;
     } else if (path === 'docentes' && idAsignatura) {
-      return <DocenteAsignatura idAsignatura={idAsignatura as string} />;
+      return <DocenteAsignatura />;
     } else {
       return <ListaAsignaturas />; // Renderiza ListaAsignaturas por defecto
     }

@@ -24,14 +24,15 @@ import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router';
-import DashboardMenu from '../../../../dashboard';
+import DashboardMenu from '../../..';
 
 interface ListaDocenteAsignaturaProps {
   idAsignatura: string;
 }
 
-const ListaDocenteAsignatura: React.FC<ListaDocenteAsignaturaProps> = ({ idAsignatura }) => {
+const ListaDocenteAsignatura: React.FC = () => {
   const router = useRouter();
+  const { idAsignatura } = router.query;
 
   type Condicion = 'Regular' | 'Interino' | 'Transitorio';
   type Cargo = 'Titular' | 'Asociado' | 'Adjunto' | 'Jtp' | 'Adg' | 'Ayudante_estudiantil';
@@ -133,7 +134,7 @@ const ListaDocenteAsignatura: React.FC<ListaDocenteAsignaturaProps> = ({ idAsign
           <Button
             variant="contained"
             endIcon={<AddIcon />}
-            onClick={() => router.push(`/dashboard/asignaturas/docentes/${idAsignatura}/crear`)}
+            onClick={() => router.push(`/dashboard/asignatura/docenteAsignatura/${idAsignatura}/create`)}
           >
             Agregar Docente Asignatura
           </Button>
@@ -231,7 +232,7 @@ const ListaDocenteAsignatura: React.FC<ListaDocenteAsignaturaProps> = ({ idAsign
                         variant="contained"
                         color="primary"
                         startIcon={<EditIcon />}
-                        onClick={() => router.push(`/dashboard/asignaturas/docentes/${idAsignatura}/editar/${docente.id}`)}
+                        onClick={() => router.push(`/dashboard/asignatura/docenteAsignatura/${idAsignatura}/edit/${docente.id}`)}
                       >
                         Editar
                       </Button>

@@ -49,7 +49,7 @@ const CrearCarrera = () => {
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/carreras/'); // Cambia a router.push para el enrutamiento en Next.js
+    router.push('/dashboard/careers/'); // Cambia a router.push para el enrutamiento en Next.js
   };
 
   const crearNuevaCarrera = async () => {

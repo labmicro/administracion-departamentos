@@ -1,7 +1,7 @@
 // src/pages/dashboard/careers/asignaturaCarrera/index.tsx
 import React from 'react';
 import { useRouter } from 'next/router';
-import ListaAsignaturaCarrera from './list'; // Asegúrate de que la ruta es correcta
+import ListaAsignaturaCarrera from './[idCarrera]'; // Asegúrate de que la ruta es correcta
 
 const AsignaturaCarrera = () => {
   const router = useRouter();

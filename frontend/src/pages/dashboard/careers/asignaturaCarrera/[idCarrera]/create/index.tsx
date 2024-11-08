@@ -4,6 +4,7 @@ import axios from 'axios';
 import {
   Container,
   Paper,
+  Typography,
   TextField,
   Button,
   InputLabel,
@@ -11,8 +12,16 @@ import {
   MenuItem,
   FormControl,
   Grid,
-  Typography,
   Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
 } from '@mui/material';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
@@ -20,7 +29,7 @@ import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import dayjs from 'dayjs';  
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
-import DashboardMenu from '../../../../dashboard';
+import DashboardMenu from '../../../..';
 
 
 // Habilita los plugins
@@ -113,7 +122,7 @@ const CrearAsignaturaCarrera = () => {
   };
 
   const handleConfirmModal = () => {
-    router.push(`/dashboard/carreras/asignaturas/${idCarrera}`);
+    router.push(`/dashboard/careers/asignaturaCarrera/${idCarrera}`);
   };
 
   useEffect(() => {
@@ -147,6 +156,8 @@ const CrearAsignaturaCarrera = () => {
       estado: estado,
     };
 
+    console.log(nuevaAsignaturaEnCarrera)
+
     try {
       const response = await axios.post('http://127.0.0.1:8000/facet/asignatura-carrera/', nuevaAsignaturaEnCarrera, {
         headers: {
@@ -174,33 +185,60 @@ const CrearAsignaturaCarrera = () => {
               Seleccionar Asignatura
             </Button>
             <Dialog open={openAsignatura} onClose={handleClose} maxWidth="md" fullWidth>
-              <TextField
-                label="Buscar Asignatura"
-                value={filtroAsignaturas}
-                onChange={(e) => setFiltroAsignaturas(e.target.value)}
-                fullWidth
-              />
-              {handleFilterAsignaturas(filtroAsignaturas).map((asignatura) => (
-                <div key={asignatura.id}>
-                  <Button
-                    onClick={() => {
-                      setIdasignatura(asignatura.id);
-                      setNombre(asignatura.nombre);
-                      setCodigo(asignatura.codigo);
-                    }}
-                    style={{
-                      backgroundColor: asignatura.id === idasignatura ? '#4caf50' : 'inherit',
-                      color: asignatura.id === idasignatura ? 'white' : 'inherit',
-                    }}
-                  >
-                    {asignatura.codigo} - {asignatura.nombre}
-                  </Button>
-                </div>
-              ))}
-              <Button variant="contained" onClick={handleConfirmSelection} style={{ marginTop: 'auto', marginBottom: '10px', position: 'sticky', bottom: 0 }}>
-                Confirmar Selección
-              </Button>
-            </Dialog>
+  <DialogTitle>Seleccionar Asignatura</DialogTitle>
+  <DialogContent>
+    <TextField
+      label="Buscar por Código o Nombre"
+      value={filtroAsignaturas}
+      onChange={(e) => setFiltroAsignaturas(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Código</TableCell>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {handleFilterAsignaturas(filtroAsignaturas).map((asignatura) => (
+            <TableRow key={asignatura.id}>
+              <TableCell>{asignatura.codigo}</TableCell>
+              <TableCell>{asignatura.nombre}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setIdasignatura(asignatura.id);
+                    setNombre(asignatura.nombre);
+                    setCodigo(asignatura.codigo);
+                    setOpenAsignatura(false);
+                  }}
+                  style={{
+                    backgroundColor: asignatura.id === idasignatura ? '#4caf50' : 'inherit',
+                    color: asignatura.id === idasignatura ? 'white' : 'inherit',
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleClose}>Cerrar</Button>
+    <Button variant="contained" onClick={handleConfirmSelection} color="primary">
+      Confirmar Selección
+    </Button>
+  </DialogActions>
+</Dialog>
+
           </Grid>
           <Grid item xs={12}>
             <TextField
