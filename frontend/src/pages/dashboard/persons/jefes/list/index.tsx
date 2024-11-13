@@ -52,6 +52,7 @@ const ListaJefes = () => {
     try {
       const response = await axios.get(url);
       setJefes(response.data);
+      console.log(response.data)
       setCurrentPage(1);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -103,12 +104,23 @@ const ListaJefes = () => {
       }
       url += params.toString();
   
-      // Procesa cada página mientras exista `url`
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
   
-        allJefes = [...allJefes, ...results];
+        // Obtener los detalles completos de cada persona
+        const detailedJefes = await Promise.all(
+          results.map(async (jefe: any) => {
+            // Solicitar los detalles de la persona si `persona` es solo un ID
+            if (typeof jefe.persona === 'number') {
+              const personaResponse = await axios.get(`http://127.0.0.1:8000/facet/persona/${jefe.persona}/`);
+              jefe.persona = personaResponse.data; // Asignar detalles completos a `jefe.persona`
+            }
+            return jefe;
+          })
+        );
+  
+        allJefes = [...allJefes, ...detailedJefes];
         url = next;
       }
   
@@ -133,6 +145,7 @@ const ListaJefes = () => {
       console.error('Error al exportar a Excel:', error);
     }
   };
+  
 
 
   const totalPages = Math.ceil(totalItems / pageSize);

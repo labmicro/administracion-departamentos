@@ -25,15 +25,17 @@ class DocenteSerializer(serializers.ModelSerializer):
         return None
 
     def update(self, instance, validated_data):
+        # Extrae el ID de persona de validated_data si existe
         persona_id = validated_data.pop('persona', None)
 
-        # Solo actualiza la persona si se ha proporcionado un nuevo ID y es diferente del actual
-        if persona_id and instance.persona_id != persona_id:
-            instance.persona_id = persona_id
+        # Si se proporciona un nuevo ID de persona, actualízalo
+        if persona_id and instance.persona_id != persona_id.id:  # Asegúrate de que persona_id sea solo el ID
+            instance.persona_id = persona_id  # Solo asigna el ID
 
-        # Actualizar el resto de los campos de Docente
+        # Actualizar otros campos de Docente
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         
         instance.save()
         return instance
+

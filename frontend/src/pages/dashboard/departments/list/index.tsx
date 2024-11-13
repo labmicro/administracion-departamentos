@@ -84,7 +84,7 @@ const ListaDepartamentos = () => {
   const descargarExcel = async () => {
     try {
       let allDepartamentos: Departamento[] = [];
-
+  
       let url = `http://127.0.0.1:8000/facet/departamento/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
@@ -97,15 +97,23 @@ const ListaDepartamentos = () => {
         params.append('telefono__icontains', filtroTelefono);
       }
       url += params.toString();
-
+  
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-
-        allDepartamentos = [...allDepartamentos, ...results];
+  
+        allDepartamentos = [
+          ...allDepartamentos,
+          ...results.map((departamento: any) => ({
+            nombre: departamento.nombre,
+            telefono: departamento.telefono,
+            estado: departamento.estado,
+            interno: departamento.interno,
+          })),
+        ];
         url = next;
       }
-
+  
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.json_to_sheet(allDepartamentos);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamentos');
@@ -116,6 +124,7 @@ const ListaDepartamentos = () => {
       console.error('Error downloading Excel:', error);
     }
   };
+  
 
   return (
     <DashboardMenu>

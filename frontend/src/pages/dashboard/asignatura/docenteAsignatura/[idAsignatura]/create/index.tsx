@@ -31,6 +31,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import DashboardMenu from '../../../../../dashboard';
 import { useRouter } from 'next/router';
+import BasicModal from '@/utils/modal';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -179,6 +180,31 @@ const [resolucion, setResolucion] = useState<Resolucion | null>(null);
 const [openResolucion, setOpenResolucion] = useState(false);
 const [filtroNroExpediente, setFiltroNroExpediente] = useState('');
 
+const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
+  const [fn, setFn] = useState(() => () => {});
+
+  function capitalizeFirstLetter(string: string) {
+    return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
+  }
+
+  const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
+    setModalTitle(title); // Establecer el título del modal
+    setModalMessage(message);
+    setModalVisible(true);
+    setFn(() => onConfirm);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setModalMessage('');
+  };
+
+  const handleConfirmModal = () => {
+    router.push('/dashboard/asignaturas/');
+  };
+
 const crearDocenteAsignatura = async () => {
   if (!persona || !asignatura || !resolucion) {
     alert('Por favor, selecciona un docente, una asignatura y una resolución.');
@@ -208,10 +234,11 @@ const crearDocenteAsignatura = async () => {
         },
       }
     );
-    alert('Docente agregado a la asignatura con éxito.');
+    // alert('Docente agregado a la asignatura con éxito.');
+    handleOpenModal('Éxito', 'Se creó el docente en Asignatura con Exito.', handleConfirmModal);
   } catch (error) {
-    console.error('Error al crear docente en asignatura:', error);
-    alert('Error al crear el docente en asignatura.');
+    console.log(error);
+    handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
   }
 };
 
@@ -449,6 +476,7 @@ const crearDocenteAsignatura = async () => {
             </Grid>
           </Grid>
         </Paper>
+        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
       </Container>
     </DashboardMenu>
   );

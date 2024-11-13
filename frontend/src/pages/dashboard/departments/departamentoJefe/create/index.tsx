@@ -51,9 +51,21 @@ const CrearDepartamentoJefe = () => {
 
   interface Jefe {
     id: number;
+    persona: Persona;
+    observaciones: string;
+    estado: 0 | 1;
+  }
+
+  interface Persona {
+    id: number;
     nombre: string;
     apellido: string;
+    telefono: string;
     dni: string;
+    estado: 0 | 1;
+    email: string;
+    interno: string;
+    legajo: string;
   }
 
   interface Departamento {
@@ -100,7 +112,7 @@ const CrearDepartamentoJefe = () => {
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/departments/jefes/');
+    router.push('/dashboard/departments/departamentoJefe/');
   };
 
   // Fetch data functions for each modal
@@ -125,8 +137,8 @@ const CrearDepartamentoJefe = () => {
 
   const fetchJefes = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/facet/jefe/');
-      setJefes(response.data.results);
+      const response = await axios.get('http://127.0.0.1:8000/facet/jefe/list_jefes_persona/');
+      setJefes(response.data);
     } catch (error) {
       Swal.fire({
         icon: 'error',
@@ -271,27 +283,30 @@ const CrearDepartamentoJefe = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {jefes
-                          .filter((j) => j.nombre.includes(filtroJefe) || j.dni.includes(filtroJefe))
-                          .map((j) => (
-                            <TableRow key={j.id}>
-                              <TableCell>{j.nombre}</TableCell>
-                              <TableCell>{j.apellido}</TableCell>
-                              <TableCell>{j.dni}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="outlined"
-                                  onClick={() => {
-                                    setJefe(j);
-                                    setOpenJefe(false);
-                                  }}
-                                >
-                                  Seleccionar
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
+  {jefes
+    .filter((j) =>
+      (j.persona.nombre && j.persona.nombre.includes(filtroJefe)) ||
+      (j.persona.dni && j.persona.dni.includes(filtroJefe))
+    )
+    .map((j) => (
+      <TableRow key={j.id}>
+        <TableCell>{j.persona.nombre}</TableCell>
+        <TableCell>{j.persona.apellido}</TableCell>
+        <TableCell>{j.persona.dni}</TableCell>
+        <TableCell>
+          <Button
+            variant="outlined"
+            onClick={() => {
+              setJefe(j);
+              setOpenJefe(false);
+            }}
+          >
+            Seleccionar
+          </Button>
+        </TableCell>
+      </TableRow>
+    ))}
+</TableBody>
                     </Table>
                   </TableContainer>
                 </DialogContent>
@@ -378,7 +393,7 @@ const CrearDepartamentoJefe = () => {
                 <Grid item xs={12}>
                   <TextField
                     label="Nombre Jefe"
-                    value={`${jefe.nombre} ${jefe.apellido}`}
+                    value={`${jefe.persona.nombre} ${jefe.persona.apellido}`}
                     fullWidth
                     InputProps={{ readOnly: true }}
                   />

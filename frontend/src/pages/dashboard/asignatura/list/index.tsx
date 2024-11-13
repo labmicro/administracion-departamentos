@@ -112,6 +112,7 @@ const ListaAsignaturas = () => {
     try {
       let allAsignaturas: Asignatura[] = [];
 
+      // Construir URL con filtros
       let url = `http://127.0.0.1:8000/facet/asignatura/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
@@ -124,20 +125,32 @@ const ListaAsignaturas = () => {
         params.append('tipo', filtroTipo);
       }
       if (filtroModulo !== '') {
-        params.append('planestudio__icontains', filtroModulo);
+        params.append('modulo__icontains', filtroModulo);
       }
       url += params.toString();
 
+      // Iterar sobre las páginas de resultados
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-
         allAsignaturas = [...allAsignaturas, ...results];
         url = next;
       }
 
+      // Preparar los datos en el formato requerido para el Excel
+      const dataForExcel = allAsignaturas.map((asignatura) => ({
+        'Codigo': asignatura.codigo,
+        'Nombre': asignatura.nombre,
+        'Modulo': asignatura.modulo,
+        'Tipo': asignatura.tipo,
+        'Estado': asignatura.estado === 1 ? 'Activo' : 'Inactivo',
+        'Area': areas.find(area => area.id === asignatura.area)?.nombre || 'Área no encontrada',
+        'Departamento': departamentos.find(depto => depto.id === asignatura.departamento)?.nombre || 'Departamento no encontrado',
+      }));
+
+      // Generar y descargar el archivo Excel
       const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(allAsignaturas);
+      const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Asignaturas');
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -146,6 +159,7 @@ const ListaAsignaturas = () => {
       console.error('Error downloading Excel:', error);
     }
   };
+
 
   return (
     <DashboardMenu>

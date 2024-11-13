@@ -2,7 +2,7 @@ import React from 'react';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import ListaNoDocentes from './list';
 import CrearNoDocente from './create';
-import EditarNoDocente from './edit';
+import EditarNoDocente from './edit/[id]';
 
 const NoDocentes = () => {
   const router = useRouter(); // Usamos useRouter para manejar la navegación

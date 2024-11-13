@@ -9,6 +9,7 @@ import Link from 'next/link'; // Cambiado para usar Link de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import DashboardMenu from '../../../../dashboard';
+import dayjs from 'dayjs';
 
 
 const ListaDepartamentosJefe = () => {
@@ -68,6 +69,7 @@ const ListaDepartamentosJefe = () => {
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [deptoJefes, setDeptoJefes] = useState<DepartamentoJefe[]>([]);
+  console.log(deptoJefes)
   const [jefes, setJefes] = useState<Jefe[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
@@ -79,7 +81,7 @@ const ListaDepartamentosJefe = () => {
   const [filtroResolucion, setFiltroResolucion] = useState<string | ''>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe-departamento/');
+  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe-departamento/list_detalle/');
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -91,7 +93,7 @@ const ListaDepartamentosJefe = () => {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      setDeptoJefes(response.data.results);
+      setDeptoJefes(response.data);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
@@ -103,8 +105,9 @@ const ListaDepartamentosJefe = () => {
       setDepartamentos(departamentosResponse.data.results);
       const resolucionesResponse = await axios.get('http://127.0.0.1:8000/facet/resolucion/');
       setResoluciones(resolucionesResponse.data.results);
-      const jefesResponse = await axios.get('http://127.0.0.1:8000/facet/jefe/');
-      setJefes(jefesResponse.data.results);
+      const jefesResponse = await axios.get('http://127.0.0.1:8000/facet/jefe/list_jefes_persona/');
+      setJefes(jefesResponse.data);
+      console.log(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -138,45 +141,42 @@ const ListaDepartamentosJefe = () => {
     setCurrentUrl(url);
   };
 
-  const descargarExcel = async () => {
-    try {
-      let allDeptoJefes: DepartamentoJefe[] = [];
+  
+const descargarExcel = async () => {
+  try {
+    let allDeptoJefes: DepartamentoJefe[] = [];
 
-      let url = `http://127.0.0.1:8000/facet/jefe-departamento/?`;
-      const params = new URLSearchParams();
-      if (filtroNombre !== '') {
-        params.append('jefe__persona__nombre__icontains', filtroNombre);
-      }
-      if (filtroDni !== '') {
-        params.append('jefe__persona__dni__icontains', filtroDni);
-      }
-      if (filtroEstado !== '') {
-        params.append('jefe__estado', filtroEstado.toString());
-      }
-      if (filtroApellido !== '') {
-        params.append('jefe__persona__apellido__icontains', filtroApellido);
-      }
-      if (filtroLegajo !== '') {
-        params.append('jefe__persona__legajo__icontains', filtroLegajo);
-      }
-      if (filtroDepartamento !== '') {
-        params.append('departamento__nombre__icontains', filtroDepartamento);
-      }
-      if (filtroResolucion !== '') {
-        params.append('resolucion__nresolucion__icontains', filtroResolucion);
-      }
-      url += params.toString();
+    // Usa la URL personalizada para obtener los detalles de jefe con la información completa
+    let url = `http://127.0.0.1:8000/facet/jefe-departamento/list_detalle/`;
 
-      while (url) {
-        const response = await axios.get(url);
-        const { results, next } = response.data;
+    while (url) {
+      const response = await axios.get(url);
+      const data = response.data;  // Asumimos que data es un array directamente
+      console.log(data);
 
-        allDeptoJefes = [...allDeptoJefes, ...results];
-        url = next;
-      }
+      // Mapea los resultados, asegurando que `nombre` y `apellido` estén disponibles
+      allDeptoJefes = [
+        ...allDeptoJefes,
+        ...data.map((item: any) => ({
+          ...item,
+          jefe: {
+            persona: {
+              nombre: item.jefe.persona.nombre,
+              apellido: item.jefe.persona.apellido,
+            },
+          },
+          fecha_de_inicio: formatFecha(item.fecha_de_inicio),
+          fecha_de_fin: item.fecha_de_fin ? formatFecha(item.fecha_de_fin) : 'N/A',
+        })),
+      ];
 
-      const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(allDeptoJefes.map((item) => ({
+      // Aquí, asegúrate de actualizar `url` si la respuesta proporciona una paginación con `next`
+      url = response.data.next; // Cambiar esta línea si `next` se encuentra en otro nivel
+    }
+
+    const workbook = XLSX.utils.book_new();
+    const worksheet = XLSX.utils.json_to_sheet(
+      allDeptoJefes.map((item) => ({
         'Nombre': item.jefe.persona.nombre,
         'Apellido': item.jefe.persona.apellido,
         'Departamento': item.departamento.nombre,
@@ -184,16 +184,20 @@ const ListaDepartamentosJefe = () => {
         'Fecha de Inicio': item.fecha_de_inicio,
         'Fecha de Fin': item.fecha_de_fin,
         'Estado': item.estado === 1 ? 'Activo' : 'Inactivo',
-        'Observaciones': item.observaciones
-      })));
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamento Jefes');
-      const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-      saveAs(excelBlob, 'departamento_jefes.xlsx');
-    } catch (error) {
-      console.error('Error downloading Excel:', error);
-    }
-  };
+        'Observaciones': item.observaciones,
+      }))
+    );
+
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'Departamento Jefes');
+    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+    saveAs(excelBlob, 'departamento_jefes.xlsx');
+  } catch (error) {
+    console.error('Error downloading Excel:', error);
+  }
+};
+
+  const formatFecha = (fecha: string) => dayjs(fecha).format('DD-MM-YYYY');
 
   const totalPages = Math.ceil(totalItems / pageSize);
 
@@ -312,8 +316,8 @@ const ListaDepartamentosJefe = () => {
                   <TableCell>{deptoJefe.jefe.persona.apellido}</TableCell>
                   <TableCell>{deptoJefe.departamento.nombre}</TableCell>
                   <TableCell>{deptoJefe.resolucion.nresolucion}</TableCell>
-                  <TableCell>{deptoJefe.fecha_de_inicio}</TableCell>
-                  <TableCell>{deptoJefe.fecha_de_fin}</TableCell>
+                  <TableCell>{formatFecha(deptoJefe.fecha_de_inicio)}</TableCell>
+                  <TableCell>{deptoJefe.fecha_de_fin ? formatFecha(deptoJefe.fecha_de_fin) : '-'}</TableCell>
                   <TableCell>{deptoJefe.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
                   <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     <Tooltip title={deptoJefe.observaciones}>
@@ -322,7 +326,7 @@ const ListaDepartamentosJefe = () => {
                   </TableCell>
                   <TableCell>
                     <Tooltip title="Editar">
-                      <Link href={`/dashboard/departments/jefes/editar/${deptoJefe.id}`} passHref>
+                      <Link href={`/dashboard/departments/departamentoJefe/edit/${deptoJefe.id}`} passHref>
                         <EditIcon />
                       </Link>
                     </Tooltip>

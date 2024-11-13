@@ -19,16 +19,15 @@ import {
   FormControl,
   Grid,
 } from '@mui/material';
-import EditIcon from '@mui/icons-material/Edit';
 import AddIcon from '@mui/icons-material/Add';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../..';
+import dayjs from 'dayjs';
+import EditIcon from '@mui/icons-material/Edit';
+import Link from 'next/link';
 
-interface ListaDocenteAsignaturaProps {
-  idAsignatura: string;
-}
 
 const ListaDocenteAsignatura: React.FC = () => {
   const router = useRouter();
@@ -60,31 +59,26 @@ const ListaDocenteAsignatura: React.FC = () => {
     cargo: Cargo;
     dedicacion: Dedicacion;
     estado: 0 | 1;
-  }
+    fecha_de_inicio: string; // Si viene como cadena en formato ISO
+    fecha_de_vencimiento: string | null; // Incluye null si la fecha es opcional
+}
 
   const [asignaturaDocentes, setAsignaturaDocentes] = useState<AsignaturaDocente[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
   const [filtroCondicion, setFiltroCondicion] = useState<Condicion | ''>('');
   const [filtroCargo, setFiltroCargo] = useState<Cargo | ''>('');
   const [filtroDedicacion, setFiltroDedicacion] = useState<Dedicacion | ''>('');
-  const [currentUrl, setCurrentUrl] = useState<string>(`http://127.0.0.1:8000/facet/asignatura-docente/?asignatura=${idAsignatura}`);
 
   useEffect(() => {
     if (idAsignatura) {
-      setCurrentUrl(`http://127.0.0.1:8000/facet/asignatura-docente/?asignatura=${idAsignatura}`);
+      fetchData(`http://127.0.0.1:8000/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`);
     }
   }, [idAsignatura]);
-
-  useEffect(() => {
-    if (currentUrl) {
-      fetchData(currentUrl);
-    }
-  }, [currentUrl]);
 
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      setAsignaturaDocentes(response.data.results);
+      setAsignaturaDocentes(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -93,39 +87,58 @@ const ListaDocenteAsignatura: React.FC = () => {
   const filtrarAsignaturaDocentes = () => {
     if (!idAsignatura) return;
 
-    let url = `http://127.0.0.1:8000/facet/asignatura-docente/?asignatura=${idAsignatura}`;
+    let url = `http://127.0.0.1:8000/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
     const params = new URLSearchParams();
-    if (filtroNombre) params.append('nombre__icontains', filtroNombre);
+    if (filtroNombre) params.append('docente__persona__nombre__icontains', filtroNombre);
     if (filtroCondicion) params.append('condicion', filtroCondicion);
     if (filtroCargo) params.append('cargo', filtroCargo);
     if (filtroDedicacion) params.append('dedicacion', filtroDedicacion);
     url += `&${params.toString()}`;
 
-    setCurrentUrl(url);
+    fetchData(url);
   };
 
   const descargarExcel = async () => {
     try {
       let allAsignaturaDocentes: AsignaturaDocente[] = [];
-      let url = currentUrl;
-
+      let url = `http://127.0.0.1:8000/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+  
       while (url) {
         const response = await axios.get(url);
-        const { results, next } = response.data;
+        const data = response.data;
+  
+        // Si `results` no está en la respuesta, usar la data directamente
+        const results = data.results || data;
+        const next = data.next || null;
+  
         allAsignaturaDocentes = [...allAsignaturaDocentes, ...results];
         url = next;
       }
-
+  
       const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(allAsignaturaDocentes);
+      const worksheet = XLSX.utils.json_to_sheet(
+        allAsignaturaDocentes.map((docente) => ({
+          Nombre: `${docente.docente.persona.nombre} ${docente.docente.persona.apellido}`,
+          Condicion: docente.condicion,
+          Cargo: docente.cargo,
+          Dedicacion: docente.dedicacion,
+          Estado: docente.estado === 1 ? 'Activo' : 'Inactivo',
+          "Fecha de Inicio": dayjs(docente.fecha_de_inicio).format('DD-MM-YYYY'),
+          "Fecha de Vencimiento": docente.fecha_de_vencimiento ? dayjs(docente.fecha_de_vencimiento).format('DD-MM-YYYY') : 'N/A',
+        }))
+      );
+  
       XLSX.utils.book_append_sheet(workbook, worksheet, 'AsignaturaDocentes');
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-      const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+      const excelBlob = new Blob([excelBuffer], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      });
       saveAs(excelBlob, 'asignatura_docentes.xlsx');
     } catch (error) {
       console.error('Error downloading Excel:', error);
     }
   };
+  
 
   return (
     <DashboardMenu>
@@ -217,7 +230,10 @@ const ListaDocenteAsignatura: React.FC = () => {
                   <TableCell className="header-cell">Condicion</TableCell>
                   <TableCell className="header-cell">Cargo</TableCell>
                   <TableCell className="header-cell">Dedicacion</TableCell>
-                  <TableCell className="header-cell">Acciones</TableCell>
+                  <TableCell className="header-cell">Fecha de Inicio</TableCell>
+                  <TableCell className="header-cell">Fecha de Vencimiento</TableCell>
+                  {/* <TableCell className="header-cell">Acciones</TableCell> */}
+                  <TableCell className="header-cell"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -227,7 +243,9 @@ const ListaDocenteAsignatura: React.FC = () => {
                     <TableCell>{docente.condicion}</TableCell>
                     <TableCell>{docente.cargo}</TableCell>
                     <TableCell>{docente.dedicacion}</TableCell>
-                    <TableCell>
+                    <TableCell>{dayjs(docente.fecha_de_inicio).format('DD-MM-YYYY')}</TableCell>
+                    <TableCell>{dayjs(docente.fecha_de_vencimiento).format('DD-MM-YYYY')}</TableCell>
+                    {/* <TableCell>
                       <Button
                         variant="contained"
                         color="primary"
@@ -236,7 +254,12 @@ const ListaDocenteAsignatura: React.FC = () => {
                       >
                         Editar
                       </Button>
-                    </TableCell>
+                    </TableCell> */}
+                    <TableCell>
+                    <Link href={`/dashboard/asignatura/docenteAsignatura/${idAsignatura}/edit/${docente.id}`} passHref>
+                      <EditIcon />
+                    </Link>
+                  </TableCell>
                   </TableRow>
                 ))}
               </TableBody>

@@ -91,22 +91,36 @@ const ListaAreas = () => {
   const descargarExcel = async () => {
     try {
       let allAreas: Area[] = [];
-
       let url = `http://127.0.0.1:8000/facet/area/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
         params.append('nombre__icontains', filtroNombre);
       }
       url += params.toString();
-
+  
+      // Obtener todos los departamentos para enlazar con las áreas
+      const departamentosResponse = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+      const departamentos: Departamento[] = departamentosResponse.data.results;
+  
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-
-        allAreas = [...allAreas, ...results];
+  
+        // Mapea los datos para incluir solo las columnas requeridas
+        allAreas = [
+          ...allAreas,
+          ...results.map((area: any) => {
+            const departamentoNombre = departamentos.find(depto => depto.id === area.departamento)?.nombre || 'Departamento no encontrado';
+            return {
+              nombre: area.nombre, // Nombre original del área
+              "nombre Departamento": departamentoNombre, // Nombre del departamento relacionado
+              estado: area.estado,
+            };
+          }),
+        ];
         url = next;
       }
-
+  
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.json_to_sheet(allAreas);
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Areas');
@@ -117,6 +131,8 @@ const ListaAreas = () => {
       console.error('Error downloading Excel:', error);
     }
   };
+  
+  
 
   return (
     <DashboardMenu>

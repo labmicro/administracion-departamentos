@@ -121,7 +121,7 @@ const ListaNoDocentes = () => {
         </Button>
         <Button
           variant="contained"
-          color="secondary"
+          color="primary"
           onClick={exportToExcel}
           style={{ marginLeft: '16px' }}
         >
@@ -232,7 +232,7 @@ const ListaNoDocentes = () => {
                     <TableCell>{NoDocente.observaciones}</TableCell>
                     <TableCell>{NoDocente.estado}</TableCell>
                     <TableCell>
-                      <Button onClick={() => router.push(`/dashboard/personas/nodocentes/editar/${NoDocente.id}`)}>
+                      <Button onClick={() => router.push(`/dashboard/persons/noDocentes/edit/${NoDocente.id}`)}>
                         <EditIcon />
                       </Button>
                     </TableCell>

@@ -31,6 +31,8 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import DashboardMenu from '../../../..';
 import { useRouter } from 'next/router';
+import BasicModal from '@/utils/modal';
+import ModalConfirmacion from '@/utils/modalConfirmacion';
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -39,6 +41,22 @@ dayjs.extend(timezone);
 const EditarDocenteAsignatura: React.FC = () => {
   const router = useRouter();
   const { idAsignatura, idDocenteAsignatura } = router.query;
+  const [modalVisible, setModalVisible] = useState(false);
+  const [modalMessage, setModalMessage] = useState('');
+  const [modalTitle, setModalTitle] = useState('');
+  const [confirmarEliminacion, setConfirmarEliminacion] = useState(false);
+
+  const handleOpenModal = (title: string, message: string) => {
+    setModalTitle(title);
+    setModalMessage(message);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setModalMessage('');
+    router.push('/dashboard/asignatura/'); // Redirige a la lista de personas
+  };
 
   interface Persona {
     id: number;
@@ -158,10 +176,22 @@ const EditarDocenteAsignatura: React.FC = () => {
         updatedDocenteAsignatura,
         { headers: { 'Content-Type': 'application/json' } }
       );
-      alert('Asignación de docente actualizada con éxito.');
+      handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
-      console.error('Error al actualizar asignatura docente:', error);
-      alert('Error al actualizar la asignación.');
+      console.error('Error al hacer la solicitud PUT:', error);
+      handleOpenModal('Error', 'No se pudo realizar la acción.')
+    }
+  };
+
+  const eliminarPersona = async () => {
+    try {
+      await axios.delete(`http://127.0.0.1:8000/facet/asignatura-docente/${idDocenteAsignatura}/`, {
+        headers: { 'Content-Type': 'application/json' },
+      });
+      handleOpenModal('Docente en Asignatura Eliminado', 'La acción se realizó con éxito.');
+    } catch (error) {
+      console.error('Error al hacer la solicitud DELETE:', error);
+      handleOpenModal('Error', 'No se pudo realizar la acción.');
     }
   };
 
@@ -211,8 +241,6 @@ const EditarDocenteAsignatura: React.FC = () => {
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker label="Fecha Inicio" value={fechaInicio} onChange={(date) => setFechaInicio(date)} />
                 </LocalizationProvider>
-              </Grid>
-              <Grid item xs={6}>
                 <LocalizationProvider dateAdapter={AdapterDayjs}>
                   <DatePicker label="Fecha Fin" value={fechaFin} onChange={(date) => setFechaFin(date)} />
                 </LocalizationProvider>
@@ -220,10 +248,27 @@ const EditarDocenteAsignatura: React.FC = () => {
             </Grid>
             <Grid item xs={12} marginBottom={2}>
               <Button variant="contained" onClick={updateDocenteAsignatura}>
+                Editar
+              </Button>
+              <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" style={{ marginLeft: '8px' }} color="error">
+                Eliminar
+              </Button>
+            </Grid>
+            <Grid item xs={12} marginBottom={2}>
+              <Button variant="contained" onClick={updateDocenteAsignatura}>
                 Guardar Cambios
               </Button>
             </Grid>
           </Grid>
+          <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} />
+          <ModalConfirmacion
+            open={confirmarEliminacion}
+            onClose={() => setConfirmarEliminacion(false)}
+            onConfirm={() => {
+              setConfirmarEliminacion(false);
+              eliminarPersona();
+            }}
+          />
         </Paper>
       </Container>
     </DashboardMenu>
