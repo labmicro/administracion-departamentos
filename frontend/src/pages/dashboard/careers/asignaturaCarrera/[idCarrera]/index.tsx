@@ -105,17 +105,41 @@ const ListaAsignaturaCarrera = () => {
     try {
       let allAsignaturasCarrera: AsignaturaCarrera[] = [];
       let url = `http://127.0.0.1:8000/facet/asignatura-carrera/?idcarrera=${idCarrera}`;
-
+  
+      // Aplicar los filtros a la URL
+      const params = new URLSearchParams();
+      if (filtroCodigo) params.append('codigo__icontains', filtroCodigo);
+      if (filtroNombre) params.append('nombre__icontains', filtroNombre);
+      if (filtroTipo) params.append('tipo', filtroTipo);
+      if (filtroModulo) params.append('modulo__icontains', filtroModulo);
+      url += `&${params.toString()}`;
+  
+      // Obtener todos los datos con paginación
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-
         allAsignaturasCarrera = [...allAsignaturasCarrera, ...results];
-        url = next;
+        url = next; // Continuar con la siguiente página si existe
       }
-
+  
+      // Generar el archivo Excel
       const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(allAsignaturasCarrera);
+      const worksheet = XLSX.utils.json_to_sheet(
+        allAsignaturasCarrera.map((asignaturaCarrera) => {
+          const asignatura = asignaturas.find(asig => asig.idasignatura === asignaturaCarrera.idasignatura);
+          const departamento = departamentos.find(depto => depto.iddepartamento === asignaturaCarrera.iddepartamento);
+          const area = areas.find(area => area.idarea === asignaturaCarrera.idarea);
+  
+          return {
+            Código: asignatura?.codigo || '',
+            Asignatura: asignatura?.nombre || '',
+            Módulo: asignatura?.modulo || '',
+            Departamento: departamento?.nombre || '',
+            Área: area?.nombre || '',
+          };
+        })
+      );
+  
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Asignaturas de Carrera');
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
@@ -124,6 +148,7 @@ const ListaAsignaturaCarrera = () => {
       console.error('Error downloading Excel:', error);
     }
   };
+  
 
   const filtrarAsignaturas = () => {
     setAsignaturasCarrera(asignaturasCarrera.filter((asignaturaCarrera) => {

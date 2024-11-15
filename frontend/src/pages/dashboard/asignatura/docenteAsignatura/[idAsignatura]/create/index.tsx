@@ -202,7 +202,7 @@ const [modalVisible, setModalVisible] = useState(false);
   };
 
   const handleConfirmModal = () => {
-    router.push('/dashboard/asignaturas/');
+    router.push('/dashboard/asignatura/');
   };
 
 const crearDocenteAsignatura = async () => {

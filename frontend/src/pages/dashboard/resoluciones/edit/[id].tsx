@@ -137,13 +137,21 @@ const EditarResolucion = () => {
             />
           </Grid>
           <Grid item xs={12}>
-            <TextField
-              label="Tipo"
+          <FormControl fullWidth margin="none">
+            <InputLabel id="tipo-select-label">Tipo</InputLabel>
+            <Select
+              labelId="tipo-select-label"
               value={tipo}
+              label="Tipo"
               onChange={(e) => setTipo(e.target.value)}
-              fullWidth
-            />
-          </Grid>
+            >
+              <MenuItem value="Rector">Rector</MenuItem>
+              <MenuItem value="Decano">Decano</MenuItem>
+              <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
+              <MenuItem value="Consejo_Directivo">Consejo Directivo</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
           <Grid item xs={12}>
             <TextField
               label="Link Documento Adjunto"

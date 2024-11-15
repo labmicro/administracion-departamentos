@@ -66,12 +66,12 @@ const ItemsMenu = () => {
         </ListItemIcon>
         <ListItemText primary="Carreras" />
       </ListItemButton>
-      <ListItemButton onClick={() => handleNavigation('/dashboard/reportes')}>
+      {/* <ListItemButton onClick={() => handleNavigation('/dashboard/reportes')}>
         <ListItemIcon>
           <BarChartIcon />
         </ListItemIcon>
         <ListItemText primary="Reportes" />
-      </ListItemButton>
+      </ListItemButton> */}
     </React.Fragment>
   );
 };

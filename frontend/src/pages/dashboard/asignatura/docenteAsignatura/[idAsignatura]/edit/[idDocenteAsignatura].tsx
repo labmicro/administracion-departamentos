@@ -55,7 +55,7 @@ const EditarDocenteAsignatura: React.FC = () => {
   const handleCloseModal = () => {
     setModalVisible(false);
     setModalMessage('');
-    router.push('/dashboard/asignatura/'); // Redirige a la lista de personas
+    router.push(`/dashboard/asignatura/docenteAsignatura/${idAsignatura}`); // Redirige a la lista de docentes de la asignatura actual
   };
 
   interface Persona {
@@ -252,11 +252,6 @@ const EditarDocenteAsignatura: React.FC = () => {
               </Button>
               <Button onClick={() => setConfirmarEliminacion(true)} variant="contained" style={{ marginLeft: '8px' }} color="error">
                 Eliminar
-              </Button>
-            </Grid>
-            <Grid item xs={12} marginBottom={2}>
-              <Button variant="contained" onClick={updateDocenteAsignatura}>
-                Guardar Cambios
               </Button>
             </Grid>
           </Grid>

@@ -79,7 +79,7 @@ const CrearCarrera = () => {
     <Container maxWidth="lg">
       <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
         <Typography variant="h4" gutterBottom>
-          Asignatura
+          Carrera
         </Typography>
 
         <Grid container spacing={2}>

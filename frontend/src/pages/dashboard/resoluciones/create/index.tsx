@@ -131,7 +131,6 @@ const CrearResolucion = () => {
                 label="Tipo"
                 onChange={(e) => setTipo(e.target.value)}
               >
-                <MenuItem value={"Todos"}>Todos</MenuItem>
                 <MenuItem value={"Rector"}>Rector</MenuItem>
                 <MenuItem value={"Decano"}>Decano</MenuItem>
                 <MenuItem value={"Consejo_Superior"}>Consejo Superior</MenuItem>

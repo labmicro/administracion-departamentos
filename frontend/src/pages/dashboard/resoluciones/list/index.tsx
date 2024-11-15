@@ -118,36 +118,45 @@ const ListaResoluciones = () => {
   const descargarExcel = async () => {
     try {
       let allResoluciones: Resolucion[] = [];
-
       let url = `http://127.0.0.1:8000/facet/resolucion/?`;
       const params = new URLSearchParams();
-      if (filtroNroExpediente !== '') {
-        params.append('nexpediente__icontains', filtroNroExpediente);
-      }
-      if (filtroEstado !== '') {
-        params.append('estado', filtroEstado.toString());
-      }
-      if (filtroTipo !== '') {
-        params.append('tipo', filtroTipo);
-      }
-      if (filtroNroResolucion !== '') {
-        params.append('nresolucion__icontains', filtroNroResolucion);
-      }
-      if (filtroFecha) {
-        params.append('fecha__date', filtroFecha.format('YYYY-MM-DD'));
-      }
+  
+      // Agrega los filtros actuales al URL de exportación
+      if (filtroNroExpediente !== '') params.append('nexpediente__icontains', filtroNroExpediente);
+      if (filtroEstado !== '') params.append('estado', filtroEstado.toString());
+      if (filtroTipo !== '') params.append('tipo', filtroTipo);
+      if (filtroNroResolucion !== '') params.append('nresolucion__icontains', filtroNroResolucion);
+      if (filtroFecha) params.append('fecha__date', filtroFecha.format('YYYY-MM-DD'));
       url += params.toString();
-
+  
+      // Obtiene todos los datos para el Excel
       while (url) {
         const response = await axios.get(url);
         const { results, next } = response.data;
-
         allResoluciones = [...allResoluciones, ...results];
         url = next;
       }
-
+  
+      // Crea el archivo Excel con las columnas de la grilla
       const workbook = XLSX.utils.book_new();
-      const worksheet = XLSX.utils.json_to_sheet(allResoluciones);
+      const worksheet = XLSX.utils.json_to_sheet(
+        allResoluciones.map((resolucion) => ({
+          "Nro Expediente": resolucion.nexpediente,
+          "Nro Resolución": resolucion.nresolucion,
+          Tipo: resolucion.tipo === 'Consejo_Superior' ? 'Consejo Superior' :
+                resolucion.tipo === 'Consejo_Directivo' ? 'Consejo Directivo' : resolucion.tipo,
+          Fecha: dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
+                ? dayjs(resolucion.fecha, "DD/MM/YYYY HH:mm:ss").format('DD/MM/YYYY')
+                : 'No disponible',
+          Carga: dayjs(resolucion.fecha_creacion, "DD/MM/YYYY HH:mm:ss").isValid()
+                ? dayjs(resolucion.fecha_creacion, "DD/MM/YYYY").format('DD/MM/YYYY')
+                : 'No disponible',
+          Estado: resolucion.estado,
+          Adjunto: resolucion.adjunto,
+          Observaciones: resolucion.observaciones
+        }))
+      );
+  
       XLSX.utils.book_append_sheet(workbook, worksheet, 'Resoluciones');
       const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
       const excelBlob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
