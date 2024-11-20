@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     "corsheaders",
     'django_filters',
     "coreapi",
+    "multiselectfield",
 ]
 
 MIDDLEWARE = [
