@@ -69,7 +69,7 @@ class User(AbstractUser):
         unique=True,
         null=True,
         blank=True,
-        verbose_name="Legajo CPA"
+        verbose_name="Legajo"
     )
     documento = models.PositiveIntegerField(
         unique=True,
