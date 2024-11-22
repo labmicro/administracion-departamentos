@@ -1,23 +1,30 @@
-"use client"; // This is a client component
-import { useEffect } from 'react';
+"use client"; // Esto indica que el componente es del lado del cliente
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation'; // Cambiado a 'next/navigation'
-import LoginPage from '@/pages/login'; // Ajusta la ruta si es necesario
-import DashboardMenu from '@/pages/dashboard'; // Ajusta la ruta si es necesario
 
 const AppWrapper = () => {
   const router = useRouter(); // Usamos useRouter de Next.js
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true); // Estado para verificar autenticación
 
   useEffect(() => {
-    // Lógica de redirección basada en autenticación
     const isAuthenticated = localStorage.getItem('access_token'); // Verifica si hay un token de acceso
+
     if (isAuthenticated) {
-      router.push('/dashboard'); // Redirige al Dashboard si está autenticado
+      router.replace('/dashboard'); // Redirige al Dashboard si está autenticado
     } else {
-      router.push('/login'); // De lo contrario, redirige a la página de login
+      router.replace('/login'); // De lo contrario, redirige a la página de login
     }
+
+    setIsCheckingAuth(false); // Finaliza la verificación de autenticación
   }, [router]);
 
-  return <LoginPage />; // Renderiza la página de Login
+  // Mientras verifica autenticación, no renderiza nada
+  if (isCheckingAuth) {
+    return <div>Cargando...</div>; // Puedes reemplazar esto con un loader si lo deseas
+  }
+
+  return null; // Evita renderizar contenido después de redirección
 };
 
+AppWrapper.displayName = "AppWrapper"; // Agrega un displayName para ESLint
 export default AppWrapper;

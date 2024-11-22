@@ -20,6 +20,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
 
 
 // Habilita los plugins
@@ -237,4 +238,4 @@ const EditarAsignaturaCarrera: React.FC = () => {
   );
 };
 
-export default EditarAsignaturaCarrera;
+export default withAuth(EditarAsignaturaCarrera);

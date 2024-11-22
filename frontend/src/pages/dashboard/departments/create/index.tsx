@@ -25,6 +25,7 @@ import dayjs from 'dayjs'; // Asegúrate de tener instalada esta dependencia
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -148,4 +149,4 @@ const CrearDepartamento = () => {
   );
 };
 
-export default CrearDepartamento;
+export default withAuth(CrearDepartamento);

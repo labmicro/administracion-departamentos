@@ -8,6 +8,8 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const ListaDocentes = () => {
   const h1Style = {
@@ -294,4 +296,4 @@ const ListaDocentes = () => {
   );
 };
 
-export default ListaDocentes;
+export default withAuth(ListaDocentes);

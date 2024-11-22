@@ -9,6 +9,8 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../..';
+import withAuth from "../../../../components/withAut"; 
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -204,4 +206,4 @@ const EditarResolucion = () => {
   );
 };
 
-export default EditarResolucion;
+export default withAuth(EditarResolucion);

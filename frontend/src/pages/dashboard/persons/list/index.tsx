@@ -26,6 +26,8 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
 import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
+
 
 interface Persona {
   id: number;
@@ -300,4 +302,4 @@ const ListaPersonas = () => {
   );
 };
 
-export default ListaPersonas;
+export default withAuth(ListaPersonas);

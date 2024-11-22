@@ -16,6 +16,8 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import ItemsMenu from './components/itemsMenu'; // Asegúrate de que la ruta sea correcta
 import { Container } from '@mui/material';
+import withAuth from "../../components/withAut"; 
+
 
 // Define las propiedades del componente
 interface DashboardMenuProps {

@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import DashboardMenu from '../../../../dashboard';
 import dayjs from 'dayjs';
+import withAuth from "../../../../../components/withAut"; 
 
 
 const ListaDepartamentosJefe = () => {
@@ -370,4 +371,4 @@ const descargarExcel = async () => {
   );
 };
 
-export default ListaDepartamentosJefe;
+export default withAuth(ListaDepartamentosJefe);

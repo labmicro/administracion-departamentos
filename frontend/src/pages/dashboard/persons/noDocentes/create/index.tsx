@@ -26,6 +26,8 @@ import {
 import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const CrearNoDocente = () => {
   const router = useRouter();
@@ -253,4 +255,4 @@ const CrearNoDocente = () => {
   );
 };
 
-export default CrearNoDocente;
+export default withAuth(CrearNoDocente);

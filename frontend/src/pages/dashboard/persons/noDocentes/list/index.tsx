@@ -8,6 +8,8 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const ListaNoDocentes = () => {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
@@ -276,4 +278,4 @@ const ListaNoDocentes = () => {
   );
 };
 
-export default ListaNoDocentes;
+export default withAuth(ListaNoDocentes);

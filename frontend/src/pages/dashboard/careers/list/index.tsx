@@ -9,6 +9,7 @@ import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
 
 type TipoCarrera = 'Pregrado' | 'Grado' | 'Posgrado';
 
@@ -278,4 +279,4 @@ const ListaCarreras = () => {
   );
 };
 
-export default ListaCarreras;
+export default withAuth(ListaCarreras);

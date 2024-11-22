@@ -27,6 +27,8 @@ import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../dashboard';
 import Swal from 'sweetalert2';
+import withAuth from "../../../../components/withAut"; // Importa el HOC
+
 
 const CrearArea = () => {
   const router = useRouter();
@@ -246,4 +248,4 @@ const CrearArea = () => {
   );
 };
 
-export default CrearArea;
+export default withAuth(CrearArea);

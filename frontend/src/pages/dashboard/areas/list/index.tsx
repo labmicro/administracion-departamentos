@@ -23,6 +23,8 @@ import { saveAs } from 'file-saver';
 import Swal from "sweetalert2";
 import DashboardMenu from '../../../dashboard';
 import Link from 'next/link'; // Asegúrate de importar Link de Next.js
+import withAuth from "../../../../components/withAut"; // Importa el HOC
+
 
 interface Area {
   id: number;
@@ -242,4 +244,4 @@ const ListaAreas = () => {
   );
 };
 
-export default ListaAreas;
+export default withAuth(ListaAreas);

@@ -27,6 +27,7 @@ import DashboardMenu from '../../..';
 import dayjs from 'dayjs';
 import EditIcon from '@mui/icons-material/Edit';
 import Link from 'next/link';
+import withAuth from "../../../../../components/withAut"; // Importa el HOC
 
 
 const ListaDocenteAsignatura: React.FC = () => {
@@ -271,4 +272,4 @@ const ListaDocenteAsignatura: React.FC = () => {
   );
 };
 
-export default ListaDocenteAsignatura;
+export default withAuth(ListaDocenteAsignatura);

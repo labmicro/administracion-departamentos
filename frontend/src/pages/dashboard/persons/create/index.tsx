@@ -16,6 +16,8 @@ import {
 import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
+
 
 // Componente para crear una nueva persona
 const CrearPersona = () => {
@@ -154,4 +156,4 @@ const CrearPersona = () => {
   );
 };
 
-export default CrearPersona;
+export default withAuth(CrearPersona);

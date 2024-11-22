@@ -10,6 +10,8 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../..';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const EditarDepartamentoJefe = () => {
   const router = useRouter();
@@ -178,4 +180,4 @@ const EditarDepartamentoJefe = () => {
   );
 };
 
-export default EditarDepartamentoJefe;
+export default withAuth(EditarDepartamentoJefe);

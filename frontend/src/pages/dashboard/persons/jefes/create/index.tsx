@@ -27,6 +27,7 @@ import BasicModal from '@/utils/modal';
 import dayjs from 'dayjs';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
 
 const CrearJefe = () => {
   const router = useRouter();
@@ -265,4 +266,4 @@ const CrearJefe = () => {
   );
 };
 
-export default CrearJefe;
+export default withAuth(CrearJefe);

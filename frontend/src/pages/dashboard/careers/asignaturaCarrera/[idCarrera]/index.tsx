@@ -11,6 +11,8 @@ import DashboardMenu from '../../../../dashboard';
 import { useRouter } from 'next/router';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const ListaAsignaturaCarrera = () => {
   const router = useRouter();
@@ -305,4 +307,4 @@ const ListaAsignaturaCarrera = () => {
   );
 };
 
-export default ListaAsignaturaCarrera;
+export default withAuth(ListaAsignaturaCarrera);

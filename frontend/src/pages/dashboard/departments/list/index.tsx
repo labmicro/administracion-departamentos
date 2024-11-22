@@ -24,6 +24,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../..';
+import withAuth from "../../../../components/withAut"; // Importa el HOC
 
 interface Departamento {
   id: number;
@@ -262,4 +263,4 @@ const ListaDepartamentos = () => {
   );
 };
 
-export default ListaDepartamentos;
+export default withAuth(ListaDepartamentos);

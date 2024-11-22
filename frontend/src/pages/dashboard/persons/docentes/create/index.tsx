@@ -26,6 +26,8 @@ import {
 import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const CrearDocente = () => {
   const router = useRouter();
@@ -254,4 +256,4 @@ const CrearDocente = () => {
   );
 };
 
-export default CrearDocente;
+export default withAuth(CrearDocente);
