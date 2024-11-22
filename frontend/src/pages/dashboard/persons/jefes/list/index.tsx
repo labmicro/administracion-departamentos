@@ -8,6 +8,8 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const ListaJefes = () => {
   const router = useRouter();
@@ -306,4 +308,4 @@ const ListaJefes = () => {
   );
 };
 
-export default ListaJefes;
+export default withAuth(ListaJefes);

@@ -23,6 +23,8 @@ import BasicModal from '@/utils/modal';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../..';
+import withAuth from "../../../../components/withAut"; 
+
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -188,4 +190,4 @@ const CrearResolucion = () => {
   );
 };
 
-export default CrearResolucion;
+export default withAuth(CrearResolucion);

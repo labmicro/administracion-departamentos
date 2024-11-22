@@ -33,6 +33,8 @@ import DashboardMenu from '../../../..';
 import { useRouter } from 'next/router';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
+import withAuth from "../../../../../../components/withAut"; // Importa el HOC
+
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -270,4 +272,4 @@ const EditarDocenteAsignatura: React.FC = () => {
   );
 };
 
-export default EditarDocenteAsignatura;
+export default withAuth(EditarDocenteAsignatura);

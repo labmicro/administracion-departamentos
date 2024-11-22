@@ -17,6 +17,8 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../..';
+import withAuth from "../../../../components/withAut"; 
+
 
 // Configuración de `EditarPersona` para usar el idPersona desde la URL
 
@@ -233,4 +235,4 @@ const EditarPersona: React.FC = () => {
   );
 };
 
-export default EditarPersona;
+export default withAuth(EditarPersona);

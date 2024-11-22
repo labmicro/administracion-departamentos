@@ -20,6 +20,7 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../..';
+import withAuth from "../../../../components/withAut"; 
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -158,4 +159,4 @@ const EditarDepartamento = () => {
   );
 };
 
-export default EditarDepartamento;
+export default withAuth(EditarDepartamento);

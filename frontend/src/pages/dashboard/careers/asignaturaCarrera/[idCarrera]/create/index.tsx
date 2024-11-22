@@ -30,6 +30,8 @@ import dayjs from 'dayjs';
 import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../../../..';
+import withAuth from "../../../../../../components/withAut"; 
+
 
 
 // Habilita los plugins
@@ -285,4 +287,4 @@ const CrearAsignaturaCarrera = () => {
   );
 };
 
-export default CrearAsignaturaCarrera;
+export default withAuth(CrearAsignaturaCarrera);

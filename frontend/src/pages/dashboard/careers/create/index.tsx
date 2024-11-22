@@ -8,6 +8,7 @@ import timezone from 'dayjs/plugin/timezone';
 import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -150,4 +151,4 @@ const CrearCarrera = () => {
   );
 };
 
-export default CrearCarrera;
+export default withAuth(CrearCarrera);

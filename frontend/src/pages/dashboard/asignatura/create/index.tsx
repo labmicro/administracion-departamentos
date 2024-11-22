@@ -30,6 +30,8 @@ import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
 import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; // Importa el HOC
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -305,4 +307,4 @@ const CrearAsignatura = () => {
   );
 };
 
-export default CrearAsignatura;
+export default withAuth(CrearAsignatura);

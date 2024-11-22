@@ -10,6 +10,7 @@ import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import Link from 'next/link';
 import DashboardMenu from '../../../dashboard';
+import withAuth from "../../../../components/withAut"; 
 
 const ListaAsignaturas = () => {
   const h1Style = {
@@ -340,4 +341,4 @@ const ListaAsignaturas = () => {
   );
 };
 
-export default ListaAsignaturas;
+export default withAuth(ListaAsignaturas);

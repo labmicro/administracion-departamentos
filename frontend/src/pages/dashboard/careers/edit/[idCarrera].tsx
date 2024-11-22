@@ -9,6 +9,7 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../..';
+import withAuth from "../../../../components/withAut"; 
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -206,4 +207,4 @@ const EditarCarrera: React.FC = () => {
   );
 };
 
-export default EditarCarrera;
+export default withAuth(EditarCarrera);

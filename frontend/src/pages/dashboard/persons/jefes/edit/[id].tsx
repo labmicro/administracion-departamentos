@@ -6,6 +6,8 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../../..';
+import withAuth from "../../../../../components/withAut"; 
+
 
 const EditarJefe: React.FC = () => {
   const router = useRouter();
@@ -153,4 +155,4 @@ const EditarJefe: React.FC = () => {
   );
 };
 
-export default EditarJefe;
+export default withAuth(EditarJefe);

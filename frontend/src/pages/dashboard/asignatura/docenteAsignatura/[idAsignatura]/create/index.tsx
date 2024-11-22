@@ -32,6 +32,8 @@ import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import DashboardMenu from '../../../../../dashboard';
 import { useRouter } from 'next/router';
 import BasicModal from '@/utils/modal';
+import withAuth from "../../../../../../components/withAut"; // Importa el HOC
+
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -482,4 +484,4 @@ const crearDocenteAsignatura = async () => {
   );
 };
 
-export default CrearDocenteAsignatura;
+export default withAuth(CrearDocenteAsignatura);

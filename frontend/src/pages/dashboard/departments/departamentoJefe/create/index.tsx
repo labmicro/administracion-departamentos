@@ -33,6 +33,7 @@ import BasicModal from '@/utils/modal';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
+import withAuth from "../../../../../components/withAut"; 
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -457,4 +458,4 @@ const CrearDepartamentoJefe = () => {
   );
 };
 
-export default CrearDepartamentoJefe;
+export default withAuth(CrearDepartamentoJefe);

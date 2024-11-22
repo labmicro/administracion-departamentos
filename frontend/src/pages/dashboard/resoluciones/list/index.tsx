@@ -35,6 +35,8 @@ import { saveAs } from 'file-saver';
 import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../..';
+import withAuth from "../../../../components/withAut"; 
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -340,4 +342,4 @@ const ListaResoluciones = () => {
   );
 };
 
-export default ListaResoluciones;
+export default withAuth(ListaResoluciones);
