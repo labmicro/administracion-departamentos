@@ -252,4 +252,5 @@ CORS_ALLOWED_ORIGINS=[
 
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
+    "http://18.215.115.94",
 ]
