@@ -140,7 +140,7 @@ const ListaResoluciones = () => {
         url = next;
       }
   
-      // Crea el archivo Excel con las columnas de la grilla
+      // Crea el archivo Excel con las columnas de la grilla!
       const workbook = XLSX.utils.book_new();
       const worksheet = XLSX.utils.json_to_sheet(
         allResoluciones.map((resolucion) => ({
