@@ -24,6 +24,8 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
+
 
 
 // Habilita los plugins

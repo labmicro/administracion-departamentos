@@ -36,6 +36,7 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 
 dayjs.extend(utc);
@@ -62,7 +63,7 @@ const ListaResoluciones = () => {
   const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/resolucion/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/resolucion/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);

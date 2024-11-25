@@ -15,6 +15,7 @@ import { Theme, createTheme, ThemeProvider } from '@mui/material/styles';
 import { useRouter } from 'next/navigation'; // Usamos useRouter de Next.js
 import axios from 'axios';
 import Swal from "sweetalert2";
+import { API_BASE_URL } from "../../utils/config";
 
 function Copyright(props: any) {
   return (
@@ -49,7 +50,7 @@ export default function LoginPage() {
     const password = data.get('password');
   
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login/token/', {
+      const response = await axios.post(`${API_BASE_URL}/api/login/token/`, {
         email,
         password,
       });
