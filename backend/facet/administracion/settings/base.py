@@ -246,6 +246,8 @@ RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
 CORS_ALLOWED_ORIGINS=[
     "http://localhost:3000",
+    "http://18.215.115.94",
+
 ]
 
 CSRF_TRUSTED_ORIGINS = [
