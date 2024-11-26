@@ -2,7 +2,7 @@
 
 /* Define un estilo para las celdas de encabezado */
 .header-row {
-    background-color: #1976d2; /* Fondo celeste */
+    background-color: #1976d2 !important; /* Fondo celeste */
   }
 
   .header-cell {

@@ -248,6 +248,7 @@ CORS_ALLOWED_ORIGINS=[
     "http://localhost:3000",
     "http://18.215.115.94",
     "http://administracionfacet.site",
+    "https://administracionfacet.site",
 
 ]
 
@@ -255,4 +256,5 @@ CSRF_TRUSTED_ORIGINS = [
     "http://localhost:3000",
     "http://18.215.115.94",
     "http://administracionfacet.site",
+    "https://administracionfacet.site",
 ]
