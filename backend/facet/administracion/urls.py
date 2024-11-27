@@ -10,6 +10,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from django.conf import settings
 from django.conf.urls.static import static
+from django.http import JsonResponse
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -48,3 +49,8 @@ urlpatterns = [
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns.append(re_path(r'^.*', TemplateView.as_view(template_name='index.html')))
+
+def custom_404_view(request, exception):
+    return JsonResponse({"error": "Not found"}, status=404)
+
+handler404 = "administracion.urls.custom_404_view"
