@@ -259,6 +259,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://administracionfacet.site",
 ]
 
+SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente
+
+
 # LOGGING = {
 #     'version': 1,
 #     'disable_existing_loggers': False,
