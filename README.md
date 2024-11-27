@@ -22,3 +22,5 @@ chmod 400 "administracion-departamentos.pem"
 
   cd administracion-departamentos/backend/facet
   cd administracion-departamentos/frontend
+
+  gunicorn --bind 0.0.0.0:8000 administracion.wsgi:application
