@@ -21,6 +21,8 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
+
 
 
 // Habilita los plugins
@@ -76,7 +78,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
     const fetchData = async () => {
       if (!idAsignatura) return; // Asegúrate de que idAsignatura esté disponible
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}`);
+        const response = await axios.get(`${API_BASE_URL}/facet/asignatura/${idAsignatura}`);
         const data = response.data;
         setAsignatura(data);
       } catch (error) {
@@ -113,7 +115,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
+      await axios.put(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -127,7 +129,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
 
   const eliminarAsignatura = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

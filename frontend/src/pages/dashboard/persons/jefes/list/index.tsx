@@ -9,6 +9,8 @@ import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
+
 
 
 const ListaJefes = () => {
@@ -41,7 +43,7 @@ const ListaJefes = () => {
   const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe/list_jefes_persona/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/jefe/list_jefes_persona/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -62,7 +64,7 @@ const ListaJefes = () => {
   };
 
   const filtrarJefes = () => {
-    let url = `http://127.0.0.1:8000/facet/jefe/list_jefes_persona/?`;
+    let url = `${API_BASE_URL}/facet/jefe/list_jefes_persona/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('persona__nombre__icontains', filtroNombre);
@@ -86,7 +88,7 @@ const ListaJefes = () => {
   const exportToExcel = async () => {
     try {
       let allJefes: Jefe[] = [];
-      let url = `http://127.0.0.1:8000/facet/jefe/?`;
+      let url = `${API_BASE_URL}/facet/jefe/?`;
       const params = new URLSearchParams();
   
       if (filtroNombre !== '') {
@@ -115,7 +117,7 @@ const ListaJefes = () => {
           results.map(async (jefe: any) => {
             // Solicitar los detalles de la persona si `persona` es solo un ID
             if (typeof jefe.persona === 'number') {
-              const personaResponse = await axios.get(`http://127.0.0.1:8000/facet/persona/${jefe.persona}/`);
+              const personaResponse = await axios.get(`${API_BASE_URL}/facet/persona/${jefe.persona}/`);
               jefe.persona = personaResponse.data; // Asignar detalles completos a `jefe.persona`
             }
             return jefe;

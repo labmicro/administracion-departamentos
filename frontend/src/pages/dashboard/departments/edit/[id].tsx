@@ -21,6 +21,8 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -57,7 +59,7 @@ const EditarDepartamento = () => {
     if (idDepartamento) {
       const fetchData = async () => {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/departamento/${idDepartamento}/`);
+          const response = await axios.get(`${API_BASE_URL}/facet/departamento/${idDepartamento}/`);
           console.log(response.data);
           setDepartamento(response.data);
         } catch (error) {
@@ -70,7 +72,7 @@ const EditarDepartamento = () => {
 
   const edicionDepartamento = async () => {
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/departamento/${idDepartamento}/`, departamento, {
+      await axios.put(`${API_BASE_URL}/facet/departamento/${idDepartamento}/`, departamento, {
         headers: { 'Content-Type': 'application/json' },
       });
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
@@ -81,7 +83,7 @@ const EditarDepartamento = () => {
 
   const eliminarDepartamento = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/departamento/${idDepartamento}/`);
+      await axios.delete(`${API_BASE_URL}/facet/departamento/${idDepartamento}/`);
       handleOpenModal('Departamento Eliminado', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');

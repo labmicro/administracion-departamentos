@@ -31,6 +31,7 @@ import utc from 'dayjs/plugin/utc';
 import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../../../..';
 import withAuth from "../../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../../utils/config";
 
 
 
@@ -130,7 +131,7 @@ const CrearAsignaturaCarrera = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/asignatura/');
+        const response = await axios.get(`${API_BASE_URL}/facet/asignatura/`);
         setAsignaturas(response.data.results);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -161,7 +162,7 @@ const CrearAsignaturaCarrera = () => {
     console.log(nuevaAsignaturaEnCarrera)
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/asignatura-carrera/', nuevaAsignaturaEnCarrera, {
+      const response = await axios.post(`${API_BASE_URL}/facet/asignatura-carrera/`, nuevaAsignaturaEnCarrera, {
         headers: {
           'Content-Type': 'application/json',
         },

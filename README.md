@@ -42,3 +42,6 @@ npm run build
 
 # Cambia el propietario a www-data para Nginx
 sudo chown -R www-data:www-data /home/ubuntu/administracion-departamentos/frontend/.next
+
+# Editar arhcivo ngnix
+ sudo nano /etc/nginx/sites-available/frontend

@@ -18,7 +18,7 @@ import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
-
+import { API_BASE_URL } from "../../../../utils/config";
 
 // Configuración de `EditarPersona` para usar el idPersona desde la URL
 
@@ -71,7 +71,7 @@ const EditarPersona: React.FC = () => {
     const fetchData = async () => {
       if (idPersona) {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/persona/${idPersona}/`);
+          const response = await axios.get(`${API_BASE_URL}/facet/persona/${idPersona}/`);
           const personaData = response.data;
           console.log(response.data)
           setPersona(personaData);
@@ -111,7 +111,7 @@ const EditarPersona: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/persona/${idPersona}/`, personaEditada, {
+      await axios.put(`${API_BASE_URL}/facet/persona/${idPersona}/`, personaEditada, {
         headers: { 'Content-Type': 'application/json' },
       });
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
@@ -123,7 +123,7 @@ const EditarPersona: React.FC = () => {
 
   const eliminarPersona = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/persona/${idPersona}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/persona/${idPersona}/`, {
         headers: { 'Content-Type': 'application/json' },
       });
       handleOpenModal('Persona Eliminada', 'La acción se realizó con éxito.');

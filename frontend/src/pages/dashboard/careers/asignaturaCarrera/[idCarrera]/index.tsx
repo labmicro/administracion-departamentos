@@ -12,6 +12,8 @@ import { useRouter } from 'next/router';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
+
 
 
 const ListaAsignaturaCarrera = () => {
@@ -88,10 +90,10 @@ const ListaAsignaturaCarrera = () => {
   const fetchData = async () => {
     try {
       const [areasRes, asignaturasRes, deptosRes, asignaturasCarreraRes] = await Promise.all([
-        axios.get('http://127.0.0.1:8000/facet/area/'),
-        axios.get('http://127.0.0.1:8000/facet/asignatura/'),
-        axios.get('http://127.0.0.1:8000/facet/departamento/'),
-        axios.get('http://127.0.0.1:8000/facet/asignatura-carrera/', { params: { idcarrera: idCarrera } }),
+        axios.get(`${API_BASE_URL}/facet/area/`),
+        axios.get(`${API_BASE_URL}/facet/asignatura/`),
+        axios.get(`${API_BASE_URL}/facet/departamento/`),
+        axios.get(`${API_BASE_URL}/facet/asignatura-carrera/`, { params: { idcarrera: idCarrera } }),
       ]);
 
       setAreas(areasRes.data.results);
@@ -106,7 +108,7 @@ const ListaAsignaturaCarrera = () => {
   const descargarExcel = async () => {
     try {
       let allAsignaturasCarrera: AsignaturaCarrera[] = [];
-      let url = `http://127.0.0.1:8000/facet/asignatura-carrera/?idcarrera=${idCarrera}`;
+      let url = `${API_BASE_URL}/facet/asignatura-carrera/?idcarrera=${idCarrera}`;
   
       // Aplicar los filtros a la URL
       const params = new URLSearchParams();
@@ -174,7 +176,7 @@ const ListaAsignaturaCarrera = () => {
   const handleDeleteAsignatura = async () => {
     if (idAsignaturaCarrera !== null) {
       try {
-        await axios.delete(`http://127.0.0.1:8000/facet/asignatura-carrera/${idAsignaturaCarrera}/`);
+        await axios.delete(`${API_BASE_URL}/facet/asignatura-carrera/${idAsignaturaCarrera}/`);
         setAsignaturasCarrera((prevAsignaturas) =>
           prevAsignaturas.filter((asignatura) => asignatura.id !== idAsignaturaCarrera)
         );

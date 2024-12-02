@@ -25,6 +25,8 @@ import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../utils/config";
+
 
 interface Departamento {
   id: number;
@@ -42,7 +44,7 @@ const ListaDepartamentos = () => {
   const [filtroTelefono, setFiltroTelefono] = useState('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/departamento/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/departamento/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -65,7 +67,7 @@ const ListaDepartamentos = () => {
   };
 
   const filtrarDepartamentos = () => {
-    let url = `http://127.0.0.1:8000/facet/departamento/?`;
+    let url = `${API_BASE_URL}/facet/departamento/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('nombre__icontains', filtroNombre);
@@ -86,7 +88,7 @@ const ListaDepartamentos = () => {
     try {
       let allDepartamentos: Departamento[] = [];
   
-      let url = `http://127.0.0.1:8000/facet/departamento/?`;
+      let url = `${API_BASE_URL}/facet/departamento/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
         params.append('nombre__icontains', filtroNombre);

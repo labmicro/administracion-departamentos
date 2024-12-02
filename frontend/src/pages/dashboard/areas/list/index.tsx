@@ -24,6 +24,7 @@ import Swal from "sweetalert2";
 import DashboardMenu from '../../../dashboard';
 import Link from 'next/link'; // Asegúrate de importar Link de Next.js
 import withAuth from "../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../utils/config";
 
 
 interface Area {
@@ -49,8 +50,8 @@ const ListaAreas = () => {
   const [filtroNombre, setFiltroNombre] = useState('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/area/');
-  const [currentUrlDepto, setCurrentUrlDepto] = useState<string>('http://127.0.0.1:8000/facet/departamento/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/area/`);
+  const [currentUrlDepto, setCurrentUrlDepto] = useState<string>(`${API_BASE_URL}/facet/departamento/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -79,7 +80,7 @@ const ListaAreas = () => {
   };
 
   const filtrarAreas = () => {
-    let url = `http://127.0.0.1:8000/facet/area/?`;
+    let url = `${API_BASE_URL}/facet/area/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('nombre__icontains', filtroNombre);
@@ -93,7 +94,7 @@ const ListaAreas = () => {
   const descargarExcel = async () => {
     try {
       let allAreas: Area[] = [];
-      let url = `http://127.0.0.1:8000/facet/area/?`;
+      let url = `${API_BASE_URL}/facet/area/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
         params.append('nombre__icontains', filtroNombre);
@@ -101,7 +102,7 @@ const ListaAreas = () => {
       url += params.toString();
   
       // Obtener todos los departamentos para enlazar con las áreas
-      const departamentosResponse = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+      const departamentosResponse = await axios.get(`${API_BASE_URL}/facet/departamento/`);
       const departamentos: Departamento[] = departamentosResponse.data.results;
   
       while (url) {

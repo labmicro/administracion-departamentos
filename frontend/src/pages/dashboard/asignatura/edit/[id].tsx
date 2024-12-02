@@ -22,6 +22,7 @@ import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../utils/config";
 
 
 dayjs.extend(utc);
@@ -64,7 +65,7 @@ const EditarAsignatura: React.FC = () => {
     const fetchData = async () => {
       if (idAsignatura) { // Verifica que idAsignatura no sea undefined
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`);
+          const response = await axios.get(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`);
           const data = response.data;
           setAsignatura(data);
         } catch (error) {
@@ -105,7 +106,7 @@ const EditarAsignatura: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
+      await axios.put(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -118,7 +119,7 @@ const EditarAsignatura: React.FC = () => {
 
   const eliminarAsignatura = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/asignatura/${idAsignatura}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

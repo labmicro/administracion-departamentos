@@ -27,6 +27,7 @@ import { saveAs } from 'file-saver';
 import Link from 'next/link';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 
 interface Persona {
@@ -51,7 +52,7 @@ const ListaPersonas = () => {
   const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/persona/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/persona/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -74,7 +75,7 @@ const ListaPersonas = () => {
   };
 
   const filtrarPersonas = () => {
-    let url = `http://127.0.0.1:8000/facet/persona/?`;
+    let url = `${API_BASE_URL}/facet/persona/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('nombre__icontains', filtroNombre);
@@ -98,7 +99,7 @@ const ListaPersonas = () => {
   const descargarExcel = async () => {
     try {
       let allPersona: Persona[] = [];
-      let url = `http://127.0.0.1:8000/facet/persona/?`;
+      let url = `${API_BASE_URL}/facet/persona/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
         params.append('nombre__icontains', filtroNombre);
@@ -153,6 +154,21 @@ const ListaPersonas = () => {
             <Button variant="contained" endIcon={<AddIcon />}>
               Agregar Persona
             </Button>
+            <Link href="/dashboard/persons/jefes" style={{ marginLeft: '10px' }} passHref>
+            <Button variant="contained" color="secondary">
+              Jefes
+            </Button>
+          </Link>
+          <Link href="/dashboard/persons/docentes" style={{ marginLeft: '10px' }} passHref>
+            <Button variant="contained" color="secondary">
+              Docentes
+            </Button>
+          </Link>
+          <Link href="/dashboard/persons/noDocentes" style={{ marginLeft: '10px' }} passHref>
+            <Button variant="contained" color="secondary">
+              No Docentes
+            </Button>
+          </Link>
           </Link>
           <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
             Descargar Excel

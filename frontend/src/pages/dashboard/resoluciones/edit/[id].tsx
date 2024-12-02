@@ -10,6 +10,7 @@ import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 
 dayjs.extend(utc);
@@ -37,7 +38,7 @@ const EditarResolucion = () => {
     const fetchData = async () => {
       if (idResolucion) {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`);
+          const response = await axios.get(`${API_BASE_URL}/facet/resolucion/${idResolucion}/`);
           console.log(response);
 
           setNroExpediente(response.data.nexpediente);
@@ -71,7 +72,7 @@ const EditarResolucion = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`, resolucionEditada, {
+      await axios.put(`${API_BASE_URL}/facet/resolucion/${idResolucion}/`, resolucionEditada, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -101,7 +102,7 @@ const EditarResolucion = () => {
 
   const eliminarResolucion = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/resolucion/${idResolucion}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/resolucion/${idResolucion}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

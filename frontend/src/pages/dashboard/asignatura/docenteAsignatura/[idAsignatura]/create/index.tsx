@@ -33,6 +33,7 @@ import DashboardMenu from '../../../../../dashboard';
 import { useRouter } from 'next/router';
 import BasicModal from '@/utils/modal';
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../../../utils/config";
 
 
 // Habilita los plugins
@@ -104,7 +105,7 @@ const CrearDocenteAsignatura: React.FC = () => {
   
   const fetchAsignatura = async (id: string) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura/${id}/`);
+      const response = await axios.get(`${API_BASE_URL}/facet/asignatura/${id}/`);
       setAsignatura(response.data.nombre); // Asume que `nombre` es el campo de la asignatura
       console.log(response.data)
     } catch (error) {
@@ -119,7 +120,7 @@ const CrearDocenteAsignatura: React.FC = () => {
 
   const fetchDataPersonas = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/facet/docente/');
+      const response = await axios.get(`${API_BASE_URL}/facet/docente/`);
       setPersonas(response.data.results);
       console.log(response.data.results)
     } catch (error) {
@@ -141,7 +142,7 @@ const CrearDocenteAsignatura: React.FC = () => {
   // Función para cargar las resoluciones
   const fetchDataResoluciones = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/facet/resolucion/');
+      const response = await axios.get(`${API_BASE_URL}/facet/resolucion/`);
       setResoluciones(response.data.results);
     } catch (error) {
       console.error('Error fetching data for resoluciones:', error);
@@ -228,7 +229,7 @@ const crearDocenteAsignatura = async () => {
 
   try {
     const response = await axios.post(
-      'http://127.0.0.1:8000/facet/asignatura-docente/',
+      `${API_BASE_URL}/facet/asignatura-docente/`,
       nuevoDocenteAsignatura,
       {
         headers: {

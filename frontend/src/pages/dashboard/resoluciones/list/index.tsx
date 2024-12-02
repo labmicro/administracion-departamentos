@@ -92,7 +92,7 @@ const ListaResoluciones = () => {
   };
 
   const filtrarResoluciones = () => {
-    let url = `http://127.0.0.1:8000/facet/resolucion/?`;
+    let url = `${API_BASE_URL}/facet/resolucion/?`;
     const params = new URLSearchParams();
 
     if (filtroNroExpediente !== '') {
@@ -121,7 +121,7 @@ const ListaResoluciones = () => {
   const descargarExcel = async () => {
     try {
       let allResoluciones: Resolucion[] = [];
-      let url = `http://127.0.0.1:8000/facet/resolucion/?`;
+      let url = `${API_BASE_URL}/facet/resolucion/?`;
       const params = new URLSearchParams();
   
       // Agrega los filtros actuales al URL de exportación

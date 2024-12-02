@@ -11,6 +11,7 @@ import { saveAs } from 'file-saver';
 import Link from 'next/link';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 const ListaAsignaturas = () => {
   const h1Style = {
@@ -56,7 +57,7 @@ const ListaAsignaturas = () => {
   const [filtroEstado, setFiltroEstado] = useState<string | number>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/asignatura/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/asignatura/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -69,8 +70,8 @@ const ListaAsignaturas = () => {
     try {
       const [asignaturasRes, departamentosRes, areasRes] = await Promise.all([
         axios.get(url),
-        axios.get('http://127.0.0.1:8000/facet/departamento/'),
-        axios.get('http://127.0.0.1:8000/facet/area/')
+        axios.get(`${API_BASE_URL}/facet/departamento/`),
+        axios.get(`${API_BASE_URL}/facet/area/`)
       ]);
 
       setAsignaturas(asignaturasRes.data.results);
@@ -86,7 +87,7 @@ const ListaAsignaturas = () => {
   };
 
   const filtrarAsignaturas = () => {
-    let url = `http://127.0.0.1:8000/facet/asignatura/?`;
+    let url = `${API_BASE_URL}/facet/asignatura/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('nombre__icontains', filtroNombre);
@@ -114,7 +115,7 @@ const ListaAsignaturas = () => {
       let allAsignaturas: Asignatura[] = [];
 
       // Construir URL con filtros
-      let url = `http://127.0.0.1:8000/facet/asignatura/?`;
+      let url = `${API_BASE_URL}/facet/asignatura/?`;
       const params = new URLSearchParams();
       if (filtroNombre !== '') {
         params.append('nombre__icontains', filtroNombre);

@@ -28,6 +28,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../../dashboard';
 import Swal from 'sweetalert2';
 import withAuth from "../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../utils/config";
 
 
 const CrearArea = () => {
@@ -83,7 +84,7 @@ const CrearArea = () => {
   useEffect(() => {
     const fetchDepartamentos = async () => {
       try {
-        const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+        const response = await axios.get(`${API_BASE_URL}/facet/departamento/`);
         setDepartamentos(response.data.results);
       } catch (error) {
         Swal.fire({
@@ -120,7 +121,7 @@ const CrearArea = () => {
     };
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/area/', nuevaArea, {
+      const response = await axios.post(`${API_BASE_URL}/facet/area/`, nuevaArea, {
         headers: {
           'Content-Type': 'application/json',
         },

@@ -7,6 +7,7 @@ import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../../..';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const EditarJefe: React.FC = () => {
@@ -40,7 +41,7 @@ const EditarJefe: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/jefe/${id}/obtener_jefe/`);
+        const response = await axios.get(`${API_BASE_URL}/facet/jefe/${id}/obtener_jefe/`);
         console.log(response.data);
 
         // Extrae y configura los datos del jefe y la persona asociada
@@ -68,7 +69,7 @@ const EditarJefe: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/jefe/${id}/`, jefeEditado, {
+      await axios.put(`${API_BASE_URL}/facet/jefe/${id}/`, jefeEditado, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -82,7 +83,7 @@ const EditarJefe: React.FC = () => {
 
   const eliminarJefe = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/jefe/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/jefe/${id}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

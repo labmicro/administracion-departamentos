@@ -11,6 +11,7 @@ import DashboardMenu from '../../..';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const EditarDepartamentoJefe = () => {
@@ -56,7 +57,7 @@ const EditarDepartamentoJefe = () => {
     const fetchData = async () => {
       if (id) {
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/jefe-departamento/${id}/obtener_detalle/`);
+          const response = await axios.get(`${API_BASE_URL}/facet/jefe-departamento/${id}/obtener_detalle/`);
           const data = response.data;
 
           setFechaInicio(dayjs(data.fecha_de_inicio));
@@ -77,7 +78,7 @@ const EditarDepartamentoJefe = () => {
 
   const eliminarJefeDepartamento = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/jefe-departamento/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/jefe-departamento/${id}/`, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -102,7 +103,7 @@ const EditarDepartamentoJefe = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/jefe-departamento/${id}/`, jefeDepartamentoEditado);
+      await axios.put(`${API_BASE_URL}/facet/jefe-departamento/${id}/`, jefeDepartamentoEditado);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       console.error('Error al hacer la solicitud PUT:', error);

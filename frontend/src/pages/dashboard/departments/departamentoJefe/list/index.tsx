@@ -11,6 +11,7 @@ import { saveAs } from 'file-saver';
 import DashboardMenu from '../../../../dashboard';
 import dayjs from 'dayjs';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const ListaDepartamentosJefe = () => {
@@ -82,7 +83,7 @@ const ListaDepartamentosJefe = () => {
   const [filtroResolucion, setFiltroResolucion] = useState<string | ''>('');
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/jefe-departamento/list_detalle/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/jefe-departamento/list_detalle/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -100,13 +101,13 @@ const ListaDepartamentosJefe = () => {
       setTotalItems(response.data.count);
       setCurrentPage(1);
 
-      const personasResponse = await axios.get('http://127.0.0.1:8000/facet/persona/');
+      const personasResponse = await axios.get(`${API_BASE_URL}/facet/persona/`);
       setPersonas(personasResponse.data.results);
-      const departamentosResponse = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+      const departamentosResponse = await axios.get(`${API_BASE_URL}/facet/departamento/`);
       setDepartamentos(departamentosResponse.data.results);
-      const resolucionesResponse = await axios.get('http://127.0.0.1:8000/facet/resolucion/');
+      const resolucionesResponse = await axios.get(`${API_BASE_URL}/facet/resolucion/`);
       setResoluciones(resolucionesResponse.data.results);
-      const jefesResponse = await axios.get('http://127.0.0.1:8000/facet/jefe/list_jefes_persona/');
+      const jefesResponse = await axios.get(`${API_BASE_URL}/facet/jefe/list_jefes_persona/`);
       setJefes(jefesResponse.data);
       console.log(response.data)
     } catch (error) {
@@ -115,7 +116,7 @@ const ListaDepartamentosJefe = () => {
   };
 
   const filtrarJefesDepartamentos = () => {
-    let url = `http://127.0.0.1:8000/facet/jefe-departamento/?`;
+    let url = `${API_BASE_URL}/facet/jefe-departamento/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('jefe__persona__nombre__icontains', filtroNombre);
@@ -148,7 +149,7 @@ const descargarExcel = async () => {
     let allDeptoJefes: DepartamentoJefe[] = [];
 
     // Usa la URL personalizada para obtener los detalles de jefe con la información completa
-    let url = `http://127.0.0.1:8000/facet/jefe-departamento/list_detalle/`;
+    let url = `${API_BASE_URL}/facet/jefe-departamento/list_detalle/`;
 
     while (url) {
       const response = await axios.get(url);

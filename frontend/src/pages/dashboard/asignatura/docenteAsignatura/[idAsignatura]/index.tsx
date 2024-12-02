@@ -28,6 +28,7 @@ import dayjs from 'dayjs';
 import EditIcon from '@mui/icons-material/Edit';
 import Link from 'next/link';
 import withAuth from "../../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const ListaDocenteAsignatura: React.FC = () => {
@@ -69,26 +70,52 @@ const ListaDocenteAsignatura: React.FC = () => {
   const [filtroCondicion, setFiltroCondicion] = useState<Condicion | ''>('');
   const [filtroCargo, setFiltroCargo] = useState<Cargo | ''>('');
   const [filtroDedicacion, setFiltroDedicacion] = useState<Dedicacion | ''>('');
+  const [currentUrl, setCurrentUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
 
   useEffect(() => {
     if (idAsignatura) {
-      fetchData(`http://127.0.0.1:8000/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`);
+      fetchData(`${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`);
     }
   }, [idAsignatura]);
+
 
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      setAsignaturaDocentes(response.data);
+      const data = response.data;
+  
+      setAsignaturaDocentes(data.results || data); // Usa `results` para DRF paginado
+      setPrevUrl(data.previous || null); // Guarda la URL anterior
+      setNextUrl(data.next || null); // Guarda la URL siguiente
+      setTotalPages(Math.ceil(data.count / 10) || 1); // Calcula páginas (ajusta si el tamaño varía)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
+  useEffect(() => {
+    if (idAsignatura) {
+      const initialUrl = `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+      setCurrentUrl(initialUrl);
+    }
+  }, [idAsignatura]);
+  
+  useEffect(() => {
+    if (currentUrl) {
+      fetchData(currentUrl);
+    }
+  }, [currentUrl]);  
+  
+
   const filtrarAsignaturaDocentes = () => {
     if (!idAsignatura) return;
 
-    let url = `http://127.0.0.1:8000/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+    let url = `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
     const params = new URLSearchParams();
     if (filtroNombre) params.append('docente__persona__nombre__icontains', filtroNombre);
     if (filtroCondicion) params.append('condicion', filtroCondicion);
@@ -102,7 +129,7 @@ const ListaDocenteAsignatura: React.FC = () => {
   const descargarExcel = async () => {
     try {
       let allAsignaturaDocentes: AsignaturaDocente[] = [];
-      let url = `http://127.0.0.1:8000/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
+      let url = `${API_BASE_URL}/facet/asignatura-docente/list_detalle/?asignatura=${idAsignatura}`;
   
       while (url) {
         const response = await axios.get(url);
@@ -266,6 +293,27 @@ const ListaDocenteAsignatura: React.FC = () => {
               </TableBody>
             </Table>
           </TableContainer>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '16px' }}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => prevUrl && setCurrentUrl(prevUrl)}
+              disabled={!prevUrl}
+            >
+              Anterior
+            </Button>
+            <Typography variant="body1">
+              Página {currentPage} de {totalPages}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => nextUrl && setCurrentUrl(nextUrl)}
+              disabled={!nextUrl}
+            >
+              Siguiente
+            </Button>
+          </div>
         </Paper>
       </Container>
     </DashboardMenu>

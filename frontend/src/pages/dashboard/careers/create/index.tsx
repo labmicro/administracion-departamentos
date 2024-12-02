@@ -9,6 +9,7 @@ import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -63,7 +64,7 @@ const CrearCarrera = () => {
     };
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/carrera/', nuevaCarrera, {
+      const response = await axios.post(`${API_BASE_URL}/facet/carrera/`, nuevaCarrera, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

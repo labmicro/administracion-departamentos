@@ -28,6 +28,8 @@ import dayjs from 'dayjs';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
+
 
 const CrearJefe = () => {
   const router = useRouter();
@@ -93,7 +95,7 @@ const CrearJefe = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responsePers = await axios.get('http://127.0.0.1:8000/facet/persona/');
+        const responsePers = await axios.get(`${API_BASE_URL}/facet/persona/`);
         setPersonas(responsePers.data.results);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -124,7 +126,7 @@ const CrearJefe = () => {
     };
   
     try {
-      const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/jefe/${persona?.id}/`);
+      const existeRegistro = await axios.get(`${API_BASE_URL}/facet/jefe/${persona?.id}/`);
       if (existeRegistro.data) {
         handleOpenModal('Error', 'Ya existe jefe departamento', () => {});
       }
@@ -132,7 +134,7 @@ const CrearJefe = () => {
       if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
         console.log(nuevoJefe);
         try {
-          await axios.post('http://127.0.0.1:8000/facet/jefe/', nuevoJefe, {
+          await axios.post(`${API_BASE_URL}/facet/jefe/`, nuevoJefe, {
             headers: {
               'Content-Type': 'application/json',
             },

@@ -7,6 +7,7 @@ import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../..';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const EditarNoDocente: React.FC = () => {
@@ -48,9 +49,9 @@ const EditarNoDocente: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/nodocente/${id}/`);
+        const response = await axios.get(`${API_BASE_URL}/facet/nodocente/${id}/`);
         setPersona(response.data.persona);
-        const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/${response.data.persona}/`);
+        const responsePers = await axios.get(`${API_BASE_URL}/facet/persona/${response.data.persona}/`);
         setNombre(responsePers.data.nombre);
         setApellido(responsePers.data.apellido);
         setDni(responsePers.data.dni);
@@ -80,7 +81,7 @@ const EditarNoDocente: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/nodocente/${id}/`, nodocenteEditado, {
+      await axios.put(`${API_BASE_URL}/facet/nodocente/${id}/`, nodocenteEditado, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -94,7 +95,7 @@ const EditarNoDocente: React.FC = () => {
 
   const eliminarNoDocente = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/nodocente/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/nodocente/${id}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

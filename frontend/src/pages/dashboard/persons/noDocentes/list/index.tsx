@@ -9,6 +9,7 @@ import { saveAs } from 'file-saver';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const ListaNoDocentes = () => {
@@ -47,7 +48,7 @@ const ListaNoDocentes = () => {
   const [filtroEstado, setFiltroEstado] = useState<string | number>(''); // Agregado
   const [nextUrl, setNextUrl] = useState<string | null>(null);
   const [prevUrl, setPrevUrl] = useState<string | null>(null);
-  const [currentUrl, setCurrentUrl] = useState<string>('http://127.0.0.1:8000/facet/nodocente/');
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/nodocente/`);
   const [totalItems, setTotalItems] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(10);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -65,7 +66,7 @@ const ListaNoDocentes = () => {
       setTotalItems(response.data.count);
       setCurrentPage(1);
 
-      const personasResponse = await axios.get('http://127.0.0.1:8000/facet/persona/');
+      const personasResponse = await axios.get(`${API_BASE_URL}/facet/persona/`);
       setPersonas(personasResponse.data.results);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -73,7 +74,7 @@ const ListaNoDocentes = () => {
   };
 
   const filtrarNoDocentes = () => {
-    let url = `http://127.0.0.1:8000/facet/nodocente/?`;
+    let url = `${API_BASE_URL}/facet/nodocente/?`;
     const params = new URLSearchParams();
     if (filtroNombre !== '') {
       params.append('persona__nombre__icontains', filtroNombre);

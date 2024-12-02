@@ -11,6 +11,7 @@ import { useRouter } from 'next/router';
 import Swal from "sweetalert2";
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../utils/config";
 
 
 dayjs.extend(utc);
@@ -46,7 +47,7 @@ const EditarArea = () => {
     const fetchData = async () => {
       if (idArea) { // Verifica que idArea no sea undefined
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/area/${idArea}/`);
+          const response = await axios.get(`${API_BASE_URL}/facet/area/${idArea}/`);
           const data = response.data;
           setArea(data);
         } catch (error) {
@@ -78,7 +79,7 @@ const EditarArea = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/area/${idArea}/`, areaEditada, {
+      await axios.put(`${API_BASE_URL}/facet/area/${idArea}/`, areaEditada, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -91,7 +92,7 @@ const EditarArea = () => {
 
   const eliminarArea = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/area/${idArea}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/area/${idArea}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

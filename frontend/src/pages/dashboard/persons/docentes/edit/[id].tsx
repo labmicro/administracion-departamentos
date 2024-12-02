@@ -7,6 +7,7 @@ import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../..';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const EditarDocente: React.FC = () => {
@@ -48,9 +49,9 @@ const EditarDocente: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://127.0.0.1:8000/facet/docente/${id}/`);
+        const response = await axios.get(`${API_BASE_URL}/facet/docente/${id}/`);
         setPersona(response.data.persona);
-        const responsePers = await axios.get(`http://127.0.0.1:8000/facet/persona/${response.data.persona}/`);
+        const responsePers = await axios.get(`${API_BASE_URL}/facet/persona/${response.data.persona}/`);
         setNombre(responsePers.data.nombre);
         setApellido(responsePers.data.apellido);
         setDni(responsePers.data.dni);
@@ -80,7 +81,7 @@ const EditarDocente: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/docente/${id}/`, docenteEditado, {
+      await axios.put(`${API_BASE_URL}/facet/docente/${id}/`, docenteEditado, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -94,7 +95,7 @@ const EditarDocente: React.FC = () => {
 
   const eliminarDocente = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/docente/${id}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/docente/${id}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

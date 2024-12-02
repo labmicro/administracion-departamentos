@@ -31,6 +31,8 @@ import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../utils/config";
+
 
 
 dayjs.extend(utc);
@@ -97,9 +99,9 @@ const CrearAsignatura = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responseDepartamentos = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+        const responseDepartamentos = await axios.get(`${API_BASE_URL}/facet/departamento/`);
         setDepartamentos(responseDepartamentos.data.results); // Guardamos los departamentos en el estado
-        const responseareas = await axios.get('http://127.0.0.1:8000/facet/area/');
+        const responseareas = await axios.get(`${API_BASE_URL}/facet/area/`);
         setAreas(responseareas.data.results);
       } catch (error) {
         Swal.fire({
@@ -141,7 +143,7 @@ const CrearAsignatura = () => {
     };
 
     try {
-      await axios.post('http://127.0.0.1:8000/facet/asignatura/', nuevaAsignatura, {
+      await axios.post(`${API_BASE_URL}/facet/asignatura/`, nuevaAsignatura, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

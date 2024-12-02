@@ -27,6 +27,7 @@ import BasicModal from '@/utils/modal';
 import { useRouter } from 'next/router'; 
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
 
 
 const CrearNoDocente = () => {
@@ -81,7 +82,7 @@ const CrearNoDocente = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const responsePers = await axios.get('http://127.0.0.1:8000/facet/persona/');
+        const responsePers = await axios.get(`${API_BASE_URL}/facet/persona/`);
         setPersonas(responsePers.data.results);
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -116,14 +117,14 @@ const CrearNoDocente = () => {
     };
 
     try {
-      const existeRegistro = await axios.get(`http://127.0.0.1:8000/facet/nodocente/${persona?.id}/`);
+      const existeRegistro = await axios.get(`${API_BASE_URL}/facet/nodocente/${persona?.id}/`);
       if (existeRegistro.data) {
         handleOpenModal('Error', 'Ya existe no docente para esta persona', () => {});
       }
     } catch (error) {
       if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
         try {
-          await axios.post('http://127.0.0.1:8000/facet/nodocente/', nuevoNoDocente, {
+          await axios.post(`${API_BASE_URL}/facet/nodocente/`, nuevoNoDocente, {
             headers: {
               'Content-Type': 'application/json',
             },

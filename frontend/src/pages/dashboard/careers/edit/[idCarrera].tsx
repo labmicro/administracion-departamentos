@@ -10,6 +10,7 @@ import ModalConfirmacion from '@/utils/modalConfirmacion';
 import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../utils/config";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -61,7 +62,7 @@ const EditarCarrera: React.FC = () => {
     const fetchData = async () => {
       if (idCarrera) { // Verificamos que idCarrera esté definido
         try {
-          const response = await axios.get(`http://127.0.0.1:8000/facet/carrera/${idCarrera}/`);
+          const response = await axios.get(`${API_BASE_URL}/facet/carrera/${idCarrera}/`);
           const data = response.data;
           console.log(response.data)
           setCarrera(data);
@@ -94,7 +95,7 @@ const EditarCarrera: React.FC = () => {
     };
 
     try {
-      await axios.put(`http://127.0.0.1:8000/facet/carrera/${idCarrera}/`, carreraEditada, {
+      await axios.put(`${API_BASE_URL}/facet/carrera/${idCarrera}/`, carreraEditada, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -108,7 +109,7 @@ const EditarCarrera: React.FC = () => {
 
   const eliminarCarrera = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/carrera/${idCarrera}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/carrera/${idCarrera}/`, {
         headers: {
           'Content-Type': 'application/json',
         },

@@ -88,7 +88,7 @@ const CrearResolucion = () => {
     };
 
     try {
-      const response = await axios.post('http://127.0.0.1:8000/facet/resolucion/', nuevaResolucion, {
+      const response = await axios.post(`${API_BASE_URL}/facet/resolucion/`, nuevaResolucion, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

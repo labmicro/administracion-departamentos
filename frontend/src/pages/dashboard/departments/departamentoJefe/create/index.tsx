@@ -34,6 +34,8 @@ import Swal from 'sweetalert2';
 import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
+import { API_BASE_URL } from "../../../../../utils/config";
+
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -119,7 +121,7 @@ const CrearDepartamentoJefe = () => {
   // Fetch data functions for each modal
   const fetchResoluciones = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/facet/resolucion/');
+      const response = await axios.get(`${API_BASE_URL}/facet/resolucion/`);
       const resolucionesData = response.data.results.map((res: Resolucion) => ({
         ...res,
         fecha: dayjs(res.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
@@ -138,7 +140,7 @@ const CrearDepartamentoJefe = () => {
 
   const fetchJefes = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/facet/jefe/list_jefes_persona/');
+      const response = await axios.get(`${API_BASE_URL}/facet/jefe/list_jefes_persona/`);
       setJefes(response.data);
     } catch (error) {
       Swal.fire({
@@ -151,7 +153,7 @@ const CrearDepartamentoJefe = () => {
 
   const fetchDepartamentos = async () => {
     try {
-      const response = await axios.get('http://127.0.0.1:8000/facet/departamento/');
+      const response = await axios.get(`${API_BASE_URL}/facet/departamento/`);
       setDepartamentos(response.data.results);
     } catch (error) {
       Swal.fire({
@@ -181,7 +183,7 @@ const CrearDepartamentoJefe = () => {
     };
 
     try {
-      await axios.post('http://127.0.0.1:8000/facet/jefe-departamento/', nuevoJefeDepartamento, {
+      await axios.post(`${API_BASE_URL}/facet/jefe-departamento/`, nuevoJefeDepartamento, {
         headers: { 'Content-Type': 'application/json' },
       });
       handleOpenModal('Bien', 'Se creó el jefe de departamento con éxito', handleConfirmModal);

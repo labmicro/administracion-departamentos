@@ -34,6 +34,7 @@ import { useRouter } from 'next/router';
 import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
+import { API_BASE_URL } from "../../../../../../utils/config";
 
 
 // Habilita los plugins
@@ -128,7 +129,7 @@ const EditarDocenteAsignatura: React.FC = () => {
 
   const fetchDocenteAsignatura = async (id: string) => {
     try {
-      const response = await axios.get(`http://127.0.0.1:8000/facet/asignatura-docente/${id}/`);
+      const response = await axios.get(`${API_BASE_URL}/facet/asignatura-docente/${id}/`);
       const data = response.data;
       console.log(response.data)
 
@@ -174,7 +175,7 @@ const EditarDocenteAsignatura: React.FC = () => {
 
     try {
       await axios.put(
-        `http://127.0.0.1:8000/facet/asignatura-docente/${idDocenteAsignatura}/`,
+        `${API_BASE_URL}/facet/asignatura-docente/${idDocenteAsignatura}/`,
         updatedDocenteAsignatura,
         { headers: { 'Content-Type': 'application/json' } }
       );
@@ -187,7 +188,7 @@ const EditarDocenteAsignatura: React.FC = () => {
 
   const eliminarPersona = async () => {
     try {
-      await axios.delete(`http://127.0.0.1:8000/facet/asignatura-docente/${idDocenteAsignatura}/`, {
+      await axios.delete(`${API_BASE_URL}/facet/asignatura-docente/${idDocenteAsignatura}/`, {
         headers: { 'Content-Type': 'application/json' },
       });
       handleOpenModal('Docente en Asignatura Eliminado', 'La acción se realizó con éxito.');
