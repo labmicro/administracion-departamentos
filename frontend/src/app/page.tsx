@@ -10,7 +10,7 @@ const AppWrapper = () => {
     const isAuthenticated = localStorage.getItem('access_token'); // Verifica si hay un token de acceso
 
     if (isAuthenticated) {
-      router.replace('/dashboard'); // Redirige al Dashboard si está autenticado
+      router.replace('/dashboard/home'); // Redirige al Dashboard si está autenticado
     } else {
       router.replace('/login'); // De lo contrario, redirige a la página de login
     }
