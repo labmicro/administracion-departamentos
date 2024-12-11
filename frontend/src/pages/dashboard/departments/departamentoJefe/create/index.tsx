@@ -82,7 +82,6 @@ const CrearDepartamentoJefe = () => {
   const [jefe, setJefe] = useState<Jefe | null>(null);
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
 
-  const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
   const [jefes, setJefes] = useState<Jefe[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
 
@@ -90,7 +89,6 @@ const CrearDepartamentoJefe = () => {
   const [filtroJefe, setFiltroJefe] = useState('');
   const [filtroDepartamento, setFiltroDepartamento] = useState('');
 
-  const [openResolucion, setOpenResolucion] = useState(false);
   const [openJefe, setOpenJefe] = useState(false);
   const [openDepartamento, setOpenDepartamento] = useState(false);
 
@@ -101,6 +99,20 @@ const CrearDepartamentoJefe = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [fn, setFn] = useState(() => () => {});
+
+const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
+const [filtroNroExpediente, setFiltroNroExpediente] = useState('');
+const [filtroNroResolucion, setFiltroNroResolucion] = useState('');
+const [filtroTipo, setFiltroTipo] = useState('');
+const [filtroFecha, setFiltroFecha] = useState<dayjs.Dayjs | null>(null);
+const [nextUrl, setNextUrl] = useState<string | null>(null);
+const [prevUrl, setPrevUrl] = useState<string | null>(null);
+const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/resolucion/`);
+const [totalItems, setTotalItems] = useState<number>(0);
+const [pageSize, setPageSize] = useState<number>(10);
+const [currentPage, setCurrentPage] = useState<number>(1);
+const [openResolucion, setOpenResolucion] = useState(false);
+const [selectedResolucion, setSelectedResolucion] = useState<Resolucion | null>(null);
 
   const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
     setModalTitle(title);
@@ -118,25 +130,35 @@ const CrearDepartamentoJefe = () => {
     router.push('/dashboard/departments/departamentoJefe/');
   };
 
-  // Fetch data functions for each modal
-  const fetchResoluciones = async () => {
+  useEffect(() => {
+  if (openResolucion) fetchResoluciones(currentUrl);
+  }, [openResolucion, currentUrl]);
+
+  const fetchResoluciones = async (url: string) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/facet/resolucion/`);
-      const resolucionesData = response.data.results.map((res: Resolucion) => ({
-        ...res,
-        fecha: dayjs(res.fecha, "DD/MM/YYYY HH:mm:ss").isValid()
-          ? dayjs(res.fecha, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY")
-          : 'Fecha no disponible',
-      }));
-      setResoluciones(resolucionesData);
+      const response = await axios.get(url);
+      setResoluciones(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+      setCurrentPage(Math.ceil(response.data.offset / pageSize) + 1);
     } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al obtener las resoluciones.',
-      });
+      console.error('Error al cargar las resoluciones:', error);
     }
   };
+
+const filtrarResoluciones = () => {
+  let url = `${API_BASE_URL}/facet/resolucion/?`;
+  const params = new URLSearchParams();
+
+  if (filtroNroExpediente) params.append('nexpediente__icontains', filtroNroExpediente);
+  if (filtroNroResolucion) params.append('nresolucion__icontains', filtroNroResolucion);
+  if (filtroTipo) params.append('tipo', filtroTipo);
+  if (filtroFecha) params.append('fecha__date', filtroFecha.format('YYYY-MM-DD'));
+
+  url += params.toString();
+  setCurrentUrl(url);
+};
 
   const fetchJefes = async () => {
     try {
@@ -166,7 +188,7 @@ const CrearDepartamentoJefe = () => {
 
   // Fetch data when opening modals
   useEffect(() => {
-    if (openResolucion) fetchResoluciones();
+    // if (openResolucion) fetchResoluciones();
     if (openJefe) fetchJefes();
     if (openDepartamento) fetchDepartamentos();
   }, [openResolucion, openJefe, openDepartamento]);
@@ -209,14 +231,56 @@ const CrearDepartamentoJefe = () => {
               <Dialog open={openResolucion} onClose={() => setOpenResolucion(false)} maxWidth="md" fullWidth>
                 <DialogTitle>Seleccionar Resolución</DialogTitle>
                 <DialogContent>
-                  <TextField
-                    label="Filtrar por Nro Resolución o Expediente"
-                    value={filtroResolucion}
-                    onChange={(e) => setFiltroResolucion(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TableContainer component={Paper}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Nro Expediente"
+                        value={filtroNroExpediente}
+                        onChange={(e) => setFiltroNroExpediente(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Nro Resolución"
+                        value={filtroNroResolucion}
+                        onChange={(e) => setFiltroNroResolucion(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <FormControl fullWidth>
+                        <InputLabel>Tipo</InputLabel>
+                        <Select
+                          value={filtroTipo}
+                          onChange={(e) => setFiltroTipo(e.target.value)}
+                          label="Tipo"
+                        >
+                          <MenuItem value="">Todos</MenuItem>
+                          <MenuItem value="Rector">Rector</MenuItem>
+                          <MenuItem value="Decano">Decano</MenuItem>
+                          <MenuItem value="Consejo_Superior">Consejo Superior</MenuItem>
+                          <MenuItem value="Consejo_Directivo">Consejo Directivo</MenuItem>
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                        <DatePicker
+                          label="Fecha"
+                          value={filtroFecha}
+                          onChange={(date) => setFiltroFecha(date)}
+                        />
+                      </LocalizationProvider>
+                    </Grid>
+                    <Grid item xs={4}>
+                      <Button variant="contained" onClick={filtrarResoluciones}>
+                        Filtrar
+                      </Button>
+                    </Grid>
+                  </Grid>
+
+                  <TableContainer component={Paper} style={{ marginTop: '20px' }}>
                     <Table>
                       <TableHead>
                         <TableRow>
@@ -228,32 +292,52 @@ const CrearDepartamentoJefe = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {resoluciones
-                          .filter((res) =>
-                            res.nresolucion.includes(filtroResolucion) || res.nexpediente.includes(filtroResolucion)
-                          )
-                          .map((res) => (
-                            <TableRow key={res.id}>
-                              <TableCell>{res.nexpediente}</TableCell>
-                              <TableCell>{res.nresolucion}</TableCell>
-                              <TableCell>{res.tipo}</TableCell>
-                              <TableCell>{res.fecha}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="outlined"
-                                  onClick={() => {
-                                    setResolucion(res);
-                                    setOpenResolucion(false);
-                                  }}
-                                >
-                                  Seleccionar
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
+                        {resoluciones.map((resolucion) => (
+                          <TableRow key={resolucion.id}>
+                            <TableCell>{resolucion.nexpediente}</TableCell>
+                            <TableCell>{resolucion.nresolucion}</TableCell>
+                            <TableCell>{resolucion.tipo}</TableCell>
+                            <TableCell>
+                              {dayjs(resolucion.fecha, 'DD/MM/YYYY HH:mm:ss').isValid()
+                                ? dayjs(resolucion.fecha, 'DD/MM/YYYY HH:mm:ss').format('DD/MM/YYYY')
+                                : 'Fecha no disponible'}
+                            </TableCell>
+                            <TableCell>
+                              <Button
+                                variant="outlined"
+                                onClick={() => {
+                                  setSelectedResolucion(resolucion);
+                                  setOpenResolucion(false);
+                                }}
+                              >
+                                Seleccionar
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
                       </TableBody>
                     </Table>
                   </TableContainer>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                    <Button
+                      variant="contained"
+                      onClick={() => prevUrl && setCurrentUrl(prevUrl)}
+                      disabled={!prevUrl}
+                    >
+                      Anterior
+                    </Button>
+                    <Typography variant="body1">
+                      Página {currentPage} de {Math.ceil(totalItems / pageSize)}
+                    </Typography>
+                    <Button
+                      variant="contained"
+                      onClick={() => nextUrl && setCurrentUrl(nextUrl)}
+                      disabled={!nextUrl}
+                    >
+                      Siguiente
+                    </Button>
+                  </div>
                 </DialogContent>
                 <DialogActions>
                   <Button onClick={() => setOpenResolucion(false)}>Cerrar</Button>

@@ -4,6 +4,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.filters import SearchFilter
 from ..models import NoDocente
 from ..serializers import NoDocenteSerializer
+from rest_framework.decorators import action
+from rest_framework.response import Response
 
 class NoDocenteViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
@@ -17,3 +19,13 @@ class NoDocenteViewSet(viewsets.ModelViewSet):
         'persona__nombre': ['icontains'],
         'persona__dni': ['icontains'],
     }
+
+    @action(detail=False, methods=['get'], url_path='buscar_por_persona')
+    def buscar_por_persona(self, request):
+        persona_id = request.query_params.get('persona_id')
+        if persona_id:
+            nodocente = self.queryset.filter(persona__id=persona_id).first()
+            if nodocente:
+                serializer = self.get_serializer(nodocente)
+                return Response(serializer.data, status=200)
+        return Response({'detail': 'No encontrado'}, status=404)

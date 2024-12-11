@@ -24,15 +24,14 @@ import {
   TableRow,
 } from '@mui/material';
 import BasicModal from '@/utils/modal';
-import { useRouter } from 'next/router'; // Importa useRouter de Next.js
+import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
 
-
 const CrearDocente = () => {
   const router = useRouter();
-  // Define los estados necesarios
+
   interface Persona {
     id: number;
     nombre: string;
@@ -45,11 +44,14 @@ const CrearDocente = () => {
     legajo: string;
   }
 
-  const [persona, setPersona] = useState<Persona>();
+  const [persona, setPersona] = useState<Persona | null>(null);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [apellido, SetApellido] = useState('');
   const [dni, SetDni] = useState('');
-  const [filtroPersonas, setFiltroPersonas] = useState('');
+  const [filtroNombre, setFiltroNombre] = useState('');
+  const [filtroApellido, setFiltroApellido] = useState('');
+  const [filtroDni, setFiltroDni] = useState('');
+  const [filtroLegajo, setFiltroLegajo] = useState('');
   const [openPersona, setOpenPersona] = useState(false);
   const [nombre, setNombre] = useState('');
   const [observaciones, setObservaciones] = useState('');
@@ -58,6 +60,10 @@ const CrearDocente = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [fn, setFn] = useState(() => () => {});
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
     setModalTitle(title);
@@ -73,186 +79,241 @@ const CrearDocente = () => {
 
   const handleOpenPersona = () => {
     setOpenPersona(true);
+    fetchPersonas(`${API_BASE_URL}/facet/persona/`);
   };
 
   const handleClose = () => {
     setOpenPersona(false);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responsePers = await axios.get(`${API_BASE_URL}/facet/persona/`);
-        setPersonas(responsePers.data.results);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleConfirmSelection = () => {
-    handleClose();
-  };
-
-  const handleConfirmModal = () => {
-    router.push('/dashboard/persons/docentes/'); // Navega a la lista de jefes
-  };
-
-  const handleFilterPersonas = (filtro: string) => {
-    return personas.filter((persona) =>
-      persona.dni.includes(filtro) ||
-      (persona.legajo ?? '').includes(filtro) ||
-      persona.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-      persona.apellido.toLowerCase().includes(filtro.toLowerCase())
-    );
-  };
-
-  const crearNuevoDocenteDepartamento = async () => {
-    const nuevoDocente = {
-      persona: persona?.id,
-      observaciones: observaciones,
-      estado: estado as 0 | 1,
-    };
-
+  const fetchPersonas = async (url: string) => {
     try {
-      const existeRegistro = await axios.get(`${API_BASE_URL}/facet/docente/${persona?.id}/`);
-      if (existeRegistro.data) {
-        handleOpenModal('Error', 'Ya existe docente departamento', () => {});
-      }
-    } catch (error: unknown) {
-      if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
-        try {
-          await axios.post(`${API_BASE_URL}/facet/docente/`, nuevoDocente, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          handleOpenModal('Bien', 'Se creó el docente con éxito', handleConfirmModal);
-        } catch (postError) {
-          console.error(postError);
-          handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
-        }
-      } else {
-        console.error(error);
-        handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
-      }
+      const response = await axios.get(url);
+      setPersonas(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+    } catch (error) {
+      console.error('Error fetching paginated data:', error);
     }
   };
 
+  const filtrarPersonas = () => {
+    let url = `${API_BASE_URL}/facet/persona/?`;
+    const params = new URLSearchParams();
+
+    if (filtroNombre.trim()) params.append('nombre__icontains', filtroNombre);
+    if (filtroApellido.trim()) params.append('apellido__icontains', filtroApellido);
+    if (filtroDni.trim()) params.append('dni__icontains', filtroDni);
+    if (filtroLegajo.trim()) params.append('legajo__icontains', filtroLegajo);
+
+    url += params.toString();
+    fetchPersonas(url);
+  };
+
+  const crearNuevoDocenteDepartamento = async () => {
+  const nuevoDocente = {
+    persona: persona?.id,
+    observaciones,
+    estado,
+  };
+
+  try {
+    // Busca si ya existe un docente asociado a esta persona
+    const response = await axios.get(`${API_BASE_URL}/facet/docente/`, {
+      params: {
+        persona: persona?.id, // Filtrar por ID de la persona
+      },
+    });
+
+    // Si hay resultados, significa que ya existe un docente
+    if (response.data.results.length > 0) {
+      handleOpenModal('Error', 'Ya existe un docente para esta persona', () => {});
+      return; // Detenemos la ejecución
+    }
+
+    // Si no existe, procedemos a crearlo
+    await axios.post(`${API_BASE_URL}/facet/docente/`, nuevoDocente, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    handleOpenModal('Bien', 'Se creó el docente con éxito', () => {
+      router.push('/dashboard/persons/docentes/');
+    });
+  } catch (error) {
+    console.error('Error:', error);
+    handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
+  }
+};
+
+
   return (
     <DashboardMenu>
-    <Container maxWidth="lg">
-      <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
-        <Typography variant="h4" gutterBottom>
-          Agregar Docente
-        </Typography>
+      <Container maxWidth="lg">
+        <Paper elevation={3} style={{ padding: '20px', marginTop: '20px' }}>
+          <Typography variant="h4" gutterBottom>
+            Agregar Docente
+          </Typography>
 
-        <Grid container spacing={2}>
-          <Grid item xs={4}>
-            <Button variant="contained" onClick={handleOpenPersona}>
-              Seleccionar Persona
-            </Button>
+          <Grid container spacing={2}>
+            <Grid item xs={4}>
+              <Button variant="contained" onClick={handleOpenPersona}>
+                Seleccionar Persona
+              </Button>
 
-            <Dialog open={openPersona} onClose={handleClose} maxWidth="md" fullWidth>
-  <DialogTitle>Seleccionar Persona</DialogTitle>
-  <DialogContent>
-    <TextField
-      label="Buscar por DNI, Apellido o Legajo"
-      value={filtroPersonas}
-      onChange={(e) => setFiltroPersonas(e.target.value)}
-      fullWidth
-      margin="normal"
-    />
+              <Dialog open={openPersona} onClose={handleClose} maxWidth="md" fullWidth>
+                <DialogTitle>Seleccionar Persona</DialogTitle>
+                <DialogContent>
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Nombre"
+                        value={filtroNombre}
+                        onChange={(e) => setFiltroNombre(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Apellido"
+                        value={filtroApellido}
+                        onChange={(e) => setFiltroApellido(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="DNI"
+                        value={filtroDni}
+                        onChange={(e) => setFiltroDni(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Legajo"
+                        value={filtroLegajo}
+                        onChange={(e) => setFiltroLegajo(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4} style={{ display: 'flex', alignItems: 'center' }}>
+                      <Button variant="contained" onClick={filtrarPersonas}>
+                        Filtrar
+                      </Button>
+                    </Grid>
+                  </Grid>
 
-    <TableContainer component={Paper}>
-      <Table>
-        <TableHead>
-          <TableRow>
-            <TableCell>DNI</TableCell>
-            <TableCell>Apellido</TableCell>
-            <TableCell>Nombre</TableCell>
-            <TableCell>Legajo</TableCell>
-            <TableCell>Seleccionar</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {handleFilterPersonas(filtroPersonas).map((personafilter) => (
-            <TableRow key={personafilter.id}>
-              <TableCell>{personafilter.dni}</TableCell>
-              <TableCell>{personafilter.apellido}</TableCell>
-              <TableCell>{personafilter.nombre}</TableCell>
-              <TableCell>{personafilter.legajo}</TableCell>
-              <TableCell>
-                <Button
-                  variant="outlined"
-                  onClick={() => {
-                    setPersona(personafilter);
-                    SetApellido(personafilter.apellido);
-                    SetDni(personafilter.dni);
-                    setNombre(personafilter.nombre);
-                  }}
-                  style={{
-                    backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit',
-                    color: personafilter.id === persona?.id ? 'white' : 'inherit',
-                  }}
+                  <TableContainer component={Paper} style={{ marginTop: '20px' }}>
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>DNI</TableCell>
+                          <TableCell>Apellido</TableCell>
+                          <TableCell>Nombre</TableCell>
+                          <TableCell>Legajo</TableCell>
+                          <TableCell>Seleccionar</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        {personas.map((p) => (
+                          <TableRow key={p.id}>
+                            <TableCell>{p.dni}</TableCell>
+                            <TableCell>{p.apellido}</TableCell>
+                            <TableCell>{p.nombre}</TableCell>
+                            <TableCell>{p.legajo}</TableCell>
+                            <TableCell>
+                              <Button
+                                variant="outlined"
+                                onClick={() => {
+                                  setPersona(p);
+                                  SetApellido(p.apellido);
+                                  SetDni(p.dni);
+                                  setNombre(p.nombre);
+                                }}
+                                style={{
+                                  backgroundColor: persona?.id === p.id ? '#4caf50' : 'inherit',
+                                  color: persona?.id === p.id ? 'white' : 'inherit',
+                                }}
+                              >
+                                Seleccionar
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </DialogContent>
+                <DialogActions>
+                  <Button
+                    variant="contained"
+                    disabled={!prevUrl}
+                    onClick={() => prevUrl && fetchPersonas(prevUrl)}
+                  >
+                    Anterior
+                  </Button>
+                  <Typography style={{ padding: '0 10px' }}>
+                    Página {currentPage} de {Math.ceil(totalItems / 10)}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    disabled={!nextUrl}
+                    onClick={() => nextUrl && fetchPersonas(nextUrl)}
+                  >
+                    Siguiente
+                  </Button>
+                  <Button onClick={handleClose}>Cerrar</Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => handleClose()}
+                    disabled={!persona}
+                  >
+                    Confirmar Selección
+                  </Button>
+                </DialogActions>
+              </Dialog>
+            </Grid>
+
+            <Grid item xs={12}>
+              <TextField disabled label="DNI" value={dni} fullWidth />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField disabled value={`${apellido} ${nombre}`} fullWidth />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Observaciones"
+                value={observaciones}
+                onChange={(e) => setObservaciones(e.target.value)}
+                fullWidth
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="estado-label">Estado</InputLabel>
+                <Select
+                  labelId="estado-label"
+                  id="estado-select"
+                  value={estado}
+                  onChange={(e) => setEstado(Number(e.target.value))}
                 >
-                  Seleccionar
-                </Button>
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
-  </DialogContent>
-  <DialogActions>
-    <Button onClick={handleClose}>Cerrar</Button>
-    <Button
-      variant="contained"
-      onClick={handleConfirmSelection}
-      style={{ marginTop: '10px' }}
-    >
-      Confirmar Selección
-    </Button>
-  </DialogActions>
-</Dialog>
+                  <MenuItem value={1}>Activo</MenuItem>
+                  <MenuItem value={0}>Inactivo</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} marginBottom={2}>
+              <Button variant="contained" onClick={crearNuevoDocenteDepartamento}>
+                Crear
+              </Button>
+            </Grid>
           </Grid>
-
-          <Grid item xs={12}>
-            <TextField disabled label="DNI" value={dni} fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField disabled value={`${apellido} ${nombre}`} fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField label="Observaciones" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} fullWidth />
-          </Grid>
-          <Grid item xs={12}>
-            <FormControl fullWidth margin="none">
-              <InputLabel id="estado-label">Estado</InputLabel>
-              <Select
-                labelId="estado-label"
-                id="estado-select"
-                value={estado}
-                label="Estado"
-                onChange={(e) => setEstado(Number(e.target.value))}
-              >
-                <MenuItem value={1}>1</MenuItem>
-                <MenuItem value={0}>0</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} marginBottom={2}>
-            <Button variant="contained" onClick={crearNuevoDocenteDepartamento}>
-              Crear
-            </Button>
-          </Grid>
-        </Grid>
-        <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
-      </Paper>
-    </Container>
+          <BasicModal open={modalVisible} onClose={handleCloseModal} title={modalTitle} content={modalMessage} onConfirm={fn} />
+        </Paper>
+      </Container>
     </DashboardMenu>
   );
 };

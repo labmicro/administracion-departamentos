@@ -149,28 +149,28 @@ const ListaPersonas = () => {
   return (
     <DashboardMenu>
       <Container maxWidth="lg">
-        <div>
-          <Link href="/dashboard/persons/create" style={{ marginLeft: '10px' }} passHref>
-            <Button variant="contained" endIcon={<AddIcon />}>
+      <div>
+          <Link href="/dashboard/persons/create" passHref>
+            <Button variant="contained" endIcon={<AddIcon />} style={{ marginRight: '10px' }}>
               Agregar Persona
             </Button>
-            <Link href="/dashboard/persons/jefes" style={{ marginLeft: '10px' }} passHref>
-            <Button variant="contained" color="secondary">
+          </Link>
+          <Link href="/dashboard/persons/jefes" passHref>
+            <Button variant="contained" color="secondary" style={{ marginRight: '10px' }}>
               Jefes
             </Button>
           </Link>
-          <Link href="/dashboard/persons/docentes" style={{ marginLeft: '10px' }} passHref>
-            <Button variant="contained" color="secondary">
+          <Link href="/dashboard/persons/docentes" passHref>
+            <Button variant="contained" color="secondary" style={{ marginRight: '10px' }}>
               Docentes
             </Button>
           </Link>
-          <Link href="/dashboard/persons/noDocentes" style={{ marginLeft: '10px' }} passHref>
-            <Button variant="contained" color="secondary">
+          <Link href="/dashboard/persons/noDocentes" passHref>
+            <Button variant="contained" color="secondary" style={{ marginRight: '10px' }}>
               No Docentes
             </Button>
           </Link>
-          </Link>
-          <Button variant="contained" color="primary" onClick={descargarExcel} style={{ marginLeft: '10px' }}>
+          <Button variant="contained" color="primary" onClick={descargarExcel}>
             Descargar Excel
           </Button>
         </div>
@@ -260,7 +260,7 @@ const ListaPersonas = () => {
                       <Typography variant="body1">{persona.dni}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body1">{persona.estado === 1 ? 'Activo' : 'Inactivo'}</Typography>
+                      <Typography variant="body1">{persona.estado == 1 ? 'Activo' : 'Inactivo'}</Typography>
                     </TableCell>
                     <TableCell>
                       <Typography variant="body1">{persona.email}</Typography>

@@ -24,11 +24,10 @@ import {
   TableRow,
 } from '@mui/material';
 import BasicModal from '@/utils/modal';
-import { useRouter } from 'next/router'; 
+import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
-
 
 const CrearNoDocente = () => {
   const router = useRouter();
@@ -45,19 +44,26 @@ const CrearNoDocente = () => {
     legajo: string;
   }
 
-  const [persona, setPersona] = useState<Persona>();
+  const [persona, setPersona] = useState<Persona | null>(null);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [apellido, setApellido] = useState('');
   const [dni, setDni] = useState('');
-  const [filtroPersonas, setFiltroPersonas] = useState('');
+  const [filtroNombre, setFiltroNombre] = useState('');
+  const [filtroApellido, setFiltroApellido] = useState('');
+  const [filtroDni, setFiltroDni] = useState('');
+  const [filtroLegajo, setFiltroLegajo] = useState('');
   const [openPersona, setOpenPersona] = useState(false);
   const [nombre, setNombre] = useState('');
   const [observaciones, setObservaciones] = useState('');
-  const [estado, setEstado] = useState<number>(0);
+  const [estado, setEstado] = useState<number>(1);
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [fn, setFn] = useState(() => () => {});
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
     setModalTitle(title);
@@ -73,73 +79,71 @@ const CrearNoDocente = () => {
 
   const handleOpenPersona = () => {
     setOpenPersona(true);
+    fetchPersonas(`${API_BASE_URL}/facet/persona/`);
   };
 
   const handleClose = () => {
     setOpenPersona(false);
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responsePers = await axios.get(`${API_BASE_URL}/facet/persona/`);
-        setPersonas(responsePers.data.results);
-      } catch (error) {
-        console.error('Error fetching data:', error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  const handleConfirmSelection = () => {
-    handleClose();
+  const fetchPersonas = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+      setPersonas(response.data.results);
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count);
+    } catch (error) {
+      console.error('Error fetching paginated data:', error);
+    }
   };
 
-  const handleConfirmModal = () => {
-    router.push('/dashboard/persons/noDocentes/');
-  };
+  const filtrarPersonas = () => {
+    let url = `${API_BASE_URL}/facet/persona/?`;
+    const params = new URLSearchParams();
 
-  const handleFilterPersonas = (filtro: string) => {
-    return personas.filter((persona) =>
-      persona.dni.includes(filtro) ||
-      (persona.legajo ?? '').includes(filtro) ||
-      persona.nombre.toLowerCase().includes(filtro.toLowerCase()) ||
-      persona.apellido.toLowerCase().includes(filtro.toLowerCase())
-    );
+    if (filtroNombre.trim()) params.append('nombre__icontains', filtroNombre);
+    if (filtroApellido.trim()) params.append('apellido__icontains', filtroApellido);
+    if (filtroDni.trim()) params.append('dni__icontains', filtroDni);
+    if (filtroLegajo.trim()) params.append('legajo__icontains', filtroLegajo);
+
+    url += params.toString();
+    fetchPersonas(url);
   };
 
   const crearNuevoNoDocenteDepartamento = async () => {
     const nuevoNoDocente = {
       persona: persona?.id,
-      observaciones: observaciones,
-      estado: estado as 0 | 1,
+      observaciones,
+      estado,
     };
-
+  
     try {
-      const existeRegistro = await axios.get(`${API_BASE_URL}/facet/nodocente/${persona?.id}/`);
-      if (existeRegistro.data) {
+      const response = await axios.get(`${API_BASE_URL}/facet/nodocente/`);
+      const existe = response.data.results.some(
+        (nodocente: any) => nodocente.persona === persona?.id
+      );
+  
+      if (existe) {
         handleOpenModal('Error', 'Ya existe no docente para esta persona', () => {});
+        return;
       }
+  
+      await axios.post(`${API_BASE_URL}/facet/nodocente/`, nuevoNoDocente, {
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+  
+      handleOpenModal('Bien', 'Se creó el no docente con éxito', () => {
+        router.push('/dashboard/persons/noDocentes/');
+      });
     } catch (error) {
-      if (axios.isAxiosError(error) && error.response && error.response.status === 404) {
-        try {
-          await axios.post(`${API_BASE_URL}/facet/nodocente/`, nuevoNoDocente, {
-            headers: {
-              'Content-Type': 'application/json',
-            },
-          });
-          handleOpenModal('Bien', 'Se creó el no docente con éxito', handleConfirmModal);
-        } catch (postError) {
-          console.error(postError);
-          handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
-        }
-      } else {
-        console.error(error);
-        handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
-      }
+      handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
     }
   };
+  
+  
 
   return (
     <DashboardMenu>
@@ -158,14 +162,47 @@ const CrearNoDocente = () => {
               <Dialog open={openPersona} onClose={handleClose} maxWidth="md" fullWidth>
                 <DialogTitle>Seleccionar Persona</DialogTitle>
                 <DialogContent>
-                  <TextField
-                    label="Buscar por DNI, Apellido o Legajo"
-                    value={filtroPersonas}
-                    onChange={(e) => setFiltroPersonas(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TableContainer component={Paper}>
+                  <Grid container spacing={2} alignItems="center">
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Nombre"
+                        value={filtroNombre}
+                        onChange={(e) => setFiltroNombre(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <TextField
+                        label="Apellido"
+                        value={filtroApellido}
+                        onChange={(e) => setFiltroApellido(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="DNI"
+                        value={filtroDni}
+                        onChange={(e) => setFiltroDni(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4}>
+                      <TextField
+                        label="Legajo"
+                        value={filtroLegajo}
+                        onChange={(e) => setFiltroLegajo(e.target.value)}
+                        fullWidth
+                      />
+                    </Grid>
+                    <Grid item xs={4} style={{ display: 'flex', alignItems: 'center' }}>
+                      <Button variant="contained" onClick={filtrarPersonas}>
+                        Filtrar
+                      </Button>
+                    </Grid>
+                  </Grid>
+
+                  <TableContainer component={Paper} style={{ marginTop: '20px' }}>
                     <Table>
                       <TableHead>
                         <TableRow>
@@ -177,24 +214,24 @@ const CrearNoDocente = () => {
                         </TableRow>
                       </TableHead>
                       <TableBody>
-                        {handleFilterPersonas(filtroPersonas).map((personafilter) => (
-                          <TableRow key={personafilter.id}>
-                            <TableCell>{personafilter.dni}</TableCell>
-                            <TableCell>{personafilter.apellido}</TableCell>
-                            <TableCell>{personafilter.nombre}</TableCell>
-                            <TableCell>{personafilter.legajo}</TableCell>
+                        {personas.map((p) => (
+                          <TableRow key={p.id}>
+                            <TableCell>{p.dni}</TableCell>
+                            <TableCell>{p.apellido}</TableCell>
+                            <TableCell>{p.nombre}</TableCell>
+                            <TableCell>{p.legajo}</TableCell>
                             <TableCell>
                               <Button
                                 variant="outlined"
                                 onClick={() => {
-                                  setPersona(personafilter);
-                                  setApellido(personafilter.apellido);
-                                  setDni(personafilter.dni);
-                                  setNombre(personafilter.nombre);
+                                  setPersona(p);
+                                  setApellido(p.apellido);
+                                  setDni(p.dni);
+                                  setNombre(p.nombre);
                                 }}
                                 style={{
-                                  backgroundColor: personafilter.id === persona?.id ? '#4caf50' : 'inherit',
-                                  color: personafilter.id === persona?.id ? 'white' : 'inherit',
+                                  backgroundColor: persona?.id === p.id ? '#4caf50' : 'inherit',
+                                  color: persona?.id === p.id ? 'white' : 'inherit',
                                 }}
                               >
                                 Seleccionar
@@ -207,11 +244,28 @@ const CrearNoDocente = () => {
                   </TableContainer>
                 </DialogContent>
                 <DialogActions>
+                  <Button
+                    variant="contained"
+                    disabled={!prevUrl}
+                    onClick={() => prevUrl && fetchPersonas(prevUrl)}
+                  >
+                    Anterior
+                  </Button>
+                  <Typography style={{ padding: '0 10px' }}>
+                    Página {currentPage} de {Math.ceil(totalItems / 10)}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    disabled={!nextUrl}
+                    onClick={() => nextUrl && fetchPersonas(nextUrl)}
+                  >
+                    Siguiente
+                  </Button>
                   <Button onClick={handleClose}>Cerrar</Button>
                   <Button
                     variant="contained"
-                    onClick={handleConfirmSelection}
-                    style={{ marginTop: '10px' }}
+                    onClick={handleClose}
+                    disabled={!persona}
                   >
                     Confirmar Selección
                   </Button>
@@ -226,16 +280,20 @@ const CrearNoDocente = () => {
               <TextField disabled value={`${apellido} ${nombre}`} fullWidth />
             </Grid>
             <Grid item xs={12}>
-              <TextField label="Observaciones" value={observaciones} onChange={(e) => setObservaciones(e.target.value)} fullWidth />
+              <TextField
+                label="Observaciones"
+                value={observaciones}
+                onChange={(e) => setObservaciones(e.target.value)}
+                fullWidth
+              />
             </Grid>
             <Grid item xs={12}>
-              <FormControl fullWidth margin="none">
+              <FormControl fullWidth>
                 <InputLabel id="estado-label">Estado</InputLabel>
                 <Select
                   labelId="estado-label"
                   id="estado-select"
                   value={estado}
-                  label="Estado"
                   onChange={(e) => setEstado(Number(e.target.value))}
                 >
                   <MenuItem value={1}>Activo</MenuItem>

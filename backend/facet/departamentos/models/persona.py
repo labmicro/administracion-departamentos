@@ -4,11 +4,11 @@ from .base import BaseModel
 class Persona(BaseModel):
     nombre = models.CharField(blank=False, null=False)
     apellido = models.CharField( blank=False, null=False)
-    telefono = models.CharField(blank=False, null=False)
+    telefono = models.CharField(blank=True, null=True)
     dni = models.CharField(blank=False, null=False)
     estado = models.CharField(max_length=1)
     email = models.CharField(blank=True, null=True)
-    interno = models.IntegerField(blank=False, null=False)
+    interno = models.IntegerField(blank=True, null=True)
     legajo = models.CharField(blank=True, null=True)
     titulo = models.CharField(blank=True, null=True)
 

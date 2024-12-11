@@ -32,9 +32,19 @@ const ListaDocentes = () => {
   interface Docente {
     id: number;
     persona: number;
+    persona_detalle: {
+      id: number;
+      nombre: string;
+      apellido: string;
+      dni: string;
+      email: string;
+      telefono: string;
+      legajo: string;
+    };
     observaciones: string;
-    estado: 0 | 1; // Aquí indicas que 'estado' es un enum que puede ser 0 o 1
+    estado: 0 | 1 | "0" | "1"; // Puede ser cadena o número según lo que devuelva el backend.
   }
+  
 
   const [docentes, setDocentes] = useState<Docente[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
@@ -57,6 +67,7 @@ const ListaDocentes = () => {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
+      console.log(response.data)
       setDocentes(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -237,30 +248,26 @@ const ListaDocentes = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {docentes.map((docente) => {
-                const persona = personas.find((p) => p.id === docente.persona);
+            {docentes.map((docente) => {
+              const { persona_detalle: persona } = docente;
 
-                if (!persona) {
-                  return null; // Si la persona no se encuentra, omite este docente
-                }
-
-                return (
-                  <TableRow key={docente.id}>
-                    <TableCell>{persona.nombre}</TableCell>
-                    <TableCell>{persona.apellido}</TableCell>
-                    <TableCell>{persona.dni}</TableCell>
-                    <TableCell>{persona.legajo}</TableCell>
-                    <TableCell>{docente.observaciones}</TableCell>
-                    <TableCell>{docente.estado}</TableCell>
-                    <TableCell>
-                      <Link href={`/dashboard/persons/docentes/edit/${docente.id}`}>
-                        <EditIcon />
-                      </Link>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
+              return (
+                <TableRow key={docente.id}>
+                  <TableCell>{persona.nombre}</TableCell>
+                  <TableCell>{persona.apellido}</TableCell>
+                  <TableCell>{persona.dni}</TableCell>
+                  <TableCell>{persona.legajo}</TableCell>
+                  <TableCell>{docente.observaciones}</TableCell>
+                  <TableCell>{docente.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                  <TableCell>
+                    <Link href={`/dashboard/persons/docentes/edit/${docente.id}`}>
+                      <EditIcon />
+                    </Link>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
           </Table>
         </TableContainer>
 
