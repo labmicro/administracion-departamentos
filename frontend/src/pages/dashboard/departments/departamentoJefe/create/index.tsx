@@ -82,12 +82,8 @@ const CrearDepartamentoJefe = () => {
   const [jefe, setJefe] = useState<Jefe | null>(null);
   const [departamento, setDepartamento] = useState<Departamento | null>(null);
 
-  const [jefes, setJefes] = useState<Jefe[]>([]);
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
-
   const [filtroResolucion, setFiltroResolucion] = useState('');
   const [filtroJefe, setFiltroJefe] = useState('');
-  const [filtroDepartamento, setFiltroDepartamento] = useState('');
 
   const [openJefe, setOpenJefe] = useState(false);
   const [openDepartamento, setOpenDepartamento] = useState(false);
@@ -114,6 +110,30 @@ const [currentPage, setCurrentPage] = useState<number>(1);
 const [openResolucion, setOpenResolucion] = useState(false);
 const [selectedResolucion, setSelectedResolucion] = useState<Resolucion | null>(null);
 
+const [jefes, setJefes] = useState<Jefe[]>([]);
+const [filtroNombre, setFiltroNombre] = useState('');
+const [filtroDni, setFiltroDni] = useState('');
+
+const [nextUrlJefes, setNextUrlJefes] = useState<string | null>(null);
+const [prevUrlJefes, setPrevUrlJefes] = useState<string | null>(null);
+const [currentUrlJefes, setCurrentUrlJefes] = useState<string>(`${API_BASE_URL}/facet/jefe/list_jefes_persona/`);
+const [totalItemsJefes, setTotalItemsJefes] = useState<number>(0);
+const [currentPageJefes, setCurrentPageJefes] = useState<number>(1);
+const pageSizeJefes = 10;
+
+const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+const [filtroDepartamento, setFiltroDepartamento] = useState('');
+
+const [nextUrlDepartamentos, setNextUrlDepartamentos] = useState<string | null>(null);
+const [prevUrlDepartamentos, setPrevUrlDepartamentos] = useState<string | null>(null);
+const [currentUrlDepartamentos, setCurrentUrlDepartamentos] = useState<string>(`${API_BASE_URL}/facet/departamento/`);
+const [totalItemsDepartamentos, setTotalItemsDepartamentos] = useState<number>(0);
+const [currentPageDepartamentos, setCurrentPageDepartamentos] = useState<number>(1);
+const pageSizeDepartamentos = 10;
+
+
+
+
   const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
     setModalTitle(title);
     setModalMessage(message);
@@ -134,14 +154,20 @@ const [selectedResolucion, setSelectedResolucion] = useState<Resolucion | null>(
   if (openResolucion) fetchResoluciones(currentUrl);
   }, [openResolucion, currentUrl]);
 
+  useEffect(() => {
+    if (openJefe) fetchJefes(currentUrlJefes);
+  }, [openJefe, currentUrlJefes]);
+  
+
   const fetchResoluciones = async (url: string) => {
     try {
       const response = await axios.get(url);
+      console.log(response.data)
       setResoluciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
       setTotalItems(response.data.count);
-      setCurrentPage(Math.ceil(response.data.offset / pageSize) + 1);
+      setCurrentPage(Math.ceil((response.data.offset || 0) / pageSize) + 1);
     } catch (error) {
       console.error('Error al cargar las resoluciones:', error);
     }
@@ -160,50 +186,76 @@ const filtrarResoluciones = () => {
   setCurrentUrl(url);
 };
 
-  const fetchJefes = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/facet/jefe/list_jefes_persona/`);
-      setJefes(response.data);
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al obtener los jefes.',
-      });
-    }
+const fetchJefes = async (url: string) => {
+  try {
+    const response = await axios.get(url);
+    setJefes(response.data.results); // Datos de la página actual
+    setNextUrlJefes(response.data.next); // URL de la siguiente página
+    setPrevUrlJefes(response.data.previous); // URL de la página anterior
+    setTotalItemsJefes(response.data.count); // Total de elementos
+
+    // Calcular la página actual
+    const offset = new URL(url).searchParams.get('offset') || '0';
+    setCurrentPageJefes(Math.floor(Number(offset) / pageSizeJefes) + 1);
+  } catch (error) {
+    console.error('Error al obtener los jefes:', error);
+  }
+};
+
+const filtrarJefes = () => {
+  let url = `${API_BASE_URL}/facet/jefe/list_jefes_persona/?`;
+  const params = new URLSearchParams();
+
+  if (filtroNombre) params.append('persona__nombre__icontains', filtroNombre);
+  if (filtroDni) params.append('persona__dni__icontains', filtroDni);
+
+  url += params.toString();
+  setCurrentUrlJefes(url); // Actualiza la URL actual
+};
+
+
+const fetchDepartamentos = async (url: string) => {
+  try {
+    const response = await axios.get(url);
+    setDepartamentos(response.data.results); // Datos de la página actual
+    setNextUrlDepartamentos(response.data.next); // URL de la página siguiente
+    setPrevUrlDepartamentos(response.data.previous); // URL de la página anterior
+    setTotalItemsDepartamentos(response.data.count); // Total de elementos
+
+    // Calcular la página actual
+    const offset = new URL(url).searchParams.get('offset') || '0';
+    setCurrentPageDepartamentos(Math.floor(Number(offset) / pageSizeDepartamentos) + 1);
+  } catch (error) {
+    console.error('Error al obtener los departamentos:', error);
+  }
+};
+
+  const filtrarDepartamentos = () => {
+    let url = `${API_BASE_URL}/facet/departamento/?`;
+    const params = new URLSearchParams();
+
+    if (filtroDepartamento) params.append('nombre__icontains', filtroDepartamento);
+
+    url += params.toString();
+    setCurrentUrlDepartamentos(url); // Actualiza la URL actual
   };
 
-  const fetchDepartamentos = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/facet/departamento/`);
-      setDepartamentos(response.data.results);
-    } catch (error) {
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'Error al obtener los departamentos.',
-      });
-    }
-  };
-
-  // Fetch data when opening modals
   useEffect(() => {
-    // if (openResolucion) fetchResoluciones();
-    if (openJefe) fetchJefes();
-    if (openDepartamento) fetchDepartamentos();
-  }, [openResolucion, openJefe, openDepartamento]);
+    if (openDepartamento) fetchDepartamentos(currentUrlDepartamentos);
+  }, [openDepartamento, currentUrlDepartamentos]);
+
 
   const crearNuevoJefeDepartamento = async () => {
     const nuevoJefeDepartamento = {
       departamento: departamento?.id,
       jefe: jefe?.id,
-      resolucion: resolucion?.id,
+      resolucion: selectedResolucion?.id,
       fecha_de_inicio: fechaInicio?.toISOString(),
       fecha_de_fin: fechaFin?.toISOString(),
       observaciones: observaciones,
       estado: estado === '1' ? 1 : 0,
     };
-
+    console.log(nuevoJefeDepartamento)
     try {
       await axios.post(`${API_BASE_URL}/facet/jefe-departamento/`, nuevoJefeDepartamento, {
         headers: { 'Content-Type': 'application/json' },
@@ -228,6 +280,17 @@ const filtrarResoluciones = () => {
               <Button variant="contained" onClick={() => setOpenResolucion(true)}>
                 Seleccionar Resolución
               </Button>
+               {/* Mostrar la resolución seleccionada */}
+            {selectedResolucion && (
+              <Paper elevation={2} style={{ marginTop: '10px', padding: '10px' }}>
+                <Typography variant="body1">
+                  <strong>Nro Resolución:</strong> {selectedResolucion.nresolucion}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Nro Expediente:</strong> {selectedResolucion.nexpediente}
+                </Typography>
+              </Paper>
+            )}
               <Dialog open={openResolucion} onClose={() => setOpenResolucion(false)} maxWidth="md" fullWidth>
                 <DialogTitle>Seleccionar Resolución</DialogTitle>
                 <DialogContent>
@@ -320,23 +383,33 @@ const filtrarResoluciones = () => {
                   </TableContainer>
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
-                    <Button
-                      variant="contained"
-                      onClick={() => prevUrl && setCurrentUrl(prevUrl)}
-                      disabled={!prevUrl}
-                    >
-                      Anterior
-                    </Button>
-                    <Typography variant="body1">
-                      Página {currentPage} de {Math.ceil(totalItems / pageSize)}
-                    </Typography>
-                    <Button
-                      variant="contained"
-                      onClick={() => nextUrl && setCurrentUrl(nextUrl)}
-                      disabled={!nextUrl}
-                    >
-                      Siguiente
-                    </Button>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      if (prevUrl) {
+                        setCurrentUrl(prevUrl);
+                        setCurrentPage((prev) => prev - 1); // Actualiza manualmente el número de página
+                      }
+                    }}
+                    disabled={!prevUrl}
+                  >
+                    Anterior
+                  </Button>
+                  <Typography variant="body1">
+                    Página {currentPage} de {Math.ceil(totalItems / pageSize)}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => {
+                      if (nextUrl) {
+                        setCurrentUrl(nextUrl);
+                        setCurrentPage((prev) => prev + 1); // Actualiza manualmente el número de página
+                      }
+                    }}
+                    disabled={!nextUrl}
+                  >
+                    Siguiente
+                  </Button>
                   </div>
                 </DialogContent>
                 <DialogActions>
@@ -350,108 +423,186 @@ const filtrarResoluciones = () => {
                 Seleccionar Jefe
               </Button>
               <Dialog open={openJefe} onClose={() => setOpenJefe(false)} maxWidth="md" fullWidth>
-                <DialogTitle>Seleccionar Jefe</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Filtrar por Nombre o DNI"
-                    value={filtroJefe}
-                    onChange={(e) => setFiltroJefe(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Apellido</TableCell>
-                          <TableCell>DNI</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-  {jefes
-    .filter((j) =>
-      (j.persona.nombre && j.persona.nombre.includes(filtroJefe)) ||
-      (j.persona.dni && j.persona.dni.includes(filtroJefe))
-    )
-    .map((j) => (
-      <TableRow key={j.id}>
-        <TableCell>{j.persona.nombre}</TableCell>
-        <TableCell>{j.persona.apellido}</TableCell>
-        <TableCell>{j.persona.dni}</TableCell>
-        <TableCell>
-          <Button
-            variant="outlined"
-            onClick={() => {
-              setJefe(j);
-              setOpenJefe(false);
-            }}
-          >
-            Seleccionar
-          </Button>
-        </TableCell>
-      </TableRow>
-    ))}
-</TableBody>
-                    </Table>
-                  </TableContainer>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={() => setOpenJefe(false)}>Cerrar</Button>
-                </DialogActions>
-              </Dialog>
+  <DialogTitle>Seleccionar Jefe</DialogTitle>
+  <DialogContent>
+    <Grid container spacing={2} marginBottom={2}>
+      <Grid item xs={6}>
+        <TextField
+          label="Nombre"
+          value={filtroNombre}
+          onChange={(e) => setFiltroNombre(e.target.value)}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={6}>
+        <TextField
+          label="DNI"
+          value={filtroDni}
+          onChange={(e) => setFiltroDni(e.target.value)}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Button variant="contained" onClick={filtrarJefes}>
+          Filtrar
+        </Button>
+      </Grid>
+    </Grid>
+
+    {/* Tabla de Jefes */}
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Apellido</TableCell>
+            <TableCell>DNI</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {jefes.map((j) => (
+            <TableRow key={j.id}>
+              <TableCell>{j.persona.nombre}</TableCell>
+              <TableCell>{j.persona.apellido}</TableCell>
+              <TableCell>{j.persona.dni}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setJefe(j);
+                    setOpenJefe(false);
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+    {/* Paginación */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+      <Button
+        variant="contained"
+        onClick={() => prevUrlJefes && setCurrentUrlJefes(prevUrlJefes)}
+        disabled={!prevUrlJefes}
+      >
+        Anterior
+      </Button>
+      <Typography>
+        Página {currentPageJefes} de {Math.ceil(totalItemsJefes / pageSizeJefes)}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => nextUrlJefes && setCurrentUrlJefes(nextUrlJefes)}
+        disabled={!nextUrlJefes}
+      >
+        Siguiente
+      </Button>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenJefe(false)}>Cerrar</Button>
+  </DialogActions>
+</Dialog>
+
             </Grid>
+            {jefe && (
+              <>
+                <Grid item xs={12}>
+                  <TextField
+                    label="Nombre Jefe"
+                    value={`${jefe.persona.nombre} ${jefe.persona.apellido}`}
+                    fullWidth
+                    InputProps={{ readOnly: true }}
+                  />
+                </Grid>
+              </>
+            )}
 
             <Grid item xs={12}>
               <Button variant="contained" onClick={() => setOpenDepartamento(true)}>
                 Seleccionar Departamento
               </Button>
               <Dialog open={openDepartamento} onClose={() => setOpenDepartamento(false)} maxWidth="md" fullWidth>
-                <DialogTitle>Seleccionar Departamento</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Filtrar por Nombre"
-                    value={filtroDepartamento}
-                    onChange={(e) => setFiltroDepartamento(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {departamentos
-                          .filter((d) => d.nombre.includes(filtroDepartamento))
-                          .map((d) => (
-                            <TableRow key={d.id}>
-                              <TableCell>{d.nombre}</TableCell>
-                              <TableCell>
-                                <Button
-                                  variant="outlined"
-                                  onClick={() => {
-                                    setDepartamento(d);
-                                    setOpenDepartamento(false);
-                                  }}
-                                >
-                                  Seleccionar
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={() => setOpenDepartamento(false)}>Cerrar</Button>
-                </DialogActions>
-              </Dialog>
+  <DialogTitle>Seleccionar Departamento</DialogTitle>
+  <DialogContent>
+    {/* Filtro */}
+    <Grid container spacing={2} marginBottom={2}>
+      <Grid item xs={12}>
+        <TextField
+          label="Nombre del Departamento"
+          value={filtroDepartamento}
+          onChange={(e) => setFiltroDepartamento(e.target.value)}
+          fullWidth
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <Button variant="contained" onClick={filtrarDepartamentos}>
+          Filtrar
+        </Button>
+      </Grid>
+    </Grid>
+
+    {/* Tabla de Departamentos */}
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {departamentos.map((departamento) => (
+            <TableRow key={departamento.id}>
+              <TableCell>{departamento.nombre}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setDepartamento(departamento);
+                    setOpenDepartamento(false);
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+    {/* Paginación */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+      <Button
+        variant="contained"
+        onClick={() => prevUrlDepartamentos && setCurrentUrlDepartamentos(prevUrlDepartamentos)}
+        disabled={!prevUrlDepartamentos}
+      >
+        Anterior
+      </Button>
+      <Typography>
+        Página {currentPageDepartamentos} de {Math.ceil(totalItemsDepartamentos / pageSizeDepartamentos)}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => nextUrlDepartamentos && setCurrentUrlDepartamentos(nextUrlDepartamentos)}
+        disabled={!nextUrlDepartamentos}
+      >
+        Siguiente
+      </Button>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setOpenDepartamento(false)}>Cerrar</Button>
+  </DialogActions>
+</Dialog>
+
             </Grid>
 
             {resolucion && (
@@ -468,19 +619,6 @@ const filtrarResoluciones = () => {
                   <TextField
                     label="Nro Expediente"
                     value={resolucion.nexpediente}
-                    fullWidth
-                    InputProps={{ readOnly: true }}
-                  />
-                </Grid>
-              </>
-            )}
-
-            {jefe && (
-              <>
-                <Grid item xs={12}>
-                  <TextField
-                    label="Nombre Jefe"
-                    value={`${jefe.persona.nombre} ${jefe.persona.apellido}`}
                     fullWidth
                     InputProps={{ readOnly: true }}
                   />

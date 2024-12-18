@@ -56,10 +56,8 @@ const CrearAsignatura = () => {
 
   type TipoAsignatura = 'Electiva' | 'Obligatoria';
 
-  const [areas, setAreas] = useState<Area[]>([]);
   const [areaSeleccionada, setAreaSeleccionada] = useState<Area | null>(null);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]); // Definimos departamentos correctamente
-  const [filtroAreas, setFiltroAreas] = useState('');
   const [openAreaModal, setOpenAreaModal] = useState(false);
   const [nombre, setNombre] = useState('');
   const [codigo, setCodigo] = useState('');
@@ -71,6 +69,16 @@ const CrearAsignatura = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [fn, setFn] = useState(() => () => {});
+
+  const [areas, setAreas] = useState<Area[]>([]);
+  const [filtroAreas, setFiltroAreas] = useState('');
+  const [nextUrlAreas, setNextUrlAreas] = useState<string | null>(null);
+  const [prevUrlAreas, setPrevUrlAreas] = useState<string | null>(null);
+  const [currentUrlAreas, setCurrentUrlAreas] = useState<string>(`${API_BASE_URL}/facet/area/`);
+  const [totalItemsAreas, setTotalItemsAreas] = useState<number>(0);
+  const [currentPageAreas, setCurrentPageAreas] = useState<number>(1);
+  const pageSizeAreas = 10; // Tamaño de página
+
 
   const handleOpenModal = (title: string, message: string, onConfirm: () => void) => {
     setModalTitle(title);
@@ -97,23 +105,61 @@ const CrearAsignatura = () => {
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const responseDepartamentos = await axios.get(`${API_BASE_URL}/facet/departamento/`);
-        setDepartamentos(responseDepartamentos.data.results); // Guardamos los departamentos en el estado
-        const responseareas = await axios.get(`${API_BASE_URL}/facet/area/`);
-        setAreas(responseareas.data.results);
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error al obtener los datos.',
-        });
-      }
-    };
+    if (openAreaModal) fetchAreas(currentUrlAreas);
+  }, [openAreaModal, currentUrlAreas]);
+  
 
-    fetchData();
-  }, []);
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const responseDepartamentos = await axios.get(`${API_BASE_URL}/facet/departamento/`);
+  //       setDepartamentos(responseDepartamentos.data.results); // Guardamos los departamentos en el estado
+  //       const responseareas = await axios.get(`${API_BASE_URL}/facet/area/`);
+  //       setAreas(responseareas.data.results);
+  //     } catch (error) {
+  //       Swal.fire({
+  //         icon: 'error',
+  //         title: 'Error',
+  //         text: 'Error al obtener los datos.',
+  //       });
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+  const fetchAreas = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+  
+      setAreas(response.data.results); // Datos de la página actual
+      setNextUrlAreas(response.data.next); // URL de la página siguiente
+      setPrevUrlAreas(response.data.previous); // URL de la página anterior
+      setTotalItemsAreas(response.data.count); // Total de elementos
+  
+      // Calcula la página actual usando offset
+      const offset = new URL(url).searchParams.get('offset') || '0';
+      setCurrentPageAreas(Math.floor(Number(offset) / pageSizeAreas) + 1);
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al obtener las áreas.',
+      });
+    }
+  };
+
+  const filtrarAreas = () => {
+    let url = `${API_BASE_URL}/facet/area/?`;
+    const params = new URLSearchParams();
+  
+    if (filtroAreas) params.append('nombre__icontains', filtroAreas);
+  
+    url += params.toString();
+    setCurrentUrlAreas(url); // Actualiza la URL, lo que dispara el useEffect
+  };
+  
+  
 
   const handleFilterAreas = (filtro: string) => {
     return areas.filter((area) =>
@@ -173,63 +219,89 @@ const CrearAsignatura = () => {
               </Button>
 
               <Dialog open={openAreaModal} onClose={handleCloseAreaModal} maxWidth="md" fullWidth>
-                <DialogTitle>Seleccionar Área</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Buscar por Nombre"
-                    value={filtroAreas}
-                    onChange={(e) => setFiltroAreas(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
+  <DialogTitle>Seleccionar Área</DialogTitle>
+  <DialogContent>
+    {/* Filtro */}
+    <TextField
+      label="Buscar por Nombre"
+      value={filtroAreas}
+      onChange={(e) => setFiltroAreas(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
+    <Button variant="contained" onClick={filtrarAreas} style={{ marginBottom: '16px' }}>
+      Filtrar
+    </Button>
 
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Departamento</TableCell>
-                          <TableCell>Estado</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {handleFilterAreas(filtroAreas).map((area) => (
-                          <TableRow key={area.id}>
-                            <TableCell>{area.nombre}</TableCell>
-                            <TableCell>{departamentos.find(dep => dep.id === area.departamento)?.nombre}</TableCell>
-                            <TableCell>{area.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outlined"
-                                onClick={() => setAreaSeleccionada(area)}
-                                style={{
-                                  backgroundColor:
-                                    areaSeleccionada?.id === area.id ? '#4caf50' : 'inherit',
-                                  color: areaSeleccionada?.id === area.id ? 'white' : 'inherit',
-                                }}
-                              >
-                                Seleccionar
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseAreaModal}>Cerrar</Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={confirmarSeleccionArea}
-                    disabled={!areaSeleccionada}
-                  >
-                    Confirmar Selección
-                  </Button>
-                </DialogActions>
-              </Dialog>
+    {/* Tabla de Áreas */}
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Departamento</TableCell>
+            <TableCell>Estado</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {areas.map((area) => (
+            <TableRow key={area.id}>
+              <TableCell>{area.nombre}</TableCell>
+              <TableCell>{departamentos.find((dep) => dep.id === area.departamento)?.nombre}</TableCell>
+              <TableCell>{area.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => setAreaSeleccionada(area)}
+                  style={{
+                    backgroundColor: areaSeleccionada?.id === area.id ? '#4caf50' : 'inherit',
+                    color: areaSeleccionada?.id === area.id ? 'white' : 'inherit',
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+    {/* Paginación */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+      <Button
+        variant="contained"
+        onClick={() => prevUrlAreas && setCurrentUrlAreas(prevUrlAreas)}
+        disabled={!prevUrlAreas}
+      >
+        Anterior
+      </Button>
+      <Typography>
+        Página {currentPageAreas} de {Math.ceil(totalItemsAreas / pageSizeAreas)}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => nextUrlAreas && setCurrentUrlAreas(nextUrlAreas)}
+        disabled={!nextUrlAreas}
+      >
+        Siguiente
+      </Button>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseAreaModal}>Cerrar</Button>
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={confirmarSeleccionArea}
+      disabled={!areaSeleccionada}
+    >
+      Confirmar Selección
+    </Button>
+  </DialogActions>
+</Dialog>
+
             </Grid>
 
             <Grid item xs={12}>

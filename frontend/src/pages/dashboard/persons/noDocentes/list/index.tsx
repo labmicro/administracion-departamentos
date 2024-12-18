@@ -206,7 +206,7 @@ const ListaNoDocentes = () => {
                     <TableCell>{NoDocente.persona_detalle?.dni}</TableCell>
                     <TableCell>{NoDocente.persona_detalle?.legajo}</TableCell>
                     <TableCell>{NoDocente.observaciones}</TableCell>
-                    <TableCell>{NoDocente.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                    <TableCell>{NoDocente.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
                     <TableCell>
                       <Button onClick={() => router.push(`/dashboard/persons/noDocentes/edit/${NoDocente.id}`)}>
                         <EditIcon />

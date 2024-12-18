@@ -150,7 +150,7 @@ const ListaDocenteAsignatura: React.FC = () => {
           Condicion: docente.condicion,
           Cargo: docente.cargo,
           Dedicacion: docente.dedicacion,
-          Estado: docente.estado === 1 ? 'Activo' : 'Inactivo',
+          Estado: docente.estado == 1 ? 'Activo' : 'Inactivo',
           "Fecha de Inicio": dayjs(docente.fecha_de_inicio).format('DD-MM-YYYY'),
           "Fecha de Vencimiento": docente.fecha_de_vencimiento ? dayjs(docente.fecha_de_vencimiento).format('DD-MM-YYYY') : 'N/A',
         }))

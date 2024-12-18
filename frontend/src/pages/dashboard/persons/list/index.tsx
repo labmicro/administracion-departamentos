@@ -130,7 +130,7 @@ const ListaPersonas = () => {
           Apellido: persona.apellido,
           Telefono: persona.telefono,
           DNI: persona.dni,
-          Estado: persona.estado === 1 ? 'Activo' : 'Inactivo',
+          Estado: persona.estado == 1 ? 'Activo' : 'Inactivo',
           Email: persona.email,
           Interno: persona.interno,
           Legajo: persona.legajo,

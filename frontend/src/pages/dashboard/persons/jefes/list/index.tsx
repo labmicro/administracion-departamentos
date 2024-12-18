@@ -55,8 +55,11 @@ const ListaJefes = () => {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      setJefes(response.data);
-      console.log(response.data)
+      setJefes(response.data.results);
+      // Actualiza los valores de paginación
+      setNextUrl(response.data.next);
+      setPrevUrl(response.data.previous);
+      setTotalItems(response.data.count)
       setCurrentPage(1);
     } catch (error) {
       console.error('Error fetching data:', error);

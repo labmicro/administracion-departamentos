@@ -39,7 +39,6 @@ const EditarResolucion = () => {
       if (idResolucion) {
         try {
           const response = await axios.get(`${API_BASE_URL}/facet/resolucion/${idResolucion}/`);
-          console.log(response);
 
           setNroExpediente(response.data.nexpediente);
           setNroResolucion(response.data.nresolucion);
@@ -80,7 +79,6 @@ const EditarResolucion = () => {
       setRedirectAfterClose(true); // Activa la redirección después de cerrar el modal
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
-      console.log(error);
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
     }
   };

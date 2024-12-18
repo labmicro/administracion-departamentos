@@ -42,7 +42,6 @@ const EditarJefe: React.FC = () => {
     const fetchData = async () => {
       try {
         const response = await axios.get(`${API_BASE_URL}/facet/jefe/${id}/obtener_jefe/`);
-        console.log(response.data);
 
         // Extrae y configura los datos del jefe y la persona asociada
         setPersona(response.data.persona.id);

@@ -67,7 +67,6 @@ const ListaDocentes = () => {
   const fetchData = async (url: string) => {
     try {
       const response = await axios.get(url);
-      console.log(response.data)
       setDocentes(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);

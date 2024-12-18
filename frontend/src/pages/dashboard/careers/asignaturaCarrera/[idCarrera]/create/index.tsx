@@ -142,7 +142,6 @@ const CrearAsignaturaCarrera = () => {
   }, []);
 
   const handleConfirmSelection = () => {
-    console.log('ID de la asignatura seleccionada:', idasignatura);
     handleClose();
   };
 
@@ -159,7 +158,6 @@ const CrearAsignaturaCarrera = () => {
       estado: estado,
     };
 
-    console.log(nuevaAsignaturaEnCarrera)
 
     try {
       const response = await axios.post(`${API_BASE_URL}/facet/asignatura-carrera/`, nuevaAsignaturaEnCarrera, {
@@ -169,7 +167,6 @@ const CrearAsignaturaCarrera = () => {
       });
       handleOpenModal('Éxito', 'Se creó la asignatura en carrera con éxito.', handleConfirmModal);
     } catch (error) {
-      console.log(error);
       handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
     }
   };

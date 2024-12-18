@@ -60,7 +60,6 @@ const EditarDepartamento = () => {
       const fetchData = async () => {
         try {
           const response = await axios.get(`${API_BASE_URL}/facet/departamento/${idDepartamento}/`);
-          console.log(response.data);
           setDepartamento(response.data);
         } catch (error) {
           console.error('Error fetching data:', error);

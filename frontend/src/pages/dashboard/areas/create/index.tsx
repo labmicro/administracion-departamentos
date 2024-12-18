@@ -42,9 +42,7 @@ const CrearArea = () => {
     interno: string;
   }
 
-  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [departamentoSeleccionado, setDepartamentoSeleccionado] = useState<Departamento | null>(null);
-  const [filtroDepartamentos, setFiltroDepartamentos] = useState('');
   const [openDepartamentoModal, setOpenDepartamentoModal] = useState(false);
   const [nombre, setNombre] = useState('');
   const [estado, setEstado] = useState('');
@@ -52,6 +50,17 @@ const CrearArea = () => {
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
   const [fn, setFn] = useState(() => () => {});
+
+  const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
+  const [filtroDepartamentos, setFiltroDepartamentos] = useState('');
+
+  const [nextUrl, setNextUrl] = useState<string | null>(null);
+  const [prevUrl, setPrevUrl] = useState<string | null>(null);
+  const [currentUrl, setCurrentUrl] = useState<string>(`${API_BASE_URL}/facet/departamento/`);
+  const [totalItems, setTotalItems] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const pageSize = 10; // Número de elementos por página
+
 
   function capitalizeFirstLetter(string: string) {
     return string.charAt(0).toUpperCase() + string.slice(1).toLowerCase();
@@ -82,21 +91,42 @@ const CrearArea = () => {
   };
 
   useEffect(() => {
-    const fetchDepartamentos = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/facet/departamento/`);
-        setDepartamentos(response.data.results);
-      } catch (error) {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'Error al obtener los departamentos.',
-        });
-      }
-    };
+    if (openDepartamentoModal) {
+      fetchDepartamentos(currentUrl);
+    }
+  }, [openDepartamentoModal, currentUrl]);
 
-    fetchDepartamentos();
-  }, []);
+  const fetchDepartamentos = async (url: string) => {
+    try {
+      const response = await axios.get(url);
+  
+      setDepartamentos(response.data.results); // Lista de departamentos paginados
+      setNextUrl(response.data.next); // URL para la página siguiente
+      setPrevUrl(response.data.previous); // URL para la página anterior
+      setTotalItems(response.data.count); // Total de elementos en la base de datos
+  
+      // Calcular la página actual usando offset
+      const offset = new URL(url).searchParams.get('offset') || '0';
+      setCurrentPage(Math.floor(Number(offset) / pageSize) + 1);
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Error al obtener los departamentos.',
+      });
+    }
+  };
+  
+  const filtrarDepartamentos = () => {
+    let url = `${API_BASE_URL}/facet/departamento/?`;
+    const params = new URLSearchParams();
+  
+    if (filtroDepartamentos) params.append('nombre__icontains', filtroDepartamentos);
+  
+    url += params.toString();
+    setCurrentUrl(url); // Actualiza la URL, lo que dispara el useEffect
+  };
+  
 
   const handleFilterDepartamentos = (filtro: string) => {
     return departamentos.filter((departamento) =>
@@ -151,63 +181,89 @@ const CrearArea = () => {
               </Button>
 
               <Dialog open={openDepartamentoModal} onClose={handleCloseDepartamentoModal} maxWidth="md" fullWidth>
-                <DialogTitle>Seleccionar Departamento</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Buscar por Nombre"
-                    value={filtroDepartamentos}
-                    onChange={(e) => setFiltroDepartamentos(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
+  <DialogTitle>Seleccionar Departamento</DialogTitle>
+  <DialogContent>
+    {/* Filtro */}
+    <TextField
+      label="Buscar por Nombre"
+      value={filtroDepartamentos}
+      onChange={(e) => setFiltroDepartamentos(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
+    <Button variant="contained" onClick={filtrarDepartamentos} style={{ marginBottom: '16px' }}>
+      Filtrar
+    </Button>
 
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Teléfono</TableCell>
-                          <TableCell>Estado</TableCell>
-                          <TableCell>Seleccionar</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {handleFilterDepartamentos(filtroDepartamentos).map((departamento) => (
-                          <TableRow key={departamento.id}>
-                            <TableCell>{departamento.nombre}</TableCell>
-                            <TableCell>{departamento.telefono}</TableCell>
-                            <TableCell>{departamento.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outlined"
-                                onClick={() => setDepartamentoSeleccionado(departamento)}
-                                style={{
-                                  backgroundColor:
-                                    departamentoSeleccionado?.id === departamento.id ? '#4caf50' : 'inherit',
-                                  color: departamentoSeleccionado?.id === departamento.id ? 'white' : 'inherit',
-                                }}
-                              >
-                                Seleccionar
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleCloseDepartamentoModal}>Cerrar</Button>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    onClick={confirmarSeleccionDepartamento}
-                    disabled={!departamentoSeleccionado}
-                  >
-                    Confirmar Selección
-                  </Button>
-                </DialogActions>
-              </Dialog>
+    {/* Tabla de Departamentos */}
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Nombre</TableCell>
+            <TableCell>Teléfono</TableCell>
+            <TableCell>Estado</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {departamentos.map((departamento) => (
+            <TableRow key={departamento.id}>
+              <TableCell>{departamento.nombre}</TableCell>
+              <TableCell>{departamento.telefono}</TableCell>
+              <TableCell>{departamento.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => setDepartamentoSeleccionado(departamento)}
+                  style={{
+                    backgroundColor:
+                      departamentoSeleccionado?.id === departamento.id ? '#4caf50' : 'inherit',
+                    color: departamentoSeleccionado?.id === departamento.id ? 'white' : 'inherit',
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+
+    {/* Paginación */}
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+      <Button
+        variant="contained"
+        onClick={() => prevUrl && setCurrentUrl(prevUrl)}
+        disabled={!prevUrl}
+      >
+        Anterior
+      </Button>
+      <Typography>
+        Página {currentPage} de {Math.ceil(totalItems / pageSize)}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => nextUrl && setCurrentUrl(nextUrl)}
+        disabled={!nextUrl}
+      >
+        Siguiente
+      </Button>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseDepartamentoModal}>Cerrar</Button>
+    <Button
+      variant="contained"
+      color="primary"
+      onClick={confirmarSeleccionDepartamento}
+      disabled={!departamentoSeleccionado}
+    >
+      Confirmar Selección
+    </Button>
+  </DialogActions>
+</Dialog>
             </Grid>
 
             <Grid item xs={12}>

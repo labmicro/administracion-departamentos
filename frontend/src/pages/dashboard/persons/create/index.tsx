@@ -82,7 +82,6 @@ const CrearPersona = () => {
       });
       handleOpenModal('Éxito', 'Se creó la persona con éxito.', handleConfirmModal);
     } catch (error) {
-      console.log(error);
       handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});
     }
   };

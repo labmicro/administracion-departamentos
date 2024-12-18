@@ -96,6 +96,21 @@ const CrearDocenteAsignatura: React.FC = () => {
   const handleOpenResolucion = () => setOpenResolucion(true);
   const handleCloseResolucion = () => setOpenResolucion(false);
 
+  const [nextUrlPersonas, setNextUrlPersonas] = useState<string | null>(null);
+  const [prevUrlPersonas, setPrevUrlPersonas] = useState<string | null>(null);
+  const [currentUrlPersonas, setCurrentUrlPersonas] = useState<string>(`${API_BASE_URL}/facet/docente/`);
+  const [currentPagePersonas, setCurrentPagePersonas] = useState<number>(1);
+  const [totalItemsPersonas, setTotalItemsPersonas] = useState<number>(0);
+  const pageSizePersonas = 10;
+
+  const [nextUrlResoluciones, setNextUrlResoluciones] = useState<string | null>(null);
+  const [prevUrlResoluciones, setPrevUrlResoluciones] = useState<string | null>(null);
+  const [currentUrlResoluciones, setCurrentUrlResoluciones] = useState<string>(`${API_BASE_URL}/facet/resolucion/`);
+  const [currentPageResoluciones, setCurrentPageResoluciones] = useState<number>(1);
+  const [totalItemsResoluciones, setTotalItemsResoluciones] = useState<number>(0);
+  const pageSizeResoluciones = 10;
+
+
   useEffect(() => {
     if (idAsignatura && typeof idAsignatura === 'string') {
       fetchAsignatura(idAsignatura);
@@ -107,7 +122,6 @@ const CrearDocenteAsignatura: React.FC = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/facet/asignatura/${id}/`);
       setAsignatura(response.data.nombre); // Asume que `nombre` es el campo de la asignatura
-      console.log(response.data)
     } catch (error) {
       console.error('Error fetching asignatura:', error);
     }
@@ -115,22 +129,28 @@ const CrearDocenteAsignatura: React.FC = () => {
   
 
   useEffect(() => {
-    fetchDataPersonas();
-  }, []);
+    fetchDataPersonas(currentUrlPersonas); // Proveer la URL inicial
+  }, [currentUrlPersonas]); // Ejecutar cuando cambie la URL
 
-  const fetchDataPersonas = async () => {
+  const fetchDataPersonas = async (url: string) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/facet/docente/`);
+      const response = await axios.get(url);
       setPersonas(response.data.results);
-      console.log(response.data.results)
+      setNextUrlPersonas(response.data.next);
+      setPrevUrlPersonas(response.data.previous);
+      setTotalItemsPersonas(response.data.count);
+  
+      // Calcular página actual
+      const offset = new URL(url).searchParams.get('offset') || '0';
+      setCurrentPagePersonas(Math.floor(Number(offset) / pageSizePersonas) + 1);
     } catch (error) {
       console.error('Error fetching data for personas:', error);
     }
   };
+  
 
   const handleFilterPersonas = (filtro: string) => {
     return personas.filter((docente) => {
-      console.log(docente.persona_detalle);
       const dniMatch = docente.persona_detalle?.dni?.includes(filtro) ?? false;
       const legajoMatch = docente.persona_detalle?.legajo?.includes(filtro) ?? false;
       const nombreMatch = docente.persona_detalle?.nombre?.toLowerCase().includes(filtro.toLowerCase()) ?? false;
@@ -140,19 +160,28 @@ const CrearDocenteAsignatura: React.FC = () => {
 };
 
   // Función para cargar las resoluciones
-  const fetchDataResoluciones = async () => {
+  const fetchDataResoluciones = async (url: string) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/facet/resolucion/`);
+      const response = await axios.get(url);
       setResoluciones(response.data.results);
+      setNextUrlResoluciones(response.data.next);
+      setPrevUrlResoluciones(response.data.previous);
+      setTotalItemsResoluciones(response.data.count);
+  
+      // Calcular página actual
+      const offset = new URL(url).searchParams.get('offset') || '0';
+      setCurrentPageResoluciones(Math.floor(Number(offset) / pageSizeResoluciones) + 1);
     } catch (error) {
       console.error('Error fetching data for resoluciones:', error);
     }
   };
+  
 
   // Llamada para cargar resoluciones
   useEffect(() => {
-    fetchDataResoluciones();
-  }, []);
+    fetchDataResoluciones(currentUrlResoluciones); // Proveer la URL inicial
+  }, [currentUrlResoluciones]); // Ejecutar cuando cambie la URL
+
 
   // Filtrar resoluciones
 const handleFilterResoluciones = (filtro: string) => {
@@ -240,7 +269,6 @@ const crearDocenteAsignatura = async () => {
     // alert('Docente agregado a la asignatura con éxito.');
     handleOpenModal('Éxito', 'Se creó el docente en Asignatura con Exito.', handleConfirmModal);
   } catch (error) {
-    console.log(error);
     handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
   }
 };
@@ -261,54 +289,74 @@ const crearDocenteAsignatura = async () => {
               </Button>
 
               <Dialog open={openPersona} onClose={handleClosePersona} maxWidth="md" fullWidth>
-                <DialogTitle>Seleccionar Docente</DialogTitle>
-                <DialogContent>
-                  <TextField
-                    label="Buscar por DNI o Nombre"
-                    value={filtroDni}
-                    onChange={(e) => setFiltroDni(e.target.value)}
-                    fullWidth
-                    margin="normal"
-                  />
-                  <TableContainer component={Paper}>
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>DNI</TableCell>
-                          <TableCell>Nombre</TableCell>
-                          <TableCell>Apellido</TableCell>
-                          <TableCell>Legajo</TableCell>
-                          <TableCell>Seleccionar</TableCell>
+              <DialogTitle>Seleccionar Docente</DialogTitle>
+              <DialogContent>
+                <TextField
+                  label="Buscar por DNI o Nombre"
+                  value={filtroDni}
+                  onChange={(e) => setFiltroDni(e.target.value)}
+                  fullWidth
+                  margin="normal"
+                />
+                <TableContainer component={Paper}>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>DNI</TableCell>
+                        <TableCell>Nombre</TableCell>
+                        <TableCell>Apellido</TableCell>
+                        <TableCell>Legajo</TableCell>
+                        <TableCell>Seleccionar</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {personas.map((docente) => (
+                        <TableRow key={docente.id}>
+                          <TableCell>{docente.persona_detalle?.dni || 'N/A'}</TableCell>
+                          <TableCell>{docente.persona_detalle?.nombre || 'N/A'}</TableCell>
+                          <TableCell>{docente.persona_detalle?.apellido || 'N/A'}</TableCell>
+                          <TableCell>{docente.persona_detalle?.legajo || 'N/A'}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="outlined"
+                              onClick={() => {
+                                setPersona(docente);
+                                handleClosePersona();
+                              }}
+                            >
+                              Seleccionar
+                            </Button>
+                          </TableCell>
                         </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {handleFilterPersonas(filtroDni).map((docente) => (
-                          <TableRow key={docente.id}>
-                            <TableCell>{docente.persona_detalle?.dni || 'N/A'}</TableCell>
-                            <TableCell>{docente.persona_detalle?.nombre || 'N/A'}</TableCell>
-                            <TableCell>{docente.persona_detalle?.apellido || 'N/A'}</TableCell>
-                            <TableCell>{docente.persona_detalle?.legajo || 'N/A'}</TableCell>
-                            <TableCell>
-                              <Button
-                                variant="outlined"
-                                onClick={() => {
-                                  setPersona(docente);
-                                  handleClosePersona();
-                                }}
-                              >
-                                Seleccionar
-                              </Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </DialogContent>
-                <DialogActions>
-                  <Button onClick={handleClosePersona}>Cerrar</Button>
-                </DialogActions>
-              </Dialog>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+                  <Button
+                    variant="contained"
+                    onClick={() => prevUrlPersonas && fetchDataPersonas(prevUrlPersonas)}
+                    disabled={!prevUrlPersonas}
+                  >
+                    Anterior
+                  </Button>
+                  <Typography>
+                    Página {currentPagePersonas} de {Math.ceil(totalItemsPersonas / pageSizePersonas)}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    onClick={() => nextUrlPersonas && fetchDataPersonas(nextUrlPersonas)}
+                    disabled={!nextUrlPersonas}
+                  >
+                    Siguiente
+                  </Button>
+                </div>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleClosePersona}>Cerrar</Button>
+              </DialogActions>
+            </Dialog>
+
             </Grid>
             {/* Mostrar Nombre y Apellido del Docente Seleccionado */}
           <Grid item xs={12}>
@@ -331,54 +379,74 @@ const crearDocenteAsignatura = async () => {
             </Button>
 
             <Dialog open={openResolucion} onClose={handleCloseResolucion} maxWidth="md" fullWidth>
-              <DialogTitle>Seleccionar Resolución</DialogTitle>
-              <DialogContent>
-                <TextField
-                  label="Buscar por Nro Expediente o Resolución"
-                  value={filtroNroResolucion}
-                  onChange={(e) => setFiltroNroResolucion(e.target.value)}
-                  fullWidth
-                  margin="normal"
-                />
-                <TableContainer component={Paper}>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Nro Expediente</TableCell>
-                        <TableCell>Nro Resolución</TableCell>
-                        <TableCell>Tipo</TableCell>
-                        <TableCell>Fecha</TableCell>
-                        <TableCell>Seleccionar</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {handleFilterResoluciones(filtroNroResolucion).map((resol) => (
-                        <TableRow key={resol.id}>
-                          <TableCell>{resol.nexpediente || 'N/A'}</TableCell>
-                          <TableCell>{resol.nresolucion || 'N/A'}</TableCell>
-                          <TableCell>{resol.tipo || 'N/A'}</TableCell>
-                          <TableCell>{dayjs(resol.fecha).format('DD/MM/YYYY') || 'N/A'}</TableCell>
-                          <TableCell>
-                            <Button
-                              variant="outlined"
-                              onClick={() => {
-                                setResolucion(resol);
-                                handleCloseResolucion();
-                              }}
-                            >
-                              Seleccionar
-                            </Button>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              </DialogContent>
-              <DialogActions>
-                <Button onClick={handleCloseResolucion}>Cerrar</Button>
-              </DialogActions>
+  <DialogTitle>Seleccionar Resolución</DialogTitle>
+  <DialogContent>
+    <TextField
+      label="Buscar por Nro Expediente o Resolución"
+      value={filtroNroResolucion}
+      onChange={(e) => setFiltroNroResolucion(e.target.value)}
+      fullWidth
+      margin="normal"
+    />
+    <TableContainer component={Paper}>
+      <Table>
+        <TableHead>
+          <TableRow>
+            <TableCell>Nro Expediente</TableCell>
+            <TableCell>Nro Resolución</TableCell>
+            <TableCell>Tipo</TableCell>
+            <TableCell>Fecha</TableCell>
+            <TableCell>Seleccionar</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {resoluciones.map((resol) => (
+            <TableRow key={resol.id}>
+              <TableCell>{resol.nexpediente || 'N/A'}</TableCell>
+              <TableCell>{resol.nresolucion || 'N/A'}</TableCell>
+              <TableCell>{resol.tipo || 'N/A'}</TableCell>
+              <TableCell>{dayjs(resol.fecha).format('DD/MM/YYYY') || 'N/A'}</TableCell>
+              <TableCell>
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setResolucion(resol);
+                    handleCloseResolucion();
+                  }}
+                >
+                  Seleccionar
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '16px' }}>
+      <Button
+        variant="contained"
+        onClick={() => prevUrlResoluciones && fetchDataResoluciones(prevUrlResoluciones)}
+        disabled={!prevUrlResoluciones}
+      >
+        Anterior
+      </Button>
+      <Typography>
+        Página {currentPageResoluciones} de {Math.ceil(totalItemsResoluciones / pageSizeResoluciones)}
+      </Typography>
+      <Button
+        variant="contained"
+        onClick={() => nextUrlResoluciones && fetchDataResoluciones(nextUrlResoluciones)}
+        disabled={!nextUrlResoluciones}
+      >
+        Siguiente
+      </Button>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={handleCloseResolucion}>Cerrar</Button>
+  </DialogActions>
             </Dialog>
+
           </Grid>
 
           {/* Mostrar Nro de Resolución Seleccionada */}

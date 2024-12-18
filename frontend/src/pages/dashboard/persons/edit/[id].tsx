@@ -25,7 +25,6 @@ import { API_BASE_URL } from "../../../../utils/config";
 const EditarPersona: React.FC = () => {
   const router = useRouter(); // Usamos useRouter para manejar la navegación
   const { id: idPersona } = router.query; // Captura el `id` desde la URL como idPersona
-  console.log(idPersona)
 
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
@@ -73,7 +72,6 @@ const EditarPersona: React.FC = () => {
         try {
           const response = await axios.get(`${API_BASE_URL}/facet/persona/${idPersona}/`);
           const personaData = response.data;
-          console.log(response.data)
           setPersona(personaData);
         } catch (error) {
           console.error('Error fetching data:', error);

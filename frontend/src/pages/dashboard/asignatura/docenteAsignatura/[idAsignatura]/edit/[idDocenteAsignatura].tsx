@@ -118,7 +118,6 @@ const EditarDocenteAsignatura: React.FC = () => {
   const [cargo, setCargo] = useState('');
   const [filtroNroResolucion, setFiltroNroResolucion] = useState('');
   const [filtroFecha, setFiltroFecha] = useState<Dayjs | null>(null);
-  console.log(idAsignatura,idDocenteAsignatura)
 
   // Cargar datos iniciales de la asignación
   useEffect(() => {
@@ -131,7 +130,6 @@ const EditarDocenteAsignatura: React.FC = () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/facet/asignatura-docente/${id}/`);
       const data = response.data;
-      console.log(response.data)
 
       setPersona(data.docente);
       setAsignatura(data.asignatura.nombre);

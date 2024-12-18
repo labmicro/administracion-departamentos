@@ -85,7 +85,6 @@ const CrearDepartamento = () => {
       });
       handleOpenModal('Éxito', 'Se creó el departamento con éxito.', handleConfirmModal);
     } catch (error) {
-      console.log(error);
       handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
     }
   };

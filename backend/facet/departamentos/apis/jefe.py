@@ -1,16 +1,17 @@
-from rest_framework.decorators import action
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.decorators import action
 from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import AllowAny
 from ..models import Jefe
-from ..serializers import JefeSerializer  # Asegúrate de importar el serializer
+from ..serializers import JefeSerializer
 
 
 class JefeViewSet(viewsets.ModelViewSet):
     permission_classes = [AllowAny]
     queryset = Jefe.objects.all()
-    serializer_class = JefeSerializer  # Agrega el serializer_class aquí
+    serializer_class = JefeSerializer
     filter_backends = [DjangoFilterBackend]
     filterset_fields = {
         'estado': ['exact'],
@@ -24,8 +25,12 @@ class JefeViewSet(viewsets.ModelViewSet):
     def list_jefes_persona(self, request):
         # Realizar la consulta de Jefes con datos de Persona
         jefes = Jefe.objects.select_related('persona').all()
+        
+        # Paginación
+        paginator = PageNumberPagination()
+        paginated_jefes = paginator.paginate_queryset(jefes, request)
 
-        # Construir la respuesta manualmente
+        # Construir los datos paginados
         jefes_data = [
             {
                 'id': jefe.id,
@@ -39,13 +44,14 @@ class JefeViewSet(viewsets.ModelViewSet):
                     'legajo': jefe.persona.legajo,
                     'telefono': jefe.persona.telefono,
                     'email': jefe.persona.email,
-                    'interno': jefe.persona.interno,
                 }
             }
-            for jefe in jefes
+            for jefe in paginated_jefes
         ]
 
-        return Response(jefes_data)
+        # Devolver respuesta paginada
+        return paginator.get_paginated_response(jefes_data)
+
 
     @action(detail=True, methods=['get'], url_path='obtener_jefe')
     def obtener_jefe(self, request, pk=None):

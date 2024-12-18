@@ -145,7 +145,7 @@ const ListaAsignaturas = () => {
         'Nombre': asignatura.nombre,
         'Modulo': asignatura.modulo,
         'Tipo': asignatura.tipo,
-        'Estado': asignatura.estado === 1 ? 'Activo' : 'Inactivo',
+        'Estado': asignatura.estado == 1 ? 'Activo' : 'Inactivo',
         'Area': areas.find(area => area.id === asignatura.area)?.nombre || 'Área no encontrada',
         'Departamento': departamentos.find(depto => depto.id === asignatura.departamento)?.nombre || 'Departamento no encontrado',
       }));
@@ -286,7 +286,7 @@ const ListaAsignaturas = () => {
                     <Typography variant="body1">{asignatura.tipo}</Typography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="body1">{asignatura.estado === 1 ? "Activo" : "Inactivo"}</Typography>
+                    <Typography variant="body1">{asignatura.estado == 1 ? "Activo" : "Inactivo"}</Typography>
                   </TableCell>
                   <TableCell>
                     {areas.find(area => area.id === asignatura.area)?.nombre || 'Área no encontrada'}

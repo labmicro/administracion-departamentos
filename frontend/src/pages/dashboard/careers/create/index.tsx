@@ -71,7 +71,6 @@ const CrearCarrera = () => {
       });
       handleOpenModal('Éxito', 'Se creó la carrera con éxito.', handleConfirmModal);
     } catch (error) {
-      console.log(error);
       handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});
     }
   };

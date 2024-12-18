@@ -71,7 +71,6 @@ const ListaDepartamentosJefe = () => {
   const [resoluciones, setResoluciones] = useState<Resolucion[]>([]);
   const [departamentos, setDepartamentos] = useState<Departamento[]>([]);
   const [deptoJefes, setDeptoJefes] = useState<DepartamentoJefe[]>([]);
-  console.log(deptoJefes)
   const [jefes, setJefes] = useState<Jefe[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [filtroNombre, setFiltroNombre] = useState('');
@@ -109,7 +108,6 @@ const ListaDepartamentosJefe = () => {
       setResoluciones(resolucionesResponse.data.results);
       const jefesResponse = await axios.get(`${API_BASE_URL}/facet/jefe/list_jefes_persona/`);
       setJefes(jefesResponse.data);
-      console.log(response.data)
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -154,7 +152,6 @@ const descargarExcel = async () => {
     while (url) {
       const response = await axios.get(url);
       const data = response.data;  // Asumimos que data es un array directamente
-      console.log(data);
 
       // Mapea los resultados, asegurando que `nombre` y `apellido` estén disponibles
       allDeptoJefes = [
@@ -185,7 +182,7 @@ const descargarExcel = async () => {
         'Resolución': item.resolucion.nresolucion,
         'Fecha de Inicio': item.fecha_de_inicio,
         'Fecha de Fin': item.fecha_de_fin,
-        'Estado': item.estado === 1 ? 'Activo' : 'Inactivo',
+        'Estado': item.estado == 1 ? 'Activo' : 'Inactivo',
         'Observaciones': item.observaciones,
       }))
     );
@@ -320,7 +317,7 @@ const descargarExcel = async () => {
                   <TableCell>{deptoJefe.resolucion.nresolucion}</TableCell>
                   <TableCell>{formatFecha(deptoJefe.fecha_de_inicio)}</TableCell>
                   <TableCell>{deptoJefe.fecha_de_fin ? formatFecha(deptoJefe.fecha_de_fin) : '-'}</TableCell>
-                  <TableCell>{deptoJefe.estado === 1 ? 'Activo' : 'Inactivo'}</TableCell>
+                  <TableCell>{deptoJefe.estado == 1 ? 'Activo' : 'Inactivo'}</TableCell>
                   <TableCell style={{ textAlign: 'center', verticalAlign: 'middle' }}>
                     <Tooltip title={deptoJefe.observaciones}>
                       <VisibilityIcon/>

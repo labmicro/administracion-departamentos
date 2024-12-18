@@ -64,7 +64,6 @@ const EditarCarrera: React.FC = () => {
         try {
           const response = await axios.get(`${API_BASE_URL}/facet/carrera/${idCarrera}/`);
           const data = response.data;
-          console.log(response.data)
           setCarrera(data);
         } catch (error) {
           console.error('Error fetching data:', error);
