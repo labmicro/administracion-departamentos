@@ -45,3 +45,5 @@ sudo chown -R www-data:www-data /home/ubuntu/administracion-departamentos/fronte
 
 # Editar arhcivo ngnix
  sudo nano /etc/nginx/sites-available/frontend
+# Server en prod
+ npm run start
