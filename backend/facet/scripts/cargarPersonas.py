@@ -12,7 +12,7 @@ DB_CONFIG = {
 }
 
 # Ruta al archivo Excel
-file_path = "D:/Prog/administracion-departamentos/Planta Docente.xlsx"
+file_path = "/home/ubuntu/administracion-departamentos/backend/facet/scripts/Planta Docente.xlsx"
 
 # Leer el archivo Excel
 data = pd.read_excel(file_path)
