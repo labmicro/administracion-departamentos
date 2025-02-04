@@ -54,6 +54,13 @@ const EditarPersona: React.FC = () => {
     email: string;
     interno: string;
     legajo: string;
+    titulo: Titulo | null;
+
+  }
+
+  interface Titulo {
+    id: number;
+    nombre: string;
   }
 
   const [persona, setPersona] = useState<Persona>();
@@ -65,6 +72,28 @@ const EditarPersona: React.FC = () => {
   const [email, setEmail] = useState('');
   const [interno, setInterno] = useState('');
   const [estado, setEstado] = useState('');
+  const [titulos, setTitulos] = useState<Titulo[]>([]);
+  const [tituloId, setTituloId] = useState<number | ''>('');
+
+  // Obtener títulos al cargar la página
+  useEffect(() => {
+    const fetchTitulos = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/facet/tipo-titulo/`);
+        setTitulos(response.data.results);
+      } catch (error) {
+        console.error('Error al obtener títulos:', error);
+      }
+    };
+
+    fetchTitulos();
+  }, []);
+
+  useEffect(() => {
+    if (persona) {
+      setTituloId(persona.titulo ? persona.titulo.id : '');
+    }
+  }, [persona]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -106,6 +135,7 @@ const EditarPersona: React.FC = () => {
       email,
       interno,
       legajo,
+      titulo: tituloId,
     };
 
     try {
@@ -163,6 +193,23 @@ const EditarPersona: React.FC = () => {
                 onChange={(e) => setApellido(e.target.value)}
                 fullWidth
               />
+            </Grid>
+            <Grid item xs={12}>
+              <FormControl fullWidth>
+                <InputLabel id="titulo-label">Título</InputLabel>
+                <Select
+                  labelId="titulo-label"
+                  value={tituloId}
+                  onChange={(e) => setTituloId(Number(e.target.value))}
+                >
+                  <MenuItem value="">Sin título</MenuItem>
+                  {titulos.map((titulo) => (
+                    <MenuItem key={titulo.id} value={titulo.id}>
+                      {titulo.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12}>
               <TextField

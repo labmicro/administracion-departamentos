@@ -1,5 +1,6 @@
 from django.db import models
-from .base import BaseModel
+from .base import BaseModel 
+from .tipoTitulo import TipoTitulo
 
 class Persona(BaseModel):
     nombre = models.CharField(blank=False, null=False)
@@ -10,7 +11,7 @@ class Persona(BaseModel):
     email = models.CharField(blank=True, null=True)
     interno = models.IntegerField(blank=True, null=True)
     legajo = models.CharField(blank=True, null=True)
-    titulo = models.CharField(blank=True, null=True)
+    titulo = models.ForeignKey(TipoTitulo, on_delete=models.SET_NULL, null=True, blank=True)
 
     def __str__(self):
         return f"{self.apellido,self.nombre}"

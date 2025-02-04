@@ -37,7 +37,6 @@ class AsignaturaDocenteViewSet(viewsets.ModelViewSet):
         Devuelve los datos de AsignaturaDocente con los datos completos del docente y su persona, 
         incluyendo fecha de inicio y fecha de vencimiento.
         """
-        print(request.query_params)
         queryset = AsignaturaDocente.objects.select_related(
             'docente__persona', 'asignatura', 'resolucion'
         ).filter(asignatura__id=request.query_params.get('asignatura'))

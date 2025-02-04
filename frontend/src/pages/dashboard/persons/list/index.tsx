@@ -40,7 +40,12 @@ interface Persona {
   email: string;
   interno: string;
   legajo: string;
-  titulo: string; // Añadir el campo título
+  titulo: Titulo | null; // Añadir el campo título
+}
+
+interface Titulo {
+  id: number;
+  nombre: string;
 }
 
 const ListaPersonas = () => {
@@ -272,8 +277,12 @@ const ListaPersonas = () => {
                       <Typography variant="body1">{persona.legajo}</Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body1">{persona.titulo}</Typography>
-                    </TableCell>
+                    <Typography variant="body1">
+                  {persona.titulo ? String(persona.titulo) : ''}
+                </Typography>
+
+
+                  </TableCell>
                     <TableCell>
                       <Link href={`/dashboard/persons/edit/${persona.id}`} passHref>
                         <EditIcon />

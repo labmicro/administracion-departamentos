@@ -162,7 +162,6 @@ const pageSizeDepartamentos = 10;
   const fetchResoluciones = async (url: string) => {
     try {
       const response = await axios.get(url);
-      console.log(response.data)
       setResoluciones(response.data.results);
       setNextUrl(response.data.next);
       setPrevUrl(response.data.previous);
@@ -255,7 +254,6 @@ const fetchDepartamentos = async (url: string) => {
       observaciones: observaciones,
       estado: estado === '1' ? 1 : 0,
     };
-    console.log(nuevoJefeDepartamento)
     try {
       await axios.post(`${API_BASE_URL}/facet/jefe-departamento/`, nuevoJefeDepartamento, {
         headers: { 'Content-Type': 'application/json' },

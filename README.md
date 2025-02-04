@@ -5,6 +5,9 @@ cd backend/facet
  .\venv\Scripts\activate
 py manage.py runserver  
 
+py manage.py makemigrations
+
+py manage.py migrate
 
  chmod 400 "administracion-departamentos.pem"
 
@@ -47,3 +50,6 @@ sudo chown -R www-data:www-data /home/ubuntu/administracion-departamentos/fronte
  sudo nano /etc/nginx/sites-available/frontend
 # Server en prod
  npm run start
+
+# Local
+
