@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../..';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
-
+import API from '@/api/axiosConfig';
 
 const EditarNoDocente: React.FC = () => {
   const router = useRouter();
@@ -81,11 +81,7 @@ const EditarNoDocente: React.FC = () => {
     };
 
     try {
-      await axios.put(`${API_BASE_URL}/facet/nodocente/${id}/`, nodocenteEditado, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.put(`/facet/nodocente/${id}/`, nodocenteEditado);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
@@ -95,11 +91,7 @@ const EditarNoDocente: React.FC = () => {
 
   const eliminarNoDocente = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/nodocente/${id}/`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.delete(`/facet/nodocente/${id}/`);
       handleOpenModal('NoDocente Eliminado', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');

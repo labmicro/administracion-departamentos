@@ -28,6 +28,7 @@ import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 const CrearJefe = () => {
   const router = useRouter();
@@ -130,9 +131,7 @@ const CrearJefe = () => {
     } catch (error) {
       if (axios.isAxiosError(error) && error.response?.status === 404) {
         try {
-          await axios.post(`${API_BASE_URL}/facet/jefe/`, nuevoJefe, {
-            headers: { 'Content-Type': 'application/json' },
-          });
+          await API.post(`/facet/jefe/`, nuevoJefe);
           handleOpenModal('Bien', 'Se creó el jefe con éxito', handleConfirmModal);
         } catch (postError) {
           handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});

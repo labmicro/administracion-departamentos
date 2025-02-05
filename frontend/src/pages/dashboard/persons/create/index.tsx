@@ -18,6 +18,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 
 // Componente para crear una nueva persona
@@ -75,11 +76,7 @@ const CrearPersona = () => {
     };
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/facet/persona/`, nuevaPersona, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await API.post(`/facet/persona/`, nuevaPersona);
       handleOpenModal('Éxito', 'Se creó la persona con éxito.', handleConfirmModal);
     } catch (error) {
       handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});

@@ -28,6 +28,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 const CrearNoDocente = () => {
   const router = useRouter();
@@ -129,11 +130,7 @@ const CrearNoDocente = () => {
         return;
       }
   
-      await axios.post(`${API_BASE_URL}/facet/nodocente/`, nuevoNoDocente, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.post(`/facet/nodocente/`, nuevoNoDocente);
   
       handleOpenModal('Bien', 'Se creó el no docente con éxito', () => {
         router.push('/dashboard/persons/noDocentes/');

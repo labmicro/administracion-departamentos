@@ -25,7 +25,7 @@ import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
-
+import API from '@/api/axiosConfig';
 
 
 // Habilita los plugins
@@ -88,11 +88,7 @@ const CrearResolucion = () => {
     };
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/facet/resolucion/`, nuevaResolucion, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await API.post(`/facet/resolucion/`, nuevaResolucion);
       handleOpenModal('Éxito', 'Se creó la resolución con éxito.', handleConfirmModal);
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});

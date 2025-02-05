@@ -19,6 +19,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 // Configuración de `EditarPersona` para usar el idPersona desde la URL
 
@@ -139,9 +140,7 @@ const EditarPersona: React.FC = () => {
     };
 
     try {
-      await axios.put(`${API_BASE_URL}/facet/persona/${idPersona}/`, personaEditada, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      await API.put(`/facet/persona/${idPersona}/`, personaEditada);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       console.error('Error al hacer la solicitud PUT:', error);
@@ -151,9 +150,7 @@ const EditarPersona: React.FC = () => {
 
   const eliminarPersona = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/persona/${idPersona}/`, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      await API.delete(`/facet/persona/${idPersona}/`);
       handleOpenModal('Persona Eliminada', 'La acción se realizó con éxito.');
     } catch (error) {
       console.error('Error al hacer la solicitud DELETE:', error);

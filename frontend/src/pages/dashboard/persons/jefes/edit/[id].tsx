@@ -8,7 +8,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../..';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
-
+import API from '@/api/axiosConfig';
 
 const EditarJefe: React.FC = () => {
   const router = useRouter();
@@ -68,11 +68,7 @@ const EditarJefe: React.FC = () => {
     };
 
     try {
-      await axios.put(`${API_BASE_URL}/facet/jefe/${id}/`, jefeEditado, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.put(`/facet/jefe/${id}/`, jefeEditado);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
@@ -82,11 +78,7 @@ const EditarJefe: React.FC = () => {
 
   const eliminarJefe = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/jefe/${id}/`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.delete(`/facet/jefe/${id}/`);
       handleOpenModal('Jefe Eliminado', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');

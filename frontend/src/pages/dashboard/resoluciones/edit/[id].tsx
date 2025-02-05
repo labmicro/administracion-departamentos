@@ -11,7 +11,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
-
+import API from '@/api/axiosConfig';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -71,11 +71,7 @@ const EditarResolucion = () => {
     };
 
     try {
-      await axios.put(`${API_BASE_URL}/facet/resolucion/${idResolucion}/`, resolucionEditada, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.put(`/facet/resolucion/${idResolucion}/`, resolucionEditada);
       setRedirectAfterClose(true); // Activa la redirección después de cerrar el modal
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
@@ -100,11 +96,7 @@ const EditarResolucion = () => {
 
   const eliminarResolucion = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/resolucion/${idResolucion}/`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.delete(`/facet/resolucion/${idResolucion}/`);
       setRedirectAfterClose(true); // Activa la redirección después de cerrar el modal
       handleOpenModal('Resolución Eliminada', 'La acción se realizó con éxito.');
     } catch (error) {

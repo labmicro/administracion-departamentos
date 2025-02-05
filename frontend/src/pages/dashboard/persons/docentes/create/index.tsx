@@ -28,6 +28,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 const CrearDocente = () => {
   const router = useRouter();
@@ -133,11 +134,7 @@ const CrearDocente = () => {
     }
 
     // Si no existe, procedemos a crearlo
-    await axios.post(`${API_BASE_URL}/facet/docente/`, nuevoDocente, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+    await API.post(`/facet/docente/`, nuevoDocente);
 
     handleOpenModal('Bien', 'Se creó el docente con éxito', () => {
       router.push('/dashboard/persons/docentes/');
