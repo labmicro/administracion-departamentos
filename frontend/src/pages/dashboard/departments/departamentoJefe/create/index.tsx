@@ -35,6 +35,7 @@ import { useRouter } from 'next/router';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import API from "../../../../../api/axiosConfig";
 
 
 dayjs.extend(utc);
@@ -255,9 +256,7 @@ const fetchDepartamentos = async (url: string) => {
       estado: estado === '1' ? 1 : 0,
     };
     try {
-      await axios.post(`${API_BASE_URL}/facet/jefe-departamento/`, nuevoJefeDepartamento, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      await API.post(`/facet/jefe-departamento/`, nuevoJefeDepartamento);
       handleOpenModal('Bien', 'Se creó el jefe de departamento con éxito', handleConfirmModal);
     } catch (error) {
       console.error(error);

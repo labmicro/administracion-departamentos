@@ -10,6 +10,7 @@ import { useRouter } from 'next/router'; // Importa useRouter de Next.js
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
+import API from "../../../../api/axiosConfig";
 
 // Habilita los plugins
 dayjs.extend(utc);
@@ -64,11 +65,7 @@ const CrearCarrera = () => {
     };
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/facet/carrera/`, nuevaCarrera, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await API.post(`/facet/carrera/`, nuevaCarrera);
       handleOpenModal('Éxito', 'Se creó la carrera con éxito.', handleConfirmModal);
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.', () => {});

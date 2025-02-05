@@ -23,7 +23,7 @@ import Swal from 'sweetalert2';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; // Importa el HOC
 import { API_BASE_URL } from "../../../../utils/config";
-
+import API from '@/api/axiosConfig';
 
 dayjs.extend(utc);
 dayjs.extend(timezone);
@@ -106,11 +106,7 @@ const EditarAsignatura: React.FC = () => {
     };
 
     try {
-      await axios.put(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.put(`/facet/asignatura/${idAsignatura}/`, asignaturaEditada);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
@@ -119,11 +115,7 @@ const EditarAsignatura: React.FC = () => {
 
   const eliminarAsignatura = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.delete(`/facet/asignatura/${idAsignatura}/`);
       handleOpenModal('Asignatura Eliminada', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');

@@ -32,6 +32,7 @@ import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../../../..';
 import withAuth from "../../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 
 
@@ -160,11 +161,7 @@ const CrearAsignaturaCarrera = () => {
 
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/facet/asignatura-carrera/`, nuevaAsignaturaEnCarrera, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await API.post(`/facet/asignatura-carrera/`, nuevaAsignaturaEnCarrera);
       handleOpenModal('Éxito', 'Se creó la asignatura en carrera con éxito.', handleConfirmModal);
     } catch (error) {
       handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});

@@ -2,7 +2,7 @@ import os
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-django_allowed_hosts = os.environ.get('DJANGO_ALLOWED_HOSTS')
+django_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 
 # Convierte la cadena en una lista separada por comas
 ALLOWED_HOSTS = django_allowed_hosts.split(',')
@@ -36,3 +36,10 @@ SWAGGER_SETTINGS = {
     },
     'USE_SESSION_AUTH': False,
 }
+
+CORS_ALLOW_ALL_ORIGINS = False  # Desactiva el wildcard "*"
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",  # React en local
+    "http://127.0.0.1:3000",  # Alternativa
+]
+CORS_ALLOW_CREDENTIALS = True  # Permite envío de cookies

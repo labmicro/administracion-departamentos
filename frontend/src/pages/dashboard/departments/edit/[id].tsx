@@ -22,6 +22,7 @@ import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../..';
 import withAuth from "../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../utils/config";
+import API from "../../../../api/axiosConfig";
 
 
 dayjs.extend(utc);
@@ -71,9 +72,7 @@ const EditarDepartamento = () => {
 
   const edicionDepartamento = async () => {
     try {
-      await axios.put(`${API_BASE_URL}/facet/departamento/${idDepartamento}/`, departamento, {
-        headers: { 'Content-Type': 'application/json' },
-      });
+      await API.put(`/facet/departamento/${idDepartamento}/`, departamento);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');
@@ -82,7 +81,7 @@ const EditarDepartamento = () => {
 
   const eliminarDepartamento = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/departamento/${idDepartamento}/`);
+      await API.delete(`/facet/departamento/${idDepartamento}/`);
       handleOpenModal('Departamento Eliminado', 'La acción se realizó con éxito.');
     } catch (error) {
       handleOpenModal('Error', 'NO se pudo realizar la acción.');

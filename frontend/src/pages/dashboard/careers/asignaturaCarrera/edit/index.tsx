@@ -22,6 +22,7 @@ import timezone from 'dayjs/plugin/timezone';
 import DashboardMenu from '../../../../dashboard';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 
 
@@ -115,11 +116,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
     };
 
     try {
-      await axios.put(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, asignaturaEditada, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.put(`/facet/asignatura/${idAsignatura}/`, asignaturaEditada);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       console.error('Error al hacer la solicitud PUT:', error);
@@ -129,11 +126,7 @@ const EditarAsignaturaCarrera: React.FC = () => {
 
   const eliminarAsignatura = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/asignatura/${idAsignatura}/`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.delete(`/facet/asignatura/${idAsignatura}/`);
       handleOpenModal('Asignatura Eliminada', 'La acción se realizó con éxito.');
     } catch (error) {
       console.error('Error al hacer la solicitud DELETE:', error);

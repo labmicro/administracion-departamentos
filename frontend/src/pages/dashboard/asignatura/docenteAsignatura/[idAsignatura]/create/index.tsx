@@ -34,6 +34,7 @@ import { useRouter } from 'next/router';
 import BasicModal from '@/utils/modal';
 import withAuth from "../../../../../../components/withAut"; // Importa el HOC
 import { API_BASE_URL } from "../../../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 
 // Habilita los plugins
@@ -257,14 +258,9 @@ const crearDocenteAsignatura = async () => {
   };
 
   try {
-    const response = await axios.post(
-      `${API_BASE_URL}/facet/asignatura-docente/`,
-      nuevoDocenteAsignatura,
-      {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+    const response = await API.post(
+      `/facet/asignatura-docente/`,
+      nuevoDocenteAsignatura
     );
     // alert('Docente agregado a la asignatura con éxito.');
     handleOpenModal('Éxito', 'Se creó el docente en Asignatura con Exito.', handleConfirmModal);

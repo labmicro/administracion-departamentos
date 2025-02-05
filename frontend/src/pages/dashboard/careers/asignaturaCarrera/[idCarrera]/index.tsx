@@ -13,6 +13,7 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import API from '@/api/axiosConfig';
 
 
 
@@ -176,7 +177,7 @@ const ListaAsignaturaCarrera = () => {
   const handleDeleteAsignatura = async () => {
     if (idAsignaturaCarrera !== null) {
       try {
-        await axios.delete(`${API_BASE_URL}/facet/asignatura-carrera/${idAsignaturaCarrera}/`);
+        await API.delete(`/facet/asignatura-carrera/${idAsignaturaCarrera}/`);
         setAsignaturasCarrera((prevAsignaturas) =>
           prevAsignaturas.filter((asignatura) => asignatura.id !== idAsignaturaCarrera)
         );

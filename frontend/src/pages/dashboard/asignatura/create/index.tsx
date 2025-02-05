@@ -32,7 +32,7 @@ import Swal from 'sweetalert2';
 import DashboardMenu from '../../../dashboard';
 import withAuth from "../../../../components/withAut"; // Importa el HOC
 import { API_BASE_URL } from "../../../../utils/config";
-
+import API from '@/api/axiosConfig';
 
 
 dayjs.extend(utc);
@@ -109,25 +109,6 @@ const CrearAsignatura = () => {
   }, [openAreaModal, currentUrlAreas]);
   
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const responseDepartamentos = await axios.get(`${API_BASE_URL}/facet/departamento/`);
-  //       setDepartamentos(responseDepartamentos.data.results); // Guardamos los departamentos en el estado
-  //       const responseareas = await axios.get(`${API_BASE_URL}/facet/area/`);
-  //       setAreas(responseareas.data.results);
-  //     } catch (error) {
-  //       Swal.fire({
-  //         icon: 'error',
-  //         title: 'Error',
-  //         text: 'Error al obtener los datos.',
-  //       });
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
   const fetchAreas = async (url: string) => {
     try {
       const response = await axios.get(url);
@@ -189,11 +170,7 @@ const CrearAsignatura = () => {
     };
 
     try {
-      await axios.post(`${API_BASE_URL}/facet/asignatura/`, nuevaAsignatura, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      await API.post(`/facet/asignatura/`, nuevaAsignatura);
       handleOpenModal('Éxito', 'Se creó la asignatura con éxito.', handleConfirmModal);
     } catch (error) {
       handleOpenModal('Error', 'No se pudo realizar la acción.', () => {});

@@ -1,9 +1,11 @@
 import axios from "axios";
 import { getCSRFToken } from "../utils/csrf";
+import { API_BASE_URL } from "../utils/config"; // Asegúrate de importar API_BASE_URL correctamente
 
+// Configuración de Axios con la URL dinámica
 const API = axios.create({
-    baseURL: "https://administracionfacet.site",
-    withCredentials: true, // Permite que se envíen cookies de sesión en las solicitudes
+    baseURL: API_BASE_URL,  // Usa la variable de entorno correcta
+    withCredentials: true,  // Permite el envío de cookies
 });
 
 // Agregar automáticamente el CSRF Token en cada petición

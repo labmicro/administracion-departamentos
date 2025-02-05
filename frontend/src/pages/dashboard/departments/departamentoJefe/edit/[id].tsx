@@ -12,6 +12,7 @@ import BasicModal from '@/utils/modal';
 import ModalConfirmacion from '@/utils/modalConfirmacion';
 import withAuth from "../../../../../components/withAut"; 
 import { API_BASE_URL } from "../../../../../utils/config";
+import API from "../../../../../api/axiosConfig";
 
 
 const EditarDepartamentoJefe = () => {
@@ -78,11 +79,7 @@ const EditarDepartamentoJefe = () => {
 
   const eliminarJefeDepartamento = async () => {
     try {
-      await axios.delete(`${API_BASE_URL}/facet/jefe-departamento/${id}/`, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      await API.delete(`/facet/jefe-departamento/${id}/`);
       handleOpenModal('Departamento Jefe Eliminado', 'La acción se realizó con éxito.');
     } catch (error) {
       console.error('Error al hacer la solicitud DELETE:', error);
@@ -103,7 +100,7 @@ const EditarDepartamentoJefe = () => {
     };
 
     try {
-      await axios.put(`${API_BASE_URL}/facet/jefe-departamento/${id}/`, jefeDepartamentoEditado);
+      await API.put(`/facet/jefe-departamento/${id}/`, jefeDepartamentoEditado);
       handleOpenModal('Éxito', 'La acción se realizó con éxito.');
     } catch (error) {
       console.error('Error al hacer la solicitud PUT:', error);
