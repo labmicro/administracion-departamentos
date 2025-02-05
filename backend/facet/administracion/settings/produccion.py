@@ -64,3 +64,7 @@ CORS_EXPOSE_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 # Seguridad (CSRF, SSL, etc.)
 CSRF_TRUSTED_ORIGINS = ['https://administracionfacet.site']
+
+CSRF_COOKIE_SECURE = True  # Requiere HTTPS
+CSRF_COOKIE_HTTPONLY = False  # Permite acceso desde JS
+CSRF_COOKIE_SAMESITE = "None"  # Necesario si frontend y backend están en dominios distintos
