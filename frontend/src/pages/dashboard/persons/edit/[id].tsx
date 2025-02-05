@@ -55,7 +55,7 @@ const EditarPersona: React.FC = () => {
     email: string;
     interno: string;
     legajo: string;
-    titulo: Titulo | null;
+    titulo: number | null; // Asegúrate de que no es un objeto
 
   }
 
@@ -92,9 +92,10 @@ const EditarPersona: React.FC = () => {
 
   useEffect(() => {
     if (persona) {
-      setTituloId(persona.titulo ? persona.titulo.id : '');
+      setTituloId(persona.titulo as number ?? '');
     }
   }, [persona]);
+  
 
   useEffect(() => {
     const fetchData = async () => {

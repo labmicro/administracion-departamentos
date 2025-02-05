@@ -20,6 +20,10 @@ import withAuth from "../../../../components/withAut";
 import { API_BASE_URL } from "../../../../utils/config";
 import API from '@/api/axiosConfig';
 
+interface Titulo {
+  id: number;
+  nombre: string;
+}
 
 // Componente para crear una nueva persona
 const CrearPersona = () => {
@@ -33,7 +37,8 @@ const CrearPersona = () => {
   const [email, setEmail] = useState('');
   const [interno, setInterno] = useState('');
   const [estado, setEstado] = useState('');
-  const [titulo, setTitulo] = useState(''); // Estado para el campo de Título
+  const [titulos, setTitulos] = useState<Titulo[]>([]);
+  const [tituloId, setTituloId] = useState<number | ''>('');
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMessage, setModalMessage] = useState('');
   const [modalTitle, setModalTitle] = useState('');
@@ -57,6 +62,20 @@ const CrearPersona = () => {
     setModalMessage('');
   };
 
+  // Obtener títulos al cargar la página
+  useEffect(() => {
+    const fetchTitulos = async () => {
+      try {
+        const response = await axios.get(`${API_BASE_URL}/facet/tipo-titulo/`);
+        setTitulos(response.data.results);
+      } catch (error) {
+        console.error('Error al obtener títulos:', error);
+      }
+    };
+
+    fetchTitulos();
+  }, []);
+
   const handleConfirmModal = () => {
     router.push('/dashboard/persons/');
   };
@@ -72,7 +91,7 @@ const CrearPersona = () => {
       email: email,
       interno: interno,
       legajo: legajo,
-      titulo: titulo, // Añadido el campo título en la solicitud
+      titulo: tituloId, // Añadido el campo título en la solicitud
     };
 
     try {
@@ -133,12 +152,21 @@ const CrearPersona = () => {
               <TextField label="Legajo" value={legajo} onChange={(e) => setLegajo(e.target.value)} fullWidth />
             </Grid>
             <Grid item xs={12}>
-              <TextField // Campo para el Título
-                label="Título"
-                value={titulo}
-                onChange={(e) => setTitulo(capitalizeFirstLetter(e.target.value))}
-                fullWidth
-              />
+            <FormControl fullWidth>
+                <InputLabel id="titulo-label">Título</InputLabel>
+                <Select
+                  labelId="titulo-label"
+                  value={tituloId}
+                  onChange={(e) => setTituloId(Number(e.target.value))}
+                >
+                  <MenuItem value="">Sin título</MenuItem>
+                  {titulos.map((titulo) => (
+                    <MenuItem key={titulo.id} value={titulo.id}>
+                      {titulo.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
             </Grid>
             <Grid item xs={12} marginBottom={2}>
               <Button variant="contained" onClick={crearNuevaPersona}>
