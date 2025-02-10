@@ -53,3 +53,5 @@ sudo chown -R www-data:www-data /home/ubuntu/administracion-departamentos/fronte
 
 # Local
 
+# Instalar dependencias
+pip install -r requirements.txt
