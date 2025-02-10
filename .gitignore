@@ -8,6 +8,7 @@ __pycache__/
 backend/facet/administracion/migrations/*
 backend/facet/roles/migrations/*
 backend/facet/usuarios/migrations/*
+backend/facet/departamentos/migrations/*
 
 #frontend
 frontend/node_modules
