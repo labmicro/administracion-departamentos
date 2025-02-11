@@ -22,6 +22,7 @@ chmod 400 "administracion-departamentos.pem"
 
  ## Descargar los cambios
   git  pull origin main
+  git pull --no-rebase origin main
 
   cd administracion-departamentos/backend/facet
   cd administracion-departamentos/frontend
