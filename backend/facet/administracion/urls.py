@@ -46,6 +46,11 @@ urlpatterns = [
     # Incluir las URLs de departamentos
     path('facet/', include('departamentos.urls')),
 
+    re_path(
+        "<path:route>", TemplateView.as_view(template_name="index.html"), name="index"
+    ),
+    re_path("", TemplateView.as_view(template_name="index.html"), name="index"),
+
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 urlpatterns.append(re_path(r'^.*', TemplateView.as_view(template_name='index.html')))

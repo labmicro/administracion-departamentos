@@ -1,12 +1,16 @@
 import os
+import environ
+
 from dotenv import load_dotenv
 from pathlib import Path
 from datetime import timedelta
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-import mimetypes
+# Carga las variables de entorno desde el archivo .env
+load_dotenv()
+env = environ.Env()
+environ.Env.read_env()
 
-mimetypes.add_type("text/javascript", ".js", True)
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 INSTALLED_APPS = [
     "jazzmin",
@@ -15,6 +19,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "rest_framework",
     # 'django_recaptcha',
@@ -31,7 +36,9 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -40,7 +47,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
-    "corsheaders.middleware.CorsMiddleware",
 ]
 
 ROOT_URLCONF = "administracion.urls"
@@ -48,7 +54,7 @@ ROOT_URLCONF = "administracion.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "build")],
+        # "DIRS": [os.path.join(BASE_DIR, "build")],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -62,14 +68,14 @@ TEMPLATES = [
 ]
 
 
-STATIC_URL = "static/"
-
+STATIC_URL = "/"
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
-# STATICFILES_DIRS = [
-#     # Tell Django where to look for React's static files (css, js)
-#     os.path.join(BASE_DIR, "build/static"),
-# ]
+STATICFILES_DIRS = [
+    BASE_DIR / "build",
+]
+STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+# WHITENOISE_ROOT = BASE_DIR / "build"
 
 WSGI_APPLICATION = "administracion.wsgi.application"
 
@@ -206,8 +212,6 @@ SIMPLE_JWT = {
 
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
-# Carga las variables de entorno desde el archivo .env
-load_dotenv()
 
 # Database
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
@@ -223,7 +227,7 @@ DATABASES = {
     }
 }
 
-SECRET_KEY = os.environ.get("SECRET_KEY")
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
 
 # Configuración del servidor de correo electrónico
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -245,19 +249,10 @@ MEDIA_URL = "/media/"
 RECAPTCHA_PUBLIC_KEY = os.environ.get("RECAPTCHA_PUBLIC_KEY")
 RECAPTCHA_PRIVATE_KEY = os.environ.get("RECAPTCHA_PRIVATE_KEY")
 
-CORS_ALLOWED_ORIGINS=[
-    "http://localhost:3000",
-    "http://18.215.115.94",
-    "http://administracionfacet.site",
-    "https://administracionfacet.site",
-
-]
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:3000",
-    "http://18.215.115.94",
-    "http://administracionfacet.site",
-    "https://administracionfacet.site",
-]
+# CORS
+CORS_ALLOWED_ORIGINS = env.list("CORS_ALLOWED_ORIGINS", default=[])
+CORS_ORIGIN_WHITELIST = env.list("CORS_ORIGIN_WHITELIST", default=[])
+CORS_ALLOW_CREDENTIALS = env.bool("CORS_ALLOW_CREDENTIALS", True)
+CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 SECURE_SSL_REDIRECT = False  # Asegúrate de que no redirija innecesariamente

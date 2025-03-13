@@ -1,17 +1,16 @@
-import os
+import sys
+import dj_database_url
+
+from .base import env
 from .base import *
 
+# SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = env.str("DJANGO_SECRET_KEY", "")
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool("DEBUG", False)
 
-django_allowed_hosts = os.environ.get("DJANGO_ALLOWED_HOSTS")
-
-# Convierte la cadena en una lista separada por comas
-ALLOWED_HOSTS = ['administracionfacet.site', '18.215.115.94', 'localhost', '127.0.0.1']
-
-MIDDLEWARE += [
-    # 'whitenoise.middleware.WhiteNoiseMiddleware',
-]
+ALLOWED_HOSTS = env.list("DJANGO_ALLOWED_HOSTS", default=["*"])
 
 REST_FRAMEWORK = {
     # Use Django's standard `django.contrib.auth` permissions,
@@ -32,9 +31,7 @@ REST_FRAMEWORK = {
     "DATETIME_FORMAT": "%d/%m/%Y %H:%M:%S",
     "DATE_FORMAT": "%d/%m/%Y",
 }
-CORS_ORIGIN_WHITELIST = [
-    'https://administracionfacet.site',
-]
+
 CORS_ALLOW_METHODS = [
     "DELETE",
     "GET",
@@ -61,10 +58,22 @@ CORS_EXPOSE_HEADERS = [
     "x-csrftoken",
 ]
 
-CORS_ALLOW_CREDENTIALS = True
-# Seguridad (CSRF, SSL, etc.)
-CSRF_TRUSTED_ORIGINS = ['https://administracionfacet.site']
+DATABASES["default"] = dj_database_url.config(
+    conn_max_age=600,
+    conn_health_checks=True,
+)
 
-CSRF_COOKIE_SECURE = True  # Requiere HTTPS
-CSRF_COOKIE_HTTPONLY = False  # Permite acceso desde JS
-CSRF_COOKIE_SAMESITE = "None"  # Necesario si frontend y backend están en dominios distintos
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+            "stream": sys.stdout,
+        }
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+}
